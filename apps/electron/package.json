@@ -1,0 +1,52 @@
+{
+  "name": "@quran/electron",
+  "version": "0.0.1",
+  "main": "main/src/main.js",
+  "author": {
+    "name": "Quran.com",
+    "email": "abcd@gmail.com"
+  },
+  "homepage": "https://quran.com",
+  "scripts": {
+    "dist": "electron-builder --dir",
+    "postinstall": "electron-builder install-app-deps",
+    "start": "electron .",
+    "build": "swc ./src -d main",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "get-port-please": "^3.1.2",
+    "next": "^14.2.3"
+  },
+  "devDependencies": {
+    "@swc/cli": "^0.3.12",
+    "@swc/core": "^1.5.5",
+    "@types/bun": "latest",
+    "electron": "^30.0.2",
+    "electron-builder": "^24.13.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "build": {
+    "asar": true,
+    "executableName": "YourAppName",
+    "files": [
+      "main"
+    ],
+    "extraFiles": [
+      {
+        "from": "../web/.next/standalone/apps/web",
+        "to": "web"
+      },
+      {
+        "from": "../web/.next/static",
+        "to": "web/.next/static"
+      },
+      {
+        "from": "../web/public",
+        "to": "web/public"
+      }
+    ]
+  }
+}

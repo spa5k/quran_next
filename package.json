@@ -1,0 +1,24 @@
+{
+  "name": "quran",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "electron": "pnpm --filter=./apps/electron",
+		"web": "pnpm --filter=./apps/web"
+  },
+  "devDependencies": {
+    "@quran/eslint-config": "workspace:^",
+    "@quran/typescript-config": "workspace:^",
+    "dprint": "^0.45.1",
+    "prettier": "^3.2.5",
+    "turbo": "latest"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {},
+  "packageManager": "pnpm@9.1.0"
+}
