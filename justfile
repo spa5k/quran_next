@@ -6,3 +6,10 @@ dist:
 
 tidy:
   node --run format
+
+build:
+  node --run build
+
+bundle:
+  just build
+  just dist

@@ -7,6 +7,8 @@
     "lint": "turbo lint",
     "format": "dprint fmt",
     "electron": "pnpm --filter=./apps/electron",
+    "ui": "pnpm --filter=./packages/ui",
+    "ui:add": "pnpm --filter @quran/ui ui:add",
     "web": "pnpm --filter=./apps/web"
   },
   "devDependencies": {

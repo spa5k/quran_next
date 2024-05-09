@@ -1,7 +1,12 @@
 {
   "extends": "@quran/typescript-config/react-library.json",
   "compilerOptions": {
-    "outDir": "dist"
+    "baseUrl": ".",
+    "paths": {
+      "@ui/*": [
+        "./src/*"
+      ]
+    }
   },
   "include": [
     "src"

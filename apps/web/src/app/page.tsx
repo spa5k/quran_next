@@ -1,3 +1,4 @@
+import { Button } from "@quran/ui/components/ui/button";
 import { ElectronCheck } from "../components/generic/ElectronCheck";
 
 export default function Page(): JSX.Element {
@@ -5,6 +6,7 @@ export default function Page(): JSX.Element {
     <main>
       Electron + nextjs
       <ElectronCheck />
+      <Button>NICer</Button>
     </main>
   );
 }
