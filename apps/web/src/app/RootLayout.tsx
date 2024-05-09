@@ -5,8 +5,8 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@ui/components/ui/breadcrumb";
-import { Button } from "@ui/components/ui/button";
+} from "@components/ui/breadcrumb";
+import { Button } from "@components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,10 +14,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@ui/components/ui/dropdown-menu";
-import { Input } from "@ui/components/ui/input";
-import { SheetContent, SheetTrigger } from "@ui/components/ui/sheet";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@ui/components/ui/tooltip";
+} from "@components/ui/dropdown-menu";
+import { Input } from "@components/ui/input";
+import { SheetContent, SheetTrigger } from "@components/ui/sheet";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@components/ui/tooltip";
 import {
   Home,
   LineChart,
@@ -28,11 +28,13 @@ import {
   Settings,
   Sheet,
   ShoppingCart,
+  User,
   Users2,
 } from "lucide-react";
-import Image from "next/image";
+import { Inter } from "next/font/google";
 import Link from "next/link";
-import { inter } from "./layout";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({
   children,
@@ -219,13 +221,16 @@ export default function RootLayout({
                       size="icon"
                       className="overflow-hidden rounded-full"
                     >
-                      <Image
+                      {
+                        /* <Image
                         src="/placeholder-user.jpg"
                         width={36}
                         height={36}
                         alt="Avatar"
                         className="overflow-hidden rounded-full"
-                      />
+                      /> */
+                      }
+                      <User width={36} height={36} />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">

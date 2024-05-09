@@ -1,4 +1,3 @@
-import "@quran/ui/globals.css";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -6,8 +5,12 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@ui/components/ui/breadcrumb";
-import { Button } from "@ui/components/ui/button";
+} from "@components/ui/breadcrumb";
+import { Button } from "@components/ui/button";
+import { Input } from "@components/ui/input";
+import { Sheet, SheetContent, SheetTrigger } from "@components/ui/sheet";
+import { TooltipProvider } from "@components/ui/tooltip";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,17 +18,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@ui/components/ui/dropdown-menu";
-import { Input } from "@ui/components/ui/input";
-import { Sheet, SheetContent, SheetTrigger } from "@ui/components/ui/sheet";
-import { TooltipProvider } from "@ui/components/ui/tooltip";
-import { PanelLeft, Search } from "lucide-react";
+} from "@components/ui/dropdown-menu";
+import { PanelLeft, Search, User } from "lucide-react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import Image from "next/image";
 import Link from "next/link";
 import { MobileNavigationLinks } from "../components/layout/MobileNavigationLinks";
 import { NavigationLinks } from "../components/layout/NavigationLinks";
+import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -94,13 +94,16 @@ export default function RootLayout({
                       size="icon"
                       className="overflow-hidden rounded-full"
                     >
-                      <Image
+                      {
+                        /* <Image
                         src="/placeholder-user.jpg"
                         width={36}
                         height={36}
                         alt="Avatar"
                         className="overflow-hidden rounded-full"
-                      />
+                      /> */
+                      }
+                      <User width={36} height={36} />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">

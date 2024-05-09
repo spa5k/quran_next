@@ -1,6 +1,6 @@
 "use client";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@ui/components/ui/tooltip";
-import { cn } from "@ui/lib/utils";
+import { cn } from "@/src/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@components/ui/tooltip";
 import { ArrowLeft, Home, LineChart, Moon, Package, Settings, ShoppingCart, Users2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
