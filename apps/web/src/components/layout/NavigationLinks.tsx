@@ -33,7 +33,7 @@ export const NavigationLinks = () => {
         />
         <Link
           href="#"
-          className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:text-base"
+          className="group flex h-9 w-9 shrink-0 items-center justify-items-start gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:text-base"
         >
           <Moon className="h-4 w-4 transition-all group-hover:scale-110" />
           <span className={"sr-only"}>Acme Inc</span>
@@ -43,7 +43,7 @@ export const NavigationLinks = () => {
             <TooltipTrigger asChild>
               <Link
                 href="#"
-                className="flex h-9 w-full items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8"
+                className="flex h-9 w-full items-center justify-items-start rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8"
               >
                 <Home className="h-5 w-5" />
                 <span className={isOpen ? "pl-4" : "sr-only"}>Dashboard</span>
@@ -55,7 +55,7 @@ export const NavigationLinks = () => {
             <TooltipTrigger asChild>
               <Link
                 href="#"
-                className="flex h-9   w-full items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8"
+                className="flex h-9 w-full items-center justify-items-start rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8"
               >
                 <ShoppingCart className="h-5 w-5" />
                 <span className={isOpen ? "pl-4" : "sr-only"}>Orders</span>
@@ -67,7 +67,7 @@ export const NavigationLinks = () => {
             <TooltipTrigger asChild>
               <Link
                 href="#"
-                className="flex h-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8"
+                className="flex h-9 w-full items-center justify-items-start rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8"
               >
                 <Package className="h-5 w-5" />
                 <span className={isOpen ? "pl-4" : "sr-only"}>Products</span>
@@ -79,7 +79,7 @@ export const NavigationLinks = () => {
             <TooltipTrigger asChild>
               <Link
                 href="#"
-                className="flex h-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8"
+                className="flex h-9 items-center justify-items-start rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8"
               >
                 <Users2 className="h-5 w-5" />
                 <span className={isOpen ? "pl-4" : "sr-only"}>Customers</span>
@@ -91,7 +91,7 @@ export const NavigationLinks = () => {
             <TooltipTrigger asChild>
               <Link
                 href="#"
-                className="flex h-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8"
+                className="flex h-9 w-full items-center justify-items-start rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8"
               >
                 <LineChart className="h-5 w-5" />
                 <span className={isOpen ? "pl-4" : "sr-only"}>Analytics</span>
@@ -107,7 +107,7 @@ export const NavigationLinks = () => {
           <TooltipTrigger asChild>
             <Link
               href="#"
-              className="flex h-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8"
+              className="flex h-9 w-full items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8"
             >
               <Settings className="h-5 w-5" />
               <span className={isOpen ? "pl-4" : "sr-only"}>Settings</span>
