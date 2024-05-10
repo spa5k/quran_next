@@ -23,6 +23,8 @@ import { PanelLeft, Search, User } from "lucide-react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
+import { ElectronIndicator } from "../components/generic/ElectronIndicator";
+import { TailwindIndicator } from "../components/generic/TailwindIndicator";
 import { MobileNavigationLinks } from "../components/layout/MobileNavigationLinks";
 import { NavigationLinks } from "../components/layout/NavigationLinks";
 import "./globals.css";
@@ -43,6 +45,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <TooltipProvider>
+          <TailwindIndicator />
+          <ElectronIndicator />
           <div className="flex h-screen border-collapse overflow-hidden">
             <aside className="inset-y-0 left-0 z-10 hidden flex-col border-r bg-background sm:flex">
               <NavigationLinks />
@@ -94,15 +98,6 @@ export default function RootLayout({
                       size="icon"
                       className="overflow-hidden rounded-full"
                     >
-                      {
-                        /* <Image
-                        src="/placeholder-user.jpg"
-                        width={36}
-                        height={36}
-                        alt="Avatar"
-                        className="overflow-hidden rounded-full"
-                      /> */
-                      }
                       <User width={36} height={36} />
                     </Button>
                   </DropdownMenuTrigger>
