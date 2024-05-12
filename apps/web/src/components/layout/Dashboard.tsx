@@ -3,7 +3,6 @@ import { BellIcon, Book, CalendarIcon, Compass, FileTextIcon, FormInputIcon, Glo
 import { RecitationCard } from "../features/recitation/components/RecitationCard";
 import { BentoCard, BentoGrid } from "../ui/bento-grid";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
-import DotPattern from "../ui/dot-pattern";
 import Globe from "../ui/globe";
 import { GridPatternLinearGradient } from "../ui/grid-pattern";
 const features = [
@@ -14,8 +13,7 @@ const features = [
     href: "/",
     cta: "Learn more",
     background: (
-      <div>
-        <DotPattern className="top-0 h-[600px] w-[600px] transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_30%,#000_100%)] group-hover:scale-105" />
+      <div className="transform-gpu blur-[1px] transition-all duration-300 ease-out hover:blur-none">
         <RecitationCard />
       </div>
     ),

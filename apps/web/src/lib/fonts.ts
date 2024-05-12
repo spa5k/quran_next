@@ -1,4 +1,4 @@
-import { Cormorant_Garamond, Inter, Taviraj, Lexend } from "next/font/google";
+import { Cormorant_Garamond, Inter, Lexend, Taviraj } from "next/font/google";
 
 export const inter = Inter({ subsets: ["latin"] });
 export const cormorant_garamond = Cormorant_Garamond({

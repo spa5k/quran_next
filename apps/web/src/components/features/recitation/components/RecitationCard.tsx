@@ -4,12 +4,15 @@
  * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
  */
 import { Button } from "@/src/components/ui/button";
+import DotPattern from "@/src/components/ui/dot-pattern";
 import { Slider } from "@/src/components/ui/slider";
 import { ForwardIcon, PlayIcon, RewindIcon, Volume2Icon } from "lucide-react";
 
 export function RecitationCard() {
   return (
     <div className="w-full max-w-md mx-auto bg-white dark:bg-gray-950 overflow-hidden">
+      <DotPattern className="top-0 h-[600px] w-[600px] transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_30%,#000_100%)] group-hover:scale-105" />
+
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="text-lg font-semibold">Surah Al-Fatihah</div>
