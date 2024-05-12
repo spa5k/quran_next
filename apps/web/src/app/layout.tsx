@@ -21,15 +21,14 @@ import {
 } from "@components/ui/dropdown-menu";
 import { PanelLeft, Search, User } from "lucide-react";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import Link from "next/link";
 import { ElectronIndicator } from "../components/generic/ElectronIndicator";
 import { TailwindIndicator } from "../components/generic/TailwindIndicator";
 import { MobileNavigationLinks } from "../components/layout/MobileNavigationLinks";
 import { NavigationLinks } from "../components/layout/NavigationLinks";
+import { AuroraBackground } from "../components/ui/aurora-background";
+import { cormorant_garamond, inter, lexend, taviraj } from "../lib/fonts";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Create Turborepo",
@@ -43,7 +42,17 @@ export default function RootLayout({
 }): JSX.Element {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body
+        className={inter.className
+          + " "
+          + taviraj.variable
+          + " "
+          + cormorant_garamond.variable
+          + " "
+          + lexend.variable
+          + " "
+          + "font-primary"}
+      >
         <TooltipProvider>
           <TailwindIndicator />
           <ElectronIndicator />
@@ -52,7 +61,7 @@ export default function RootLayout({
               <NavigationLinks />
             </aside>
             <div className="flex-1 overflow-y-auto overflow-x-hidden bg-secondary/10 pb-1">
-              <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+              <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 z-20">
                 <Sheet>
                   <SheetTrigger asChild>
                     <Button size="icon" variant="outline" className="sm:hidden">
@@ -111,9 +120,11 @@ export default function RootLayout({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </header>
-              <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-                {children}
-              </main>
+              <AuroraBackground>
+                <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 z-10">
+                  {children}
+                </main>
+              </AuroraBackground>
             </div>
           </div>
         </TooltipProvider>

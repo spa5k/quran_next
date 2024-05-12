@@ -1,4 +1,6 @@
-import { Dashboard } from "../components/layout/Dashboard";
+import { QuranHomepage } from "@/src/components/features/quran/Homepage";
+import { cormorant_garamond, taviraj } from "@/src/lib/fonts";
+import "./quran.css";
 
 const data = async () => {
   const honoport = process.env.HONO_PORT;
@@ -10,10 +12,10 @@ const data = async () => {
 
 export default async function Page(): Promise<JSX.Element> {
   const d = await data();
-  console.log("data", d);
+  console.log(cormorant_garamond.variable);
   return (
     <main>
-      <Dashboard />
+      <QuranHomepage />
     </main>
   );
 }
