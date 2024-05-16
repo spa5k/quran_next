@@ -19,6 +19,18 @@ export function CommandMenu({ ...props }) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
 
+  const [keyCombination, setKeyCombination] = React.useState("");
+
+  React.useEffect(() => {
+    if (navigator.userAgent.includes("Mac")) {
+      setKeyCombination("⌘K");
+    } else if (navigator.userAgent.includes("Linux")) {
+      setKeyCombination("Super+K");
+    } else {
+      setKeyCombination("Ctrl+K");
+    }
+  }, []);
+
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (!((e.key === "k" && (e.metaKey || e.ctrlKey)) || e.key === "/")) {
@@ -59,23 +71,7 @@ export function CommandMenu({ ...props }) {
         <span className="hidden lg:inline-flex">Search Quran or Hadith...</span>
         <span className="inline-flex lg:hidden">Search...</span>
         <kbd className="pointer-events-none absolute right-[0.3rem] top-[0.55rem] hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-          {navigator.userAgent.includes("Mac")
-            ? (
-              <>
-                <span className="text-xs">⌘</span>K
-              </>
-            )
-            : navigator.userAgent.includes("Linux")
-            ? (
-              <>
-                <span className="text-xs">Super</span>+K
-              </>
-            )
-            : (
-              <>
-                <span className="text-xs">Ctrl</span>+K
-              </>
-            )}
+          {keyCombination}
         </kbd>
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen}>
