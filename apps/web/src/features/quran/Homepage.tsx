@@ -10,7 +10,15 @@ export async function QuranHomepage({
 }: {
   searchParams?: { sort?: string; filter?: string; order?: string };
 }) {
-  const file = await fs.readFile(process.cwd() + "/public/data/quran.json", "utf-8");
+  let file;
+  if (process.env.NODE_ENV === "production") {
+    const response = await fetch(
+      "https://raw.githubusercontent.com/spa5k/quran_next/main/apps/web/public/data/quran.json",
+    );
+    file = await response.text();
+  } else {
+    file = await fs.readFile(process.cwd() + "/public/data/quran.json", "utf-8");
+  }
   const data: QuranData = JSON.parse(file);
   if (!searchParams) {
     searchParams = {};
