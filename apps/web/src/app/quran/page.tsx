@@ -10,12 +10,15 @@ const data = async () => {
   return honoport;
 };
 
-export default async function Page(): Promise<JSX.Element> {
-  const d = await data();
-  console.log(cormorant_garamond.variable);
+export default async function Page({
+  searchParams,
+}: {
+  searchParams?: { sort?: string; filter?: string };
+}): Promise<JSX.Element> {
+  console.log("searchParams", searchParams);
   return (
-    <main>
-      <QuranHomepage />
+    <main className="mt-20">
+      <QuranHomepage searchParams={searchParams} />
     </main>
   );
 }
