@@ -13,3 +13,6 @@ build:
 bundle:
   just build
   just dist
+
+docker-build:
+  docker build -t web:latest ./apps/web
