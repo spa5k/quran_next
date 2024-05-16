@@ -13,7 +13,7 @@ const features = [
     href: "/",
     cta: "Learn more",
     background: (
-      <div className="transform-gpu blur-[1px] transition-all duration-300 ease-out hover:blur-none">
+      <div className="transform-gpu transition-all duration-300 ease-out hover:blur-none">
         <RecitationCard />
       </div>
     ),
@@ -62,7 +62,6 @@ const features = [
     background: (
       <div className="h-[200px] w-full transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_10%,#000_60%)] group-hover:scale-105 sm:left-40 p-5">
         Next prayer in <span className="text-2xl font-semibold">15 minutes</span>
-
         <div className="flex flex-col gap-4 mt-4">
           <div className="flex flex-col gap-1">
             <span className="text-lg font-semibold">Fajr</span>
@@ -126,7 +125,7 @@ const features = [
 
 export const Dashboard = () => {
   return (
-    <div className="flex flex-1 flex-col mt-10">
+    <div className="flex flex-1 flex-col ">
       <BentoGrid className="lg:grid-rows-4">
         {features.map((feature) => <BentoCard key={feature.name} {...feature} />)}
       </BentoGrid>

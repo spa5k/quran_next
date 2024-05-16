@@ -1,4 +1,5 @@
 import { Dashboard } from "../components/layout/Dashboard";
+import { Hero } from "../components/layout/Hero";
 
 const data = async () => {
   const honoport = process.env.HONO_PORT;
@@ -13,6 +14,7 @@ export default async function Page(): Promise<JSX.Element> {
   console.log("data", d);
   return (
     <main>
+      <Hero />
       <Dashboard />
     </main>
   );
