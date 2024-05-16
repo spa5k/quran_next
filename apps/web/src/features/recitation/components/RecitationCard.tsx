@@ -62,3 +62,5 @@ export function RecitationCard() {
     </div>
   );
 }
+
+export default RecitationCard;

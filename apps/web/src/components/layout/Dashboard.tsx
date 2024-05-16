@@ -1,10 +1,13 @@
-/* eslint-disable @next/next/no-img-element */
-import { RecitationCard } from "@/src/features/recitation/components/RecitationCard";
 import { BellIcon, Book, CalendarIcon, Compass, FileTextIcon, FormInputIcon, GlobeIcon, Settings } from "lucide-react";
+import { lazy, Suspense } from "react";
 import { BentoCard, BentoGrid } from "../ui/bento-grid";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
-import Globe from "../ui/globe";
 import { GridPatternLinearGradient } from "../ui/grid-pattern";
+
+// Lazy load components
+const RecitationCard = lazy(() => import("@/src/features/recitation/components/RecitationCard"));
+const Globe = lazy(() => import("../ui/globe"));
+
 const features = [
   {
     Icon: FileTextIcon,
@@ -14,7 +17,9 @@ const features = [
     cta: "Learn more",
     background: (
       <div className="transform-gpu transition-all duration-300 ease-out hover:blur-none">
-        <RecitationCard />
+        <Suspense fallback={<div>Loading...</div>}>
+          <RecitationCard />
+        </Suspense>
       </div>
     ),
     className: "lg:row-start-1 lg:row-end-4 lg:col-start-2 lg:col-end-3",
@@ -26,21 +31,23 @@ const features = [
     href: "/",
     cta: "Learn more",
     background: (
-      <Command className="absolute right-10 top-10 w-[70%] origin-top translate-x-0 border transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_40%,#000_80%)] group-hover:-translate-x-10">
-        <CommandInput placeholder="Type a command or search..." />
-        <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
-          <CommandGroup heading="Suggestions">
-            <CommandItem>Surah Al-Fatiha</CommandItem>
-            <CommandItem>Surah Al-Baqarah</CommandItem>
-            <CommandItem>Surah Al-Ikhlas</CommandItem>
-            <CommandItem>
-              Jesus declared, “I am truly a servant of Allah. He has destined me to be given the Scripture and to be a
-              prophet. (19:30)
-            </CommandItem>
-          </CommandGroup>
-        </CommandList>
-      </Command>
+      <Suspense fallback={<div>Loading...</div>}>
+        <Command className="absolute right-10 top-10 w-[70%] origin-top translate-x-0 border transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_40%,#000_80%)] group-hover:-translate-x-10">
+          <CommandInput placeholder="Type a command or search..." />
+          <CommandList>
+            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandGroup heading="Suggestions">
+              <CommandItem>Surah Al-Fatiha</CommandItem>
+              <CommandItem>Surah Al-Baqarah</CommandItem>
+              <CommandItem>Surah Al-Ikhlas</CommandItem>
+              <CommandItem>
+                Jesus declared, “I am truly a servant of Allah. He has destined me to be given the Scripture and to be a
+                prophet. (19:30)
+              </CommandItem>
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </Suspense>
     ),
     className: "lg:col-start-1 lg:col-end-2 lg:row-start-1 lg:row-end-3",
   },
@@ -89,7 +96,6 @@ const features = [
     background: <img className="absolute -right-20 -top-20 opacity-60" />,
     className: "lg:col-start-3 lg:col-end-3 lg:row-start-3 lg:row-end-4",
   },
-  // Islamic history
   {
     Icon: Compass,
     name: "Islamic History",
@@ -97,11 +103,12 @@ const features = [
     href: "/",
     cta: "Learn more",
     background: (
-      <Globe className="top-0 h-[600px] w-[600px] transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_30%,#000_100%)] group-hover:scale-105 sm:left-40" />
+      <Suspense fallback={<div>Loading...</div>}>
+        <Globe className="top-0 h-[600px] w-[600px] transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_30%,#000_100%)] group-hover:scale-105 sm:left-40" />
+      </Suspense>
     ),
     className: "lg:col-start-1 lg:col-end-3 lg:row-start-4 lg:row-end-6",
   },
-  // Hadith browser
   {
     Icon: Book,
     name: "Hadith Browser",
@@ -111,7 +118,6 @@ const features = [
     background: <img className="absolute -right-20 -top-20 opacity-60" />,
     className: "lg:col-start-3 lg:col-end-4 lg:row-start-4 lg:row-end-5",
   },
-  // User settings
   {
     Icon: Settings,
     name: "User Settings",
@@ -127,7 +133,11 @@ export const Dashboard = () => {
   return (
     <div className="flex flex-1 flex-col ">
       <BentoGrid className="lg:grid-rows-4">
-        {features.map((feature) => <BentoCard key={feature.name} {...feature} />)}
+        {features.map((feature) => (
+          <Suspense key={feature.name} fallback={<div>Loading...</div>}>
+            <BentoCard {...feature} />
+          </Suspense>
+        ))}
       </BentoGrid>
     </div>
   );
