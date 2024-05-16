@@ -51,8 +51,13 @@ export async function QuranHomepage({
       });
     } else if (dataType === "juz") {
       dataToDisplay = (dataToDisplay as JuzsReference[]).sort((a, b) => {
-        if (sort === "juz") {
-          console.log(a.juz, b.juz);
+        if (sort === "surah") {
+          // Sort by the starting chapter and verse of the Juz
+          if (a.start.chapter !== b.start.chapter) {
+            return (a.start.chapter - b.start.chapter) * sortOrder;
+          }
+          return (a.start.verse - b.start.verse) * sortOrder;
+        } else if (sort === "juz") {
           return (a.juz - b.juz) * sortOrder;
         }
         return 0;

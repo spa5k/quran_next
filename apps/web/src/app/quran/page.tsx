@@ -14,7 +14,6 @@ export default async function Page({
 }: {
   searchParams?: { sort?: string; filter?: string };
 }): Promise<JSX.Element> {
-  console.log("searchParams", searchParams);
   return (
     <main className="mt-20">
       <QuranHomepage searchParams={searchParams} />

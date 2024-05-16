@@ -92,13 +92,11 @@ export const QuranFilters = (
             onValueChange={handleSortChange}
           >
             <DropdownMenuRadioItem value="surah" disabled={filter === "surah"}>
-              Surah Number
+              Number
             </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="juz" disabled={filter === "juz"}>
-              Juz
-            </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="name">
-              Surah Name
+
+            <DropdownMenuRadioItem value="name" disabled={filter === "juz"}>
+              Name
             </DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="last-read">
               Last Read
