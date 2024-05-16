@@ -15,7 +15,7 @@ import { Button } from "../../ui/button";
 export const QuranFilters = () => {
   const router = useRouter();
 
-  const updateQueryParams = (key, value) => {
+  const updateQueryParams = (key: string, value: string) => {
     const url = new URL(window.location.href);
     const params = new URLSearchParams(url.search);
 
