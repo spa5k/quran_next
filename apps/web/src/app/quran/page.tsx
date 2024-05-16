@@ -1,5 +1,4 @@
-import { QuranHomepage } from "@/src/components/features/quran/Homepage";
-import { cormorant_garamond, taviraj } from "@/src/lib/fonts";
+import { QuranHomepage } from "@/src/features/quran/Homepage";
 import "./quran.css";
 
 const data = async () => {

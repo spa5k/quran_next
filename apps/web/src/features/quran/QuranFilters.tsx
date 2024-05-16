@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/src/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,11 +11,11 @@ import {
 } from "@components/ui/dropdown-menu";
 import { FilterIcon, ListIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Button } from "../../ui/button";
 
-export const QuranFilters = () => {
+export const QuranFilters = (
+  { filter, order, sort }: { filter: string | undefined; order: string | undefined; sort: string | undefined },
+) => {
   const router = useRouter();
-
   const updateQueryParams = (key: string, value: string) => {
     const url = new URL(window.location.href);
     const params = new URLSearchParams(url.search);
@@ -36,12 +37,16 @@ export const QuranFilters = () => {
     updateQueryParams("sort", sortType);
   };
 
+  const handleSortOrderChange = (order: string) => {
+    updateQueryParams("order", order);
+  };
+
   return (
     <div className="w-full flex justify-between items-center mb-4">
       <div className="flex items-center space-x-4">
         <Button
           size="sm"
-          variant="outline"
+          variant={filter === "surah" ? "default" : "outline"}
           onClick={() => handleFilterClick("surah")}
         >
           <ListIcon className="w-4 h-4 mr-2" />
@@ -49,7 +54,7 @@ export const QuranFilters = () => {
         </Button>
         <Button
           size="sm"
-          variant="outline"
+          variant={filter === "juz" ? "default" : "outline"}
           onClick={() => handleFilterClick("juz")}
         >
           <ListIcon className="w-4 h-4 mr-2" />
@@ -57,19 +62,19 @@ export const QuranFilters = () => {
         </Button>
         <Button
           size="sm"
-          variant="outline"
-          onClick={() => handleFilterClick("revelation")}
+          variant={filter === "mecca" ? "default" : "outline"}
+          onClick={() => handleFilterClick("mecca")}
         >
           <ListIcon className="w-4 h-4 mr-2" />
-          List by Revelation
+          List by Mecca
         </Button>
         <Button
           size="sm"
-          variant="outline"
-          onClick={() => handleFilterClick("makkah-madinah")}
+          variant={filter === "medina" ? "default" : "outline"}
+          onClick={() => handleFilterClick("medina")}
         >
           <ListIcon className="w-4 h-4 mr-2" />
-          List by Makkah/Madinah
+          List by Medina
         </Button>
       </div>
       <DropdownMenu>
@@ -83,13 +88,15 @@ export const QuranFilters = () => {
           <DropdownMenuLabel>Sort Options</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuRadioGroup
-            defaultValue="surah"
+            value={sort}
             onValueChange={handleSortChange}
           >
-            <DropdownMenuRadioItem value="surah">
+            <DropdownMenuRadioItem value="surah" disabled={filter === "surah"}>
               Surah Number
             </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="juz">Juz</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="juz" disabled={filter === "juz"}>
+              Juz
+            </DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="name">
               Surah Name
             </DropdownMenuRadioItem>
@@ -99,6 +106,15 @@ export const QuranFilters = () => {
             <DropdownMenuRadioItem value="bookmarked">
               Bookmarked
             </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuLabel>Sort Order</DropdownMenuLabel>
+          <DropdownMenuRadioGroup
+            value={order}
+            onValueChange={handleSortOrderChange}
+          >
+            <DropdownMenuRadioItem value="asc">Ascending</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="desc">Descending</DropdownMenuRadioItem>
           </DropdownMenuRadioGroup>
         </DropdownMenuContent>
       </DropdownMenu>

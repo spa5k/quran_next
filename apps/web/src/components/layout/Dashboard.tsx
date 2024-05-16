@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
+import { RecitationCard } from "@/src/features/recitation/components/RecitationCard";
 import { BellIcon, Book, CalendarIcon, Compass, FileTextIcon, FormInputIcon, GlobeIcon, Settings } from "lucide-react";
-import { RecitationCard } from "../features/recitation/components/RecitationCard";
 import { BentoCard, BentoGrid } from "../ui/bento-grid";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
 import Globe from "../ui/globe";
