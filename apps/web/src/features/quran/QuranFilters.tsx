@@ -13,6 +13,7 @@ import {
 } from "@components/ui/dropdown-menu";
 import { FilterIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
+
 export const QuranFilters = (
   { filter, order, sort }: { filter: string | undefined; order: string | undefined; sort: string | undefined },
 ) => {
@@ -80,7 +81,7 @@ export const QuranFilters = (
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline">
+          <Button variant="outline" size="sm">
             <FilterIcon className="w-4 h-4 mr-2" />
             Sort by
           </Button>
@@ -92,11 +93,10 @@ export const QuranFilters = (
             value={sort}
             onValueChange={handleSortChange}
           >
-            <DropdownMenuRadioItem value="surah" disabled={filter === "surah"}>
+            <DropdownMenuRadioItem value="number">
               Number
             </DropdownMenuRadioItem>
-
-            <DropdownMenuRadioItem value="name" disabled={filter === "juz"}>
+            <DropdownMenuRadioItem value="name">
               Name
             </DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="last-read">
