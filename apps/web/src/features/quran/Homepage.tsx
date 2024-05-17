@@ -91,7 +91,14 @@ export async function QuranHomepage({
           <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {dataType === "juz"
               ? (dataToDisplay as JuzsReference[]).map((juz, index) => <JuzCard juz={juz} key={juz.arabic_name} />)
-              : (dataToDisplay as Chapter[]).map((chapter) => <QuranCard key={chapter.name} chapter={chapter} />)}
+              : (dataToDisplay as Chapter[]).map((chapter, index) => (
+                <QuranCard
+                  key={chapter.name}
+                  chapter={chapter}
+                  juzStart={data.chapters[index]?.verses[0]?.juz || 0}
+                  juzEnd={data.chapters[index]?.verses?.[data.chapters[index]?.verses?.length! - 1]?.juz ?? 0}
+                />
+              ))}
           </div>
         </div>
       </div>

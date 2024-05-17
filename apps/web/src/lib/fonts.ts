@@ -1,4 +1,4 @@
-import { Cormorant_Garamond, Inter, Lexend, Taviraj } from "next/font/google";
+import { Cormorant_Garamond, Inter, Lexend, Readex_Pro, Taviraj } from "next/font/google";
 
 export const inter = Inter({ subsets: ["latin"] });
 export const cormorant_garamond = Cormorant_Garamond({
@@ -16,5 +16,11 @@ export const taviraj = Taviraj({
 export const lexend = Lexend({
   subsets: ["latin"],
   variable: "--font-lexend",
+  weight: ["300", "400", "700"],
+});
+
+export const readex_pro = Readex_Pro({
+  subsets: ["latin"],
+  variable: "--font-readex_pro",
   weight: ["300", "400", "700"],
 });

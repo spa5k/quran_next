@@ -64,6 +64,7 @@ const config = {
         sans: ["var(--font-inter)"],
         cursive: ["var(--font-cormorant_garamond)"],
         primary: ["var(--font-lexend)"],
+        arabic: ["var(--font-readex_pro)"],
       },
       keyframes: {
         "accordion-down": {
