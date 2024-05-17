@@ -1,4 +1,6 @@
 "use client";
+import { JuzIcon, SurahIcon } from "@/src/components/icons/juz";
+import { KaabaIcon, MedinaIcon } from "@/src/components/icons/mosque";
 import { Button } from "@/src/components/ui/button";
 import {
   DropdownMenu,
@@ -9,9 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@components/ui/dropdown-menu";
-import { FilterIcon, ListIcon } from "lucide-react";
+import { FilterIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-
 export const QuranFilters = (
   { filter, order, sort }: { filter: string | undefined; order: string | undefined; sort: string | undefined },
 ) => {
@@ -46,35 +47,35 @@ export const QuranFilters = (
       <div className="flex items-center space-x-4">
         <Button
           size="sm"
-          variant={filter === "surah" ? "default" : "outline"}
+          variant={(filter === "surah" || !filter) ? "default" : "outline"}
           onClick={() => handleFilterClick("surah")}
         >
-          <ListIcon className="w-4 h-4 mr-2" />
-          List by Surahs
+          <SurahIcon className="w-4 h-4 mr-2" />
+          Surahs
         </Button>
         <Button
           size="sm"
           variant={filter === "juz" ? "default" : "outline"}
           onClick={() => handleFilterClick("juz")}
         >
-          <ListIcon className="w-4 h-4 mr-2" />
-          List by Juz
+          <JuzIcon className="w-4 h-4 mr-2" />
+          Juz
         </Button>
         <Button
           size="sm"
           variant={filter === "mecca" ? "default" : "outline"}
           onClick={() => handleFilterClick("mecca")}
         >
-          <ListIcon className="w-4 h-4 mr-2" />
-          List by Mecca
+          <KaabaIcon className="w-4 h-4 mr-2" />
+          Mecca
         </Button>
         <Button
           size="sm"
           variant={filter === "medina" ? "default" : "outline"}
           onClick={() => handleFilterClick("medina")}
         >
-          <ListIcon className="w-4 h-4 mr-2" />
-          List by Medina
+          <MedinaIcon className="w-4 h-4 mr-2" />
+          Medina
         </Button>
       </div>
       <DropdownMenu>
