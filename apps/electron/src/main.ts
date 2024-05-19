@@ -1,14 +1,21 @@
 import { electronApp, is, optimizer } from "@electron-toolkit/utils";
 import { serve } from "@hono/node-server";
 import { BrowserWindow, app, ipcMain, shell } from "electron";
+import { download } from "electron-dl";
+import * as fs from "fs";
 import { getPort } from "get-port-please";
 import { Hono } from "hono";
-import { startServer } from "next/dist/server/lib/start-server";
+import { startServer } from "next/dist/server/lib/start-server.js";
 import * as path from "path";
 import { join } from "path";
 
-function createWindow(): void {
-  // Create the browser window.
+const APP_DATA_PATH = app.getPath("userData");
+console.log("App data path:", APP_DATA_PATH);
+const VERSION_FILE_PATH = path.join(APP_DATA_PATH, "last_release_version.json");
+
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
+function createWindow(): BrowserWindow {
   const mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
@@ -30,18 +37,18 @@ function createWindow(): void {
     return { action: "deny" };
   });
 
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
   if (is.dev) {
     mainWindow.loadURL("http://localhost:3000");
   } else {
     const port = startNextJSServer();
     mainWindow.loadURL(`http://localhost:${port}`);
   }
+
+  return mainWindow;
 }
 
 async function startNextJSServer() {
-  const nextJSPort = await getPort({ portRange: [30_011, 50_000] });
+  const nextJSPort = await getPort({ portRange: [30011, 50000] });
   const appPath = app.getAppPath();
   const parentDir = path.dirname(appPath);
   const grandParentDir = path.dirname(parentDir);
@@ -60,7 +67,7 @@ async function startNextJSServer() {
 }
 
 async function startHonoServer() {
-  const honoPort = await getPort({ portRange: [50_000, 51_000] });
+  const honoPort = await getPort({ portRange: [50000, 51000] });
   console.log("Hono server port:", honoPort);
 
   const hono = new Hono();
@@ -76,44 +83,81 @@ async function startHonoServer() {
   return honoPort;
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
-  // Set app user model id for windows
+app.whenReady().then(async () => {
   electronApp.setAppUserModelId("com.electron");
 
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
   app.on("browser-window-created", (_, window) => {
     optimizer.watchWindowShortcuts(window);
   });
 
-  // IPC test
   ipcMain.on("ping", () => console.log("pong"));
 
-  // Start the Hono server
   const honoPort = startHonoServer();
   ipcMain.handle("getHonoPort", () => honoPort);
 
-  createWindow();
+  const latestReleaseVersion = await getLatestReleaseVersion(
+    "spa5k",
+    "quran_data",
+  );
+
+  const lastReleaseVersion = getLastReleaseVersion();
+
+  if (latestReleaseVersion === lastReleaseVersion) {
+    console.log("Last release version:", lastReleaseVersion);
+    console.log("No new release found.");
+  } else {
+    const latestReleaseUrl = await getLatestRelease("spa5k", "quran_data");
+    console.log("New release found. Downloading...");
+    const win = createWindow();
+    await download(win, latestReleaseUrl, {
+      directory: APP_DATA_PATH,
+    }).then((dl) => {
+      console.log("Downloaded to:", dl.getSavePath());
+    });
+    saveLastReleaseVersion(latestReleaseVersion);
+  }
 
   app.on("activate", function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 });
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
   }
 });
 
-// In this file you can include the rest of your app"s specific main process
-// code. You can also put them in separate files and require them here.
+async function getLatestReleaseVersion(
+  user: string,
+  repo: string,
+): Promise<string> {
+  const response = await fetch(
+    `https://api.github.com/repos/${user}/${repo}/releases/latest`,
+  );
+  const data = await response.json();
+  return data.tag_name;
+}
+
+async function getLatestRelease(user: string, repo: string): Promise<string> {
+  const response = await fetch(
+    `https://api.github.com/repos/${user}/${repo}/releases/latest`,
+  );
+  const data = await response.json();
+  const asset = data.assets.find((asset: any) => asset.name === "quran.db");
+  return asset.browser_download_url;
+}
+
+function getLastReleaseVersion(): string | null {
+  if (fs.existsSync(VERSION_FILE_PATH)) {
+    const data = fs.readFileSync(VERSION_FILE_PATH, "utf-8");
+    const json = JSON.parse(data);
+    return json.version;
+  }
+  return null;
+}
+
+function saveLastReleaseVersion(version: string): void {
+  const data = JSON.stringify({ version }, null, 2);
+  fs.writeFileSync(VERSION_FILE_PATH, data, "utf-8");
+}
