@@ -1,18 +1,15 @@
 import { electronApp, is, optimizer } from "@electron-toolkit/utils";
 import { serve } from "@hono/node-server";
-import { BrowserWindow, app, ipcMain, shell } from "electron";
-import { download } from "electron-dl";
+import { app, BrowserWindow, ipcMain, shell } from "electron";
 import log from "electron-log";
-import Store from "electron-store";
+import settings from "electron-settings";
 import { getPort } from "get-port-please";
 import { Hono } from "hono";
 import { startServer } from "next/dist/server/lib/start-server.js";
 import * as path from "path";
 import { join } from "path";
+import downloadFile from "./utils/downloader.js";
 import { getLatestRelease, getLatestReleaseVersion } from "./utils/releases.js";
-
-const store = new Store();
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 let mainWindow: BrowserWindow | null = null;
 let loadingWindow: BrowserWindow | null = null;
@@ -25,7 +22,7 @@ function createLoadingWindow(): BrowserWindow {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      nodeIntegration: false,
+      nodeIntegration: true,
       contextIsolation: false,
     },
     backgroundMaterial: "auto",
@@ -143,7 +140,7 @@ app.whenReady().then(async () => {
       "quran_data",
     );
 
-    const lastReleaseVersion = store.get("lastReleaseVersion");
+    const lastReleaseVersion = await settings.get("lastReleaseVersion");
 
     loadingWindow = createLoadingWindow();
     mainWindow = createWindow();
@@ -157,12 +154,14 @@ app.whenReady().then(async () => {
       const latestReleaseUrl = await getLatestRelease("spa5k", "quran_data");
       log.info("New release found. Downloading...");
 
-      await download(mainWindow, latestReleaseUrl, {
-        directory: app.getPath("userData"),
-      }).then((dl) => {
-        log.info("Downloaded to:", dl.getSavePath());
-      });
-      store.set("lastReleaseVersion", latestReleaseVersion);
+      downloadFile(mainWindow, latestReleaseUrl, { filename: "quran.db" })
+        .then(() => {
+          console.log("Download completed successfully");
+          settings.set("lastReleaseVersion", latestReleaseVersion);
+        })
+        .catch((error) => {
+          console.error("Download failed:", error);
+        });
       log.info("Download complete.", latestReleaseVersion);
     }
 

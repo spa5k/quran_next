@@ -16,3 +16,7 @@ bundle:
 
 docker-build:
   docker build -t web:latest ./apps/web
+
+elec:
+  nr electron build
+  nr electron dist
