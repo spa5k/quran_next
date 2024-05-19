@@ -2,17 +2,14 @@ import { electronApp, is, optimizer } from "@electron-toolkit/utils";
 import { serve } from "@hono/node-server";
 import { BrowserWindow, app, ipcMain, shell } from "electron";
 import { download } from "electron-dl";
-import * as fs from "fs";
+import Store from "electron-store";
 import { getPort } from "get-port-please";
 import { Hono } from "hono";
 import { startServer } from "next/dist/server/lib/start-server.js";
 import * as path from "path";
 import { join } from "path";
 
-const APP_DATA_PATH = app.getPath("userData");
-console.log("App data path:", APP_DATA_PATH);
-const VERSION_FILE_PATH = path.join(APP_DATA_PATH, "last_release_version.json");
-
+const store = new Store();
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 function createWindow(): BrowserWindow {
@@ -100,24 +97,27 @@ app.whenReady().then(async () => {
     "quran_data",
   );
 
-  const lastReleaseVersion = getLastReleaseVersion();
+  const lastReleaseVersion = store.get("lastReleaseVersion");
 
   if (latestReleaseVersion === lastReleaseVersion) {
-    console.log("Last release version:", lastReleaseVersion);
-    console.log("No new release found.");
+    console.log(
+      "No new release found in the repository. Last release is up to date.",
+      lastReleaseVersion,
+    );
   } else {
     const latestReleaseUrl = await getLatestRelease("spa5k", "quran_data");
     console.log("New release found. Downloading...");
     const win = createWindow();
     await download(win, latestReleaseUrl, {
-      directory: APP_DATA_PATH,
+      directory: app.getPath("userData"),
     }).then((dl) => {
       console.log("Downloaded to:", dl.getSavePath());
     });
-    saveLastReleaseVersion(latestReleaseVersion);
+    store.set("lastReleaseVersion", latestReleaseVersion);
+    console.log("Download complete.", latestReleaseVersion);
   }
 
-  app.on("activate", function () {
+  app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 });
@@ -146,18 +146,4 @@ async function getLatestRelease(user: string, repo: string): Promise<string> {
   const data = await response.json();
   const asset = data.assets.find((asset: any) => asset.name === "quran.db");
   return asset.browser_download_url;
-}
-
-function getLastReleaseVersion(): string | null {
-  if (fs.existsSync(VERSION_FILE_PATH)) {
-    const data = fs.readFileSync(VERSION_FILE_PATH, "utf-8");
-    const json = JSON.parse(data);
-    return json.version;
-  }
-  return null;
-}
-
-function saveLastReleaseVersion(version: string): void {
-  const data = JSON.stringify({ version }, null, 2);
-  fs.writeFileSync(VERSION_FILE_PATH, data, "utf-8");
 }
