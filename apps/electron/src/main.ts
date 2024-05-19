@@ -2,12 +2,14 @@ import { electronApp, is, optimizer } from "@electron-toolkit/utils";
 import { serve } from "@hono/node-server";
 import { BrowserWindow, app, ipcMain, shell } from "electron";
 import { download } from "electron-dl";
+import log from "electron-log";
 import Store from "electron-store";
 import { getPort } from "get-port-please";
 import { Hono } from "hono";
 import { startServer } from "next/dist/server/lib/start-server.js";
 import * as path from "path";
 import { join } from "path";
+import { getLatestRelease, getLatestReleaseVersion } from "./utils/releases.js";
 
 const store = new Store();
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
@@ -37,89 +39,108 @@ function createWindow(): BrowserWindow {
   if (is.dev) {
     mainWindow.loadURL("http://localhost:3000");
   } else {
-    const port = startNextJSServer();
-    mainWindow.loadURL(`http://localhost:${port}`);
+    startNextJSServer()
+      .then((port) => {
+        mainWindow.loadURL(`http://localhost:${port}`);
+      })
+      .catch((error) => {
+        log.error("Failed to start Next.js server:", error);
+      });
   }
 
   return mainWindow;
 }
 
 async function startNextJSServer() {
-  const nextJSPort = await getPort({ portRange: [30011, 50000] });
-  const appPath = app.getAppPath();
-  const parentDir = path.dirname(appPath);
-  const grandParentDir = path.dirname(parentDir);
-  const webDir = path.join(grandParentDir, "web");
+  try {
+    const nextJSPort = await getPort({ portRange: [30011, 50000] });
+    const appPath = app.getAppPath();
+    const parentDir = path.dirname(appPath);
+    const grandParentDir = path.dirname(parentDir);
+    const webDir = path.join(grandParentDir, "web");
 
-  await startServer({
-    dir: webDir,
-    isDev: false,
-    hostname: "localhost",
-    port: nextJSPort,
-    customServer: true,
-    allowRetry: false,
-  });
+    await startServer({
+      dir: webDir,
+      isDev: false,
+      hostname: "localhost",
+      port: nextJSPort,
+      customServer: true,
+      allowRetry: false,
+    });
 
-  return nextJSPort;
+    return nextJSPort;
+  } catch (error) {
+    log.error("Error starting Next.js server:", error);
+    throw error;
+  }
 }
 
 async function startHonoServer() {
-  const honoPort = await getPort({ portRange: [50000, 51000] });
-  console.log("Hono server port:", honoPort);
+  try {
+    const honoPort = await getPort({ portRange: [50000, 51000] });
+    log.info("Hono server port:", honoPort);
 
-  const hono = new Hono();
+    const hono = new Hono();
 
-  hono.get("/health", (c) => c.text("Hono!"));
+    hono.get("/health", (c) => c.text("Hono!"));
 
-  serve({
-    fetch: hono.fetch,
-    port: honoPort,
-    hostname: "localhost",
-  });
+    serve({
+      fetch: hono.fetch,
+      port: honoPort,
+      hostname: "localhost",
+    });
 
-  return honoPort;
+    return honoPort;
+  } catch (error) {
+    log.error("Error starting Hono server:", error);
+    throw error;
+  }
 }
 
 app.whenReady().then(async () => {
-  electronApp.setAppUserModelId("com.electron");
+  try {
+    electronApp.setAppUserModelId("com.electron");
 
-  app.on("browser-window-created", (_, window) => {
-    optimizer.watchWindowShortcuts(window);
-  });
-
-  ipcMain.on("ping", () => console.log("pong"));
-
-  const honoPort = startHonoServer();
-  ipcMain.handle("getHonoPort", () => honoPort);
-
-  const latestReleaseVersion = await getLatestReleaseVersion(
-    "spa5k",
-    "quran_data",
-  );
-
-  const lastReleaseVersion = store.get("lastReleaseVersion");
-
-  if (latestReleaseVersion === lastReleaseVersion) {
-    console.log(
-      "No new release found in the repository. Last release is up to date.",
-      lastReleaseVersion,
-    );
-  } else {
-    const latestReleaseUrl = await getLatestRelease("spa5k", "quran_data");
-    console.log("New release found. Downloading...");
-    const win = createWindow();
-    await download(win, latestReleaseUrl, {
-      directory: app.getPath("userData"),
-    }).then((dl) => {
-      console.log("Downloaded to:", dl.getSavePath());
+    app.on("browser-window-created", (_, window) => {
+      optimizer.watchWindowShortcuts(window);
     });
-    store.set("lastReleaseVersion", latestReleaseVersion);
-    console.log("Download complete.", latestReleaseVersion);
-  }
 
-  app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
+    ipcMain.on("ping", () => log.info("pong"));
+
+    const honoPort = await startHonoServer();
+    ipcMain.handle("getHonoPort", () => honoPort);
+
+    const latestReleaseVersion = await getLatestReleaseVersion(
+      "spa5k",
+      "quran_data",
+    );
+
+    const lastReleaseVersion = store.get("lastReleaseVersion");
+    const win = createWindow();
+    if (latestReleaseVersion === lastReleaseVersion) {
+      log.info(
+        "No new release found in the repository. Last release is up to date.",
+        lastReleaseVersion,
+      );
+    } else {
+      const latestReleaseUrl = await getLatestRelease("spa5k", "quran_data");
+      log.info("New release found. Downloading...");
+
+      await download(win, latestReleaseUrl, {
+        directory: app.getPath("userData"),
+      }).then((dl) => {
+        log.info("Downloaded to:", dl.getSavePath());
+      });
+      store.set("lastReleaseVersion", latestReleaseVersion);
+      log.info("Download complete.", latestReleaseVersion);
+    }
+
+    app.on("activate", () => {
+      if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    });
+  } catch (error) {
+    log.error("Error during app initialization:", error);
+  }
 });
 
 app.on("window-all-closed", () => {
@@ -127,23 +148,3 @@ app.on("window-all-closed", () => {
     app.quit();
   }
 });
-
-async function getLatestReleaseVersion(
-  user: string,
-  repo: string,
-): Promise<string> {
-  const response = await fetch(
-    `https://api.github.com/repos/${user}/${repo}/releases/latest`,
-  );
-  const data = await response.json();
-  return data.tag_name;
-}
-
-async function getLatestRelease(user: string, repo: string): Promise<string> {
-  const response = await fetch(
-    `https://api.github.com/repos/${user}/${repo}/releases/latest`,
-  );
-  const data = await response.json();
-  const asset = data.assets.find((asset: any) => asset.name === "quran.db");
-  return asset.browser_download_url;
-}
