@@ -14,6 +14,30 @@ import { getLatestRelease, getLatestReleaseVersion } from "./utils/releases.js";
 const store = new Store();
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
+let mainWindow: BrowserWindow | null = null;
+let loadingWindow: BrowserWindow | null = null;
+
+function createLoadingWindow(): BrowserWindow {
+  const loadingWindow = new BrowserWindow({
+    width: 300,
+    height: 200,
+    frame: false,
+    transparent: true,
+    alwaysOnTop: true,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: false,
+    },
+    backgroundMaterial: "auto",
+  });
+
+  const url = `${join(__dirname, "..", "..", "public", "loading.html")}`;
+
+  loadingWindow.loadFile(url);
+
+  return loadingWindow;
+}
+
 function createWindow(): BrowserWindow {
   const mainWindow = new BrowserWindow({
     width: 900,
@@ -28,6 +52,10 @@ function createWindow(): BrowserWindow {
   });
 
   mainWindow.on("ready-to-show", () => {
+    if (loadingWindow) {
+      loadingWindow.close();
+      loadingWindow = null;
+    }
     mainWindow.show();
   });
 
@@ -116,7 +144,10 @@ app.whenReady().then(async () => {
     );
 
     const lastReleaseVersion = store.get("lastReleaseVersion");
-    const win = createWindow();
+
+    loadingWindow = createLoadingWindow();
+    mainWindow = createWindow();
+
     if (latestReleaseVersion === lastReleaseVersion) {
       log.info(
         "No new release found in the repository. Last release is up to date.",
@@ -126,7 +157,7 @@ app.whenReady().then(async () => {
       const latestReleaseUrl = await getLatestRelease("spa5k", "quran_data");
       log.info("New release found. Downloading...");
 
-      await download(win, latestReleaseUrl, {
+      await download(mainWindow, latestReleaseUrl, {
         directory: app.getPath("userData"),
       }).then((dl) => {
         log.info("Downloaded to:", dl.getSavePath());

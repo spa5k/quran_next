@@ -21,16 +21,17 @@
   "dependencies": {
     "@electron-toolkit/utils": "^3.0.0",
     "@hono/node-server": "^1.11.1",
-    "@libsql/client": "^0.6.0",
     "@types/better-sqlite3": "^7.6.10",
     "better-sqlite3": "^10.0.0",
     "cross-env": "^7.0.3",
     "drizzle-orm": "^0.30.10",
     "electron-dl": "^4.0.0",
+    "electron-log": "^5.1.4",
     "electron-store": "^9.0.0",
     "get-port-please": "^3.1.2",
     "hono": "^4.3.7",
-    "next": "^14.2.3"
+    "next": "^14.2.3",
+    "unused-filename": "^4.0.1"
   },
   "devDependencies": {
     "@swc/cli": "^0.3.12",
