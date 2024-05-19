@@ -2,4 +2,7 @@
 export default {
   output: "standalone",
   reactStrictMode: true,
+  experimental: {
+    instrumentationHook: true,
+  },
 };
