@@ -7,14 +7,14 @@
     "name": "Quran.com",
     "email": "abcd@gmail.com"
   },
-  "main": "main/src/main.js",
+  "main": "main/main.js",
   "scripts": {
     "dist": "electron-builder --dir",
     "dist:deb": "electron-builder --linux deb",
     "postinstall": "electron-builder install-app-deps",
     "start": "NODE_ENV=development electron .",
-    "build": "swc ./src -d main",
-    "build:dev": "swc ./src -d main --watch",
+    "build": "tsup",
+    "build:dev": "tsup --watch",
     "dev": "npm-run-all --parallel build:dev electron:dev",
     "electron:dev": "cross-env NODE_ENV='development' nodemon",
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -35,8 +35,6 @@
     "next": "^14.2.3"
   },
   "devDependencies": {
-    "@swc/cli": "^0.3.12",
-    "@swc/core": "^1.5.7",
     "drizzle-kit": "^0.21.2",
     "electron": "^30.0.6",
     "electron-builder": "^24.13.3",
