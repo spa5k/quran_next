@@ -25,12 +25,21 @@ function createLoadingWindow(): BrowserWindow {
       nodeIntegration: true,
       contextIsolation: false,
     },
-    backgroundMaterial: "auto",
+    backgroundMaterial: "acrylic",
   });
 
-  const url = `${join(__dirname, "..", "..", "public", "loading.html")}`;
+  const url = join(__dirname, "..", "public", "loading.html");
 
   loadingWindow.loadFile(url);
+
+  if (process.platform === "win32") {
+    loadingWindow.setBackgroundMaterial("mica");
+  } else if (process.platform === "darwin") {
+    loadingWindow.setBackgroundColor("#00000000"); // Transparent background for macOS
+    loadingWindow.setBackgroundMaterial("auto");
+  } else {
+    loadingWindow.setBackgroundColor("#00000000"); // Transparent background for other platforms
+  }
 
   return loadingWindow;
 }
@@ -143,7 +152,6 @@ app.whenReady().then(async () => {
     const lastReleaseVersion = await settings.get("lastReleaseVersion");
 
     loadingWindow = createLoadingWindow();
-    mainWindow = createWindow();
 
     if (latestReleaseVersion === lastReleaseVersion) {
       log.info(
@@ -154,7 +162,7 @@ app.whenReady().then(async () => {
       const latestReleaseUrl = await getLatestRelease("spa5k", "quran_data");
       log.info("New release found. Downloading...");
 
-      downloadFile(mainWindow, latestReleaseUrl, { filename: "quran.db" })
+      downloadFile(mainWindow!, latestReleaseUrl, { filename: "quran.db" })
         .then(() => {
           console.log("Download completed successfully");
           settings.set("lastReleaseVersion", latestReleaseVersion);
@@ -164,7 +172,10 @@ app.whenReady().then(async () => {
         });
       log.info("Download complete.", latestReleaseVersion);
     }
-
+    // wait for 3 to show main window
+    setTimeout(() => {
+      mainWindow = createWindow();
+    }, 3000);
     app.on("activate", () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow();
     });
