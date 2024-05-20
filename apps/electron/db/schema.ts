@@ -1,21 +1,17 @@
-import { foreignKey, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import {
+  foreignKey,
+  integer,
+  sqliteTable,
+  text,
+} from "drizzle-orm/sqlite-core";
 
-export const ayah = sqliteTable(
-  "ayah",
-  {
-    id: integer("id").primaryKey().notNull(),
-    surahNumber: integer("surah_number").notNull(),
-    ayahNumber: integer("ayah_number").notNull(),
-    editionId: integer("edition_id").notNull(),
-    text: text("text").notNull(),
-  },
-  (ayah) => ({
-    editionFk: foreignKey({
-      columns: [ayah.editionId],
-      foreignColumns: [edition.id],
-    }),
-  }),
-);
+export const ayah = sqliteTable("ayah", {
+  id: integer("id").primaryKey().notNull(),
+  surahNumber: integer("surah_number").notNull(),
+  ayahNumber: integer("ayah_number").notNull(),
+  editionId: integer("edition_id").notNull(),
+  text: text("text").notNull(),
+});
 
 // Ayah Info Table
 export const ayahInfo = sqliteTable("ayah_info", {
@@ -62,24 +58,18 @@ export const sajdah = sqliteTable("sajdah", {
 });
 
 // Surah Table
-export const surah = sqliteTable(
-  "surah",
-  {
-    id: integer("id").primaryKey().notNull(),
-    surahNumber: integer("surah_number").notNull(),
-    nameSimple: text("name_simple").notNull(),
-    nameComplex: text("name_complex").notNull(),
-    nameArabic: text("name_arabic").notNull(),
-    ayahStart: integer("ayah_start").notNull(),
-    ayahEnd: integer("ayah_end").notNull(),
-    revelationPlace: text("revelation_place").notNull(),
-    pageStart: integer("page_start").notNull(),
-    pageEnd: integer("page_end").notNull(),
-  },
-  (surah) => ({
-    uniqueIndex: uniqueIndex("surah_surah_number_unique").on(surah.surahNumber),
-  }),
-);
+export const surah = sqliteTable("surah", {
+  id: integer("id").primaryKey().notNull(),
+  surahNumber: integer("surah_number").notNull(),
+  nameSimple: text("name_simple").notNull(),
+  nameComplex: text("name_complex").notNull(),
+  nameArabic: text("name_arabic").notNull(),
+  ayahStart: integer("ayah_start").notNull(),
+  ayahEnd: integer("ayah_end").notNull(),
+  revelationPlace: text("revelation_place").notNull(),
+  pageStart: integer("page_start").notNull(),
+  pageEnd: integer("page_end").notNull(),
+});
 
 // Translation Table
 export const translation = sqliteTable(
@@ -101,29 +91,22 @@ export const translation = sqliteTable(
       columns: [translation.surahNumber, translation.ayahNumber],
       foreignColumns: [ayah.surahNumber, ayah.ayahNumber],
     }),
-    uniqueIndex: uniqueIndex(
-      "translation_surah_number_ayah_number_edition_id_unique",
-    ).on(
-      translation.surahNumber,
-      translation.ayahNumber,
-      translation.editionId,
-    ),
   }),
 );
 
 // Tajweed Table
-export const tajweed = sqliteTable(
-  "tajweed",
-  {
-    id: integer("id").primaryKey().notNull(),
-    surahNumber: integer("surah_number").notNull(),
-    ayahNumber: integer("ayah_number").notNull(),
-    tajweed: text("tajweed").notNull(),
-  },
-  (tajweed) => ({
-    uniqueIndex: uniqueIndex("tajweed_surah_number_ayah_number_unique").on(
-      tajweed.surahNumber,
-      tajweed.ayahNumber,
-    ),
-  }),
-);
+export const tajweed = sqliteTable("tajweed", {
+  id: integer("id").primaryKey().notNull(),
+  surahNumber: integer("surah_number").notNull(),
+  ayahNumber: integer("ayah_number").notNull(),
+  tajweed: text("tajweed").notNull(),
+});
+
+export type Ayah = typeof ayah.$inferSelect;
+export type AyahInfo = typeof ayahInfo.$inferSelect;
+export type Edition = typeof edition.$inferSelect;
+export type Juz = typeof juz.$inferSelect;
+export type Sajdah = typeof sajdah.$inferSelect;
+export type Surah = typeof surah.$inferSelect;
+export type Translation = typeof translation.$inferSelect;
+export type Tajweed = typeof tajweed.$inferSelect;

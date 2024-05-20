@@ -1,13 +1,12 @@
 import { electronApp, is, optimizer } from "@electron-toolkit/utils";
-import { serve } from "@hono/node-server";
-import { app, BrowserWindow, ipcMain, shell } from "electron";
+import { BrowserWindow, app, ipcMain, shell } from "electron";
 import log from "electron-log";
 import settings from "electron-settings";
 import { getPort } from "get-port-please";
-import { Hono } from "hono";
 import { startServer } from "next/dist/server/lib/start-server.js";
 import * as path from "path";
 import { join } from "path";
+import { startHonoServer } from "./server/index.js";
 import downloadFile from "./utils/downloader.js";
 import { getLatestRelease, getLatestReleaseVersion } from "./utils/releases.js";
 
@@ -109,28 +108,6 @@ async function startNextJSServer() {
   }
 }
 
-async function startHonoServer() {
-  try {
-    const honoPort = await getPort({ portRange: [50000, 51000] });
-    log.info("Hono server port:", honoPort);
-
-    const hono = new Hono();
-
-    hono.get("/health", (c) => c.text("Hono!"));
-
-    serve({
-      fetch: hono.fetch,
-      port: honoPort,
-      hostname: "localhost",
-    });
-
-    return honoPort;
-  } catch (error) {
-    log.error("Error starting Hono server:", error);
-    throw error;
-  }
-}
-
 app.whenReady().then(async () => {
   try {
     electronApp.setAppUserModelId("com.electron");
@@ -142,6 +119,7 @@ app.whenReady().then(async () => {
     ipcMain.on("ping", () => log.info("pong"));
 
     const honoPort = await startHonoServer();
+    console.log("Hono server started on port:", honoPort);
     ipcMain.handle("getHonoPort", () => honoPort);
 
     const latestReleaseVersion = await getLatestReleaseVersion(
