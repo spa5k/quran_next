@@ -40,10 +40,12 @@ export function getAyahBySurahNumberAyahNumberAndEditionID(
     .from(ayah)
     .where(
       sql`
-    ${eq(ayah.surahNumber, surahNumber)} and ${eq(
-      ayah.ayahNumber,
-      ayahNumber,
-    )} and ${eq(ayah.editionId, editionId)}
+    ${eq(ayah.surahNumber, surahNumber)} and ${
+        eq(
+          ayah.ayahNumber,
+          ayahNumber,
+        )
+      } and ${eq(ayah.editionId, editionId)}
   `,
     )
     .all();

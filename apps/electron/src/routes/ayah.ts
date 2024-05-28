@@ -1,15 +1,12 @@
 import { createRoute, type OpenAPIHono } from "@hono/zod-openapi";
 import type { Env } from "electron";
 import z from "zod";
-import {
-  getAyahsBySurahNumber,
-  getAyahsBySurahNumberAndEditionID,
-} from "../../db/ayah";
+import { getAyahsBySurahNumber, getAyahsBySurahNumberAndEditionID } from "../../db/ayah";
 
 export function AyahRoutes(app: OpenAPIHono<Env, {}, "/">) {
   const getAyahsBySurahNumberRoute = createRoute({
     method: "get",
-    path: "/ayahs/surah/{surahNumber}",
+    path: "/surah/{surahNumber}",
     tags: ["Ayah"],
     request: {
       params: z.object({
@@ -53,7 +50,7 @@ export function AyahRoutes(app: OpenAPIHono<Env, {}, "/">) {
     method: "get",
     tags: ["Ayah"],
 
-    path: "/ayahs/surah/{surahNumber}/edition/{editionId}",
+    path: "/surah/{surahNumber}/{editionId}",
     request: {
       params: z.object({
         surahNumber: z.string().openapi({

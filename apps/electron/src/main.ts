@@ -1,5 +1,5 @@
 import { electronApp, is, optimizer } from "@electron-toolkit/utils";
-import { BrowserWindow, app, ipcMain, shell } from "electron";
+import { app, BrowserWindow, ipcMain, shell } from "electron";
 import log from "electron-log";
 import settings from "electron-settings";
 import { getPort } from "get-port-please";
@@ -119,7 +119,7 @@ app.whenReady().then(async () => {
     ipcMain.on("ping", () => log.info("pong"));
 
     const honoPort = await startHonoServer();
-    console.log("Hono server started on port:", honoPort);
+    console.log("Hono server started on port:", `http://localhost:${honoPort}`);
     ipcMain.handle("getHonoPort", () => honoPort);
 
     const latestReleaseVersion = await getLatestReleaseVersion(

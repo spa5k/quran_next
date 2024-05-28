@@ -120,3 +120,10 @@ export interface SajdasReference {
 export interface Verses {
   readonly count: number;
 }
+
+export interface AyahAPI {
+  id: number;
+  surahNumber: number;
+  ayahNumber: number;
+  text: string;
+}

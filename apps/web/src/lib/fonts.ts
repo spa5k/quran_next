@@ -1,4 +1,5 @@
 import { Cormorant_Garamond, Inter, Lexend, Readex_Pro, Taviraj } from "next/font/google";
+import localFont from "next/font/local";
 
 export const inter = Inter({ subsets: ["latin"] });
 export const cormorant_garamond = Cormorant_Garamond({
@@ -23,4 +24,16 @@ export const readex_pro = Readex_Pro({
   subsets: ["latin"],
   variable: "--font-readex_pro",
   weight: ["300", "400", "700"],
+});
+
+// export const indopak = localFont({
+//   src: "./fonts/indopak.woff2",
+//   display: "swap",
+//   variable: "--font-indopak",
+// });
+
+export const indopak = localFont({
+  src: "./fonts/hafs-uthmanic-v14-full.woff2",
+  display: "swap",
+  variable: "--font-indopak",
 });

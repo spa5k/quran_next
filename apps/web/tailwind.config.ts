@@ -65,6 +65,7 @@ const config = {
         cursive: ["var(--font-cormorant_garamond)"],
         primary: ["var(--font-lexend)"],
         arabic: ["var(--font-readex_pro)"],
+        indopak: ["var(--font-indopak)"],
       },
       keyframes: {
         "accordion-down": {

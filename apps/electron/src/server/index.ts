@@ -38,7 +38,10 @@ export async function startHonoServer() {
     });
 
     // list hono routes
-    log.info("Hono routes:", app.routes);
+    // log.info("Hono routes:", app.routes);
+    for (const route of app.routes) {
+      console.log("Route", route.path, route.method);
+    }
 
     return honoPort;
   } catch (error) {

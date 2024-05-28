@@ -27,7 +27,7 @@ import { TailwindIndicator } from "../components/generic/TailwindIndicator";
 import { MobileNavigationLinks } from "../components/layout/MobileNavigationLinks";
 import { NavigationLinks } from "../components/layout/NavigationLinks";
 import { AuroraBackground } from "../components/ui/aurora-background";
-import { cormorant_garamond, inter, lexend, readex_pro, taviraj } from "../lib/fonts";
+import { cormorant_garamond, indopak, inter, lexend, readex_pro, taviraj } from "../lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -52,6 +52,8 @@ export default function RootLayout({
           + lexend.variable
           + " "
           + readex_pro.variable
+          + " "
+          + indopak.variable
           + " "
           + "font-primary"}
       >

@@ -83,6 +83,7 @@ export function EditionRoutes(app: OpenAPIHono<Env, {}, "/">) {
 
   app.openapi(allEditionsRoute, async (c) => {
     const editions = getEditions();
+
     return c.json(editions);
   });
 
@@ -189,8 +190,7 @@ export function EditionRoutes(app: OpenAPIHono<Env, {}, "/">) {
 
   app.openapi(enabledEditionsRoute, async (c) => {
     const status = c.req.param("status");
-    const editions =
-      status === "enabled" ? getEnabledEditions() : getDisabledEditions();
+    const editions = status === "enabled" ? getEnabledEditions() : getDisabledEditions();
     return c.json(editions);
   });
 }
