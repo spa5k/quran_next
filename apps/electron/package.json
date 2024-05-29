@@ -12,6 +12,7 @@
     "dist": "electron-builder --dir",
     "dist:deb": "electron-builder --linux deb",
     "start": "NODE_ENV=development electron .",
+    "postinstall": "electron-builder install-app-deps",
     "build": "tsup",
     "build:dev": "tsup --watch",
     "dev": "npm-run-all --parallel build:dev electron:dev",

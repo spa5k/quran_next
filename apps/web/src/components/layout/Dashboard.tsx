@@ -6,7 +6,7 @@ import { GridPatternLinearGradient } from "../ui/grid-pattern";
 
 // Lazy load components
 const RecitationCard = lazy(() => import("@/src/features/recitation/components/RecitationCard"));
-const Globe = lazy(() => import("../ui/globe"));
+// const Globe = lazy(() => import("../ui/globe"));
 
 const features = [
   {
@@ -103,9 +103,10 @@ const features = [
     href: "/",
     cta: "Learn more",
     background: (
-      <Suspense fallback={<div>Loading...</div>}>
-        <Globe className="top-0 h-[600px] w-[600px] transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_30%,#000_100%)] group-hover:scale-105 sm:left-40" />
-      </Suspense>
+      <img className="absolute -right-20 -top-20 opacity-60" />
+      // <Suspense fallback={<div>Loading...</div>}>
+      //   {/* <Globe className="top-0 h-[600px] w-[600px] transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_30%,#000_100%)] group-hover:scale-105 sm:left-40" /> */}
+      // </Suspense>
     ),
     className: "lg:col-start-1 lg:col-end-3 lg:row-start-4 lg:row-end-6",
   },

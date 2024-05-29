@@ -26,7 +26,6 @@ import { ElectronIndicator } from "../components/generic/ElectronIndicator";
 import { TailwindIndicator } from "../components/generic/TailwindIndicator";
 import { MobileNavigationLinks } from "../components/layout/MobileNavigationLinks";
 import { NavigationLinks } from "../components/layout/NavigationLinks";
-import { AuroraBackground } from "../components/ui/aurora-background";
 import { cormorant_garamond, indopak, inter, lexend, readex_pro, taviraj } from "../lib/fonts";
 import "./globals.css";
 
@@ -124,11 +123,11 @@ export default function RootLayout({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </header>
-              <AuroraBackground>
-                <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 z-10">
-                  {children}
-                </main>
-              </AuroraBackground>
+              {/* <AuroraBackground> */}
+              <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 z-10">
+                {children}
+              </main>
+              {/* </AuroraBackground> */}
             </div>
           </div>
         </TooltipProvider>
