@@ -1,6 +1,6 @@
 "use client";
 
-import { isLocalhostReachable } from "@/src/features/api/ayah";
+import { isLocalhostReachable } from "@/src/features/quran/api/ayah";
 import { useEffect, useState } from "react";
 
 // Custom hook to check if the app is running in Electron
@@ -18,8 +18,18 @@ function useIsElectron() {
   return isElectron;
 }
 
-export async function ElectronIndicator() {
+export function ElectronIndicator() {
   const isElectron = useIsElectron();
+  const [isLocalhost, setIsLocalhost] = useState(false);
+
+  useEffect(() => {
+    async function checkLocalhost() {
+      const reachable = await isLocalhostReachable();
+      setIsLocalhost(reachable);
+    }
+
+    checkLocalhost();
+  }, []);
 
   if (process.env.NODE_ENV === "production") return null;
 
@@ -35,7 +45,7 @@ export async function ElectronIndicator() {
         className="fixed bottom-20 left-1 z-50 flex items-center space-x-2 rounded-full bg-black px-2.5 py-1 font-mono text-xs font-medium text-white"
         title="Is localhost reachable?"
       >
-        Localhost - {await isLocalhostReachable() ? "Yes" : "No"}
+        Localhost - {isLocalhost ? "Yes" : "No"}
       </div>
     </div>
   );

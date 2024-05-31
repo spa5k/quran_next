@@ -21,5 +21,5 @@
     "node": ">=18"
   },
   "dependencies": {},
-  "packageManager": "pnpm@9.1.3"
+  "packageManager": "pnpm@9.1.4"
 }

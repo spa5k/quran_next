@@ -2,6 +2,7 @@ export async function isLocalhostReachable(): Promise<boolean> {
   try {
     const response = await fetch("http://localhost:50000/health", {
       cache: "no-cache",
+      mode: "no-cors",
     });
     const body = await response.text();
     return response.status === 200 && body === "Hono!";
