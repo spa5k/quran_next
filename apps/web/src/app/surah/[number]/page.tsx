@@ -1,5 +1,4 @@
-import { EditionsMultiSelect } from "@/src/features/edition/components/EditionSelector";
-import { fetchAyahs } from "@/src/features/quran/api/ayah";
+import { EditionMultiSelectForm } from "@/src/features/edition/components/EditionMultiSelect";
 import editions from "@features/quran/data/editions.json";
 
 export default async function Page({
@@ -11,19 +10,37 @@ export default async function Page({
 }): Promise<JSX.Element> {
   console.log({ searchParams, params });
 
-  const editionId = Number.parseInt(searchParams?.edition ?? "") || 120;
+  // const editionId = Number.parseInt(searchParams?.edition ?? "") || 120;
+  // console.log({ editionId });
 
-  const edition = editions.find((edition) => edition.id === editionId);
+  // const edition = editions.find((edition) => edition.id === editionId);
 
-  const ayahAPI = await fetchAyahs(
-    editionId,
-    Number.parseInt(params!.number),
-    edition?.name ?? "",
+  // const ayahAPI = await fetchAyahs(
+  //   editionId,
+  //   Number.parseInt(params!.number),
+  //   edition?.name ?? "",
+  // );
+
+  const quranEditions = editions.filter(
+    (edition) => edition.type === "QURAN",
+  );
+
+  const translationEditions = editions.filter(
+    (edition) => edition.type === "TRANSLATION",
+  );
+
+  const transliterationEditions = editions.filter(
+    (edition) => edition.type === "TRANSLITERATION",
   );
 
   return (
     <main className="mt-20">
-      <EditionsMultiSelect editions={editions} />
+      <EditionMultiSelectForm edition={quranEditions} queryParam="q" />
+      <EditionMultiSelectForm edition={translationEditions} queryParam="t" />
+      <EditionMultiSelectForm
+        edition={transliterationEditions}
+        queryParam="tl"
+      />
 
       {
         /* <div className="mt-20">

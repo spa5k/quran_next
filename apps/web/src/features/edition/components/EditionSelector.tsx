@@ -1,11 +1,10 @@
 "use client";
 
-import { Button } from "@/src/components/ui/button";
-import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "@/src/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/src/components/ui/popover";
-import { cn } from "@/src/lib/utils";
-import { Check } from "lucide-react";
-import React from "react";
+import { X } from "lucide-react";
+import * as React from "react";
+
+import { Badge } from "@/src/components/ui/badge";
+import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "@/src/components/ui/command";
 import type { Edition } from "../api/editions";
 
 export function EditionsMultiSelect({ editions }: {
@@ -20,64 +19,114 @@ export function EditionsMultiSelect({ editions }: {
     enabled: number;
   }[];
 }) {
+  const inputRef = React.useRef<HTMLInputElement>(null);
   const [open, setOpen] = React.useState(false);
-  const [selectedStatus, setSelectedStatus] = React.useState<Edition | null>(
-    null,
+  const [selectedEditions, setSelectedEditions] = React.useState<Edition[]>([]);
+  const [inputValue, setInputValue] = React.useState("");
+
+  const handleUnselect = React.useCallback((edition: Edition) => {
+    setSelectedEditions((prev) => prev.filter((s) => s.id !== edition.id));
+  }, []);
+
+  const handleKeyDown = React.useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      const input = inputRef.current;
+      if (input) {
+        if (e.key === "Delete" || e.key === "Backspace") {
+          if (input.value === "") {
+            setSelectedEditions((prev) => {
+              const newSelected = [...prev];
+              newSelected.pop();
+              return newSelected;
+            });
+          }
+        }
+        if (e.key === "Escape") {
+          input.blur();
+        }
+      }
+    },
+    [],
   );
 
-  const translationEditions = editions.filter((edition) => edition.type === "TRANSLATION");
-  const quranEditions = editions.filter((edition) => edition.type === "QURAN");
-  const transliterationEditions = editions.filter((edition) => edition.type === "TRANSLITERATION");
-  const quranTransliterationEditions = editions.filter((edition) => edition.type === "QURAN_TRANSLITERATION");
+  const selectables = editions.filter(
+    (edition) => !selectedEditions.includes(edition),
+  );
+
+  const quranEditions = editions.filter(
+    (edition) => edition.type === "QURAN",
+  );
 
   return (
-    <div className="space-y-4 z-20">
-      <div className="flex items-center space-x-4">
-        <p className="text-sm text-muted-foreground">Status</p>
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-[150px] justify-start"
-            >
-              {selectedStatus
-                ? (
-                  <>
-                    {selectedStatus.author}
-                  </>
-                )
-                : <>+ Set status</>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="p-0" side="right" align="start">
-            <Command>
-              <CommandInput placeholder="Change status..." />
-              <CommandList>
-                <CommandEmpty>No results found.</CommandEmpty>
-                {quranEditions.map((edition) => (
-                  <CommandItem
-                    key={edition.id + edition.name}
-                    value={edition.name}
-                    onSelect={(currentValue) => {
-                      setSelectedStatus(edition);
-                      setOpen(false);
-                    }}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        selectedStatus?.name === edition.name ? "opacity-100" : "opacity-0",
-                      )}
-                    />
-                    {edition.author}
-                  </CommandItem>
-                ))}
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+    <Command
+      onKeyDown={handleKeyDown}
+      className="overflow-visible bg-transparent z-100"
+    >
+      <div className="group rounded-md border border-input px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+        <div className="flex flex-wrap gap-1">
+          {selectedEditions.map((edition) => {
+            return (
+              <Badge key={edition.id} variant="secondary">
+                {edition.author}
+                <button
+                  className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleUnselect(edition);
+                    }
+                  }}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onClick={() => handleUnselect(edition)}
+                >
+                  <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                </button>
+              </Badge>
+            );
+          })}
+          <CommandInput
+            ref={inputRef}
+            value={inputValue}
+            onValueChange={setInputValue}
+            onBlur={() => setOpen(false)}
+            onFocus={() => setOpen(true)}
+            placeholder="Select editions..."
+            className="ml-2 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
+          />
+        </div>
       </div>
-    </div>
+      <div className="relative mt-2">
+        <CommandList className="z-100">
+          {open && quranEditions.length > 0
+            ? (
+              <div className="absolute top-0 z-10 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
+                <CommandGroup className="h-full overflow-auto">
+                  {quranEditions.map((edition) => {
+                    return (
+                      <CommandItem
+                        key={edition.id}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        onSelect={() => {
+                          setInputValue("");
+                          setSelectedEditions((prev) => [...prev, edition]);
+                        }}
+                        className={"cursor-pointer"}
+                      >
+                        {edition.name}
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              </div>
+            )
+            : null}
+        </CommandList>
+      </div>
+    </Command>
   );
 }
