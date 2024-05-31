@@ -19,8 +19,14 @@ interface Edition {
 interface EditionMultiSelectFormProps {
   edition: Edition[];
   queryParam: string;
+  placeholder: string;
+  formName: string;
+  description: string;
 }
-export const EditionMultiSelectForm = ({ edition, queryParam }: EditionMultiSelectFormProps) => {
+
+export const EditionMultiSelectForm = (
+  { edition, queryParam, placeholder, formName, description }: EditionMultiSelectFormProps,
+) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -78,12 +84,12 @@ export const EditionMultiSelectForm = ({ edition, queryParam }: EditionMultiSele
                     field.onChange(value);
                     updateQueryParam(value);
                   }}
-                  placeholder="Select Quran Edition"
+                  placeholder={placeholder}
                   variant="secondary"
                 />
               </FormControl>
               <FormDescription>
-                Select the quran edition you want to view
+                {description}
               </FormDescription>
               <FormMessage />
             </FormItem>

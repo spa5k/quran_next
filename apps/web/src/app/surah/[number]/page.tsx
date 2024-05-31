@@ -34,12 +34,27 @@ export default async function Page({
   );
 
   return (
-    <main className="mt-20">
-      <EditionMultiSelectForm edition={quranEditions} queryParam="q" />
-      <EditionMultiSelectForm edition={translationEditions} queryParam="t" />
+    <main className="mt-20 flex gap-4">
+      <EditionMultiSelectForm
+        edition={quranEditions}
+        queryParam="q"
+        placeholder="Select Quran Edition"
+        formName="Quran Editions"
+        description="Select the Quran edition you want to view"
+      />
+      <EditionMultiSelectForm
+        edition={translationEditions}
+        queryParam="t"
+        placeholder="Select Translation Edition"
+        formName="Translation Editions"
+        description="Select the translation edition you want to view"
+      />
       <EditionMultiSelectForm
         edition={transliterationEditions}
         queryParam="tl"
+        placeholder="Select Transliteration Edition"
+        formName="Transliteration Editions"
+        description="Select the transliteration edition you want to view"
       />
 
       {
