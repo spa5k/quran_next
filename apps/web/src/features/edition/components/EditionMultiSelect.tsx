@@ -27,6 +27,7 @@ interface EditionMultiSelectFormProps {
 export const EditionMultiSelectForm = (
   { edition, queryParam, placeholder, formName, description }: EditionMultiSelectFormProps,
 ) => {
+  console.log({ edition });
   const router = useRouter();
   const searchParams = useSearchParams();
 

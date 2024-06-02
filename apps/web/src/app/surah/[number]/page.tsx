@@ -55,19 +55,16 @@ export default async function Page({
   const translationEditionsSelectedData = translationEditionsSelected.map(
     (edition) => {
       return translationEditions.find(
-        (translationEdition) =>
-          translationEdition.id === Number.parseInt(edition),
+        (translationEdition) => translationEdition.id === Number.parseInt(edition),
       );
     },
   );
 
-  const transliterationEditionsSelectedData =
-    transliterationEditionsSelected.map((edition) => {
-      return transliterationEditions.find(
-        (transliterationEdition) =>
-          transliterationEdition.id === Number.parseInt(edition),
-      );
-    });
+  const transliterationEditionsSelectedData = transliterationEditionsSelected.map((edition) => {
+    return transliterationEditions.find(
+      (transliterationEdition) => transliterationEdition.id === Number.parseInt(edition),
+    );
+  });
 
   console.log({
     quranEditionsSelectedData,
@@ -77,11 +74,14 @@ export default async function Page({
 
   const quranEditionsFetched = await Promise.all(
     quranEditionsSelectedData.map(async (edition) => {
-      return await fetchAyahs(
-        edition!.id,
-        Number.parseInt(params!.number),
-        edition!.name,
-      );
+      if (edition) {
+        return await fetchAyahs(
+          edition.id,
+          Number.parseInt(params!.number),
+          edition.name,
+        );
+      }
+      return null;
     }),
   );
   console.log({ quranEditionsFetched });
@@ -91,7 +91,7 @@ export default async function Page({
     translationEditionsSelected,
     transliterationEditionsSelected,
   });
-  console.log({ quranEditions });
+  console.log({ translationEditions });
   return (
     <main className="mt-20 flex gap-4 flex-col">
       <div className="flex gap-4">
@@ -118,7 +118,7 @@ export default async function Page({
         />
       </div>
       {quranEditionsFetched.map((ayahAPI) => {
-        return ayahAPI.map((ayah) => {
+        return ayahAPI?.map((ayah) => {
           return (
             <p
               className="font-indopak text-8xl leading-loose"
@@ -130,7 +130,8 @@ export default async function Page({
         });
       })}
 
-      {/* <div className="mt-20">
+      {
+        /* <div className="mt-20">
         {ayahAPI.map((ayah: Ayah) => {
           return (
             <p className="font-indopak text-8xl leading-loose" key={ayah.id}>
@@ -138,7 +139,8 @@ export default async function Page({
             </p>
           );
         })}
-      </div> */}
+      </div> */
+      }
     </main>
   );
 }
