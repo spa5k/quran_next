@@ -4,17 +4,7 @@ import MultiSelectFormField from "@/src/components/ui/multi-select";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-
-interface Edition {
-  id: number;
-  name: string;
-  author: string;
-  language: string;
-  direction: string;
-  source: string;
-  type: string;
-  enabled: number;
-}
+import type { Edition } from "../api/editions";
 
 interface EditionMultiSelectFormProps {
   edition: Edition[];
@@ -38,7 +28,7 @@ export const EditionMultiSelectForm = (
   });
 
   const parsedEditions = edition.map((edition) => ({
-    label: edition.author!,
+    label: edition.name,
     value: edition.id.toString(),
   }));
 

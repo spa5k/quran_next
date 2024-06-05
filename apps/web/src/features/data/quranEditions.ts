@@ -1,4 +1,6 @@
-export const quranEditions = [
+import type { Edition } from "../edition/api/editions";
+
+export const quranEditions: Edition[] = [
   {
     id: 145,
     slug: "ara-quranindopak",
@@ -7,6 +9,7 @@ export const quranEditions = [
     type: "QURAN",
     name: "IndoPak",
     enabled: true,
+    language: "arabic",
   },
   {
     id: 120,
@@ -16,6 +19,7 @@ export const quranEditions = [
     type: "QURAN",
     name: "Uthmanic",
     enabled: true,
+    language: "arabic",
   },
   {
     id: 62,
@@ -25,5 +29,6 @@ export const quranEditions = [
     type: "QURAN",
     name: "Simple",
     enabled: true,
+    language: "arabic",
   },
 ];

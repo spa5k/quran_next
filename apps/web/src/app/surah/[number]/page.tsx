@@ -1,6 +1,8 @@
+import { quranEditions } from "@/src/features/data/quranEditions";
+import { translationEditions } from "@/src/features/data/translationEditions";
+import type { Edition } from "@/src/features/edition/api/editions";
 import { EditionMultiSelectForm } from "@/src/features/edition/components/EditionMultiSelect";
 import { fetchAyahs } from "@/src/features/quran/api/ayah";
-import editions from "@features/quran/data/editions.json";
 
 export default async function Page({
   searchParams,
@@ -17,60 +19,35 @@ export default async function Page({
 }): Promise<JSX.Element> {
   console.log({ searchParams, params });
 
-  // const editionId = Number.parseInt(searchParams?.edition ?? "") || 120;
-  // console.log({ editionId });
-
-  // const edition = editions.find((edition) => edition.id === editionId);
-
-  // const ayahAPI = await fetchAyahs(
-  //   editionId,
-  //   Number.parseInt(params!.number),
-  //   edition?.name ?? "",
-  // );
-
-  const quranEditions = editions.filter((edition) => edition.type === "QURAN");
-
-  const translationEditions = editions.filter(
-    (edition) => edition.type === "TRANSLATION",
-  );
-
-  const transliterationEditions = editions.filter(
-    (edition) => edition.type === "TRANSLITERATION",
-  );
-
   function parseEditions(editions: string): string[] {
     return editions.split(",").map((edition) => edition.trim());
   }
 
   const quranEditionsSelected = parseEditions(searchParams?.q ?? "");
   const translationEditionsSelected = parseEditions(searchParams?.t ?? "");
-  const transliterationEditionsSelected = parseEditions(searchParams?.tl ?? "");
+  // const transliterationEditionsSelected = parseEditions(searchParams?.tl ?? "");
 
-  const quranEditionsSelectedData = quranEditionsSelected.map((edition) => {
-    return quranEditions.find(
-      (quranEdition) => quranEdition.id === Number.parseInt(edition),
-    );
-  });
+  const quranEditionsSelectedData: Edition[] = quranEditionsSelected.map(
+    (edition) => {
+      return quranEditions.find(
+        (quranEdition) => quranEdition.id === Number.parseInt(edition),
+      );
+    },
+  ) as unknown as Edition[];
 
-  const translationEditionsSelectedData = translationEditionsSelected.map(
+  const translationEditionsSelectedData: Edition[] = translationEditionsSelected.map(
     (edition) => {
       return translationEditions.find(
         (translationEdition) => translationEdition.id === Number.parseInt(edition),
       );
     },
-  );
+  ) as unknown as Edition[];
 
-  const transliterationEditionsSelectedData = transliterationEditionsSelected.map((edition) => {
-    return transliterationEditions.find(
-      (transliterationEdition) => transliterationEdition.id === Number.parseInt(edition),
-    );
-  });
-
-  console.log({
-    quranEditionsSelectedData,
-    translationEditionsSelectedData,
-    transliterationEditionsSelectedData,
-  });
+  // const transliterationEditionsSelectedData = transliterationEditionsSelected.map((edition) => {
+  //   return transliterationEditions.find(
+  //     (transliterationEdition) => transliterationEdition.id === Number.parseInt(edition),
+  //   );
+  // });
 
   const quranEditionsFetched = await Promise.all(
     quranEditionsSelectedData.map(async (edition) => {
@@ -84,14 +61,7 @@ export default async function Page({
       return null;
     }),
   );
-  console.log({ quranEditionsFetched });
 
-  console.log({
-    quranEditionsSelected,
-    translationEditionsSelected,
-    transliterationEditionsSelected,
-  });
-  console.log({ translationEditions });
   return (
     <main className="mt-20 flex gap-4 flex-col">
       <div className="flex gap-4">
@@ -108,13 +78,6 @@ export default async function Page({
           placeholder="Select Translation Edition"
           formName="Translation Editions"
           description="Select the translation edition you want to view"
-        />
-        <EditionMultiSelectForm
-          edition={transliterationEditions}
-          queryParam="tl"
-          placeholder="Select Transliteration Edition"
-          formName="Transliteration Editions"
-          description="Select the transliteration edition you want to view"
         />
       </div>
       {quranEditionsFetched.map((ayahAPI) => {
