@@ -3,7 +3,7 @@ import { translationEditions } from "@/src/features/data/translationEditions";
 import type { Edition } from "@/src/features/edition/api/editions";
 import { EditionMultiSelectForm } from "@/src/features/edition/components/EditionMultiSelect";
 import { fetchAyahs } from "@/src/features/quran/api/ayah";
-
+import { Ayah } from "@features/ayah/Ayah";
 export default async function Page({
   searchParams,
   params,
@@ -17,15 +17,12 @@ export default async function Page({
   };
   params?: { number: string };
 }): Promise<JSX.Element> {
-  console.log({ searchParams, params });
-
   function parseEditions(editions: string): string[] {
     return editions.split(",").map((edition) => edition.trim());
   }
 
   const quranEditionsSelected = parseEditions(searchParams?.q ?? "");
   const translationEditionsSelected = parseEditions(searchParams?.t ?? "");
-  // const transliterationEditionsSelected = parseEditions(searchParams?.tl ?? "");
 
   const quranEditionsSelectedData: Edition[] = quranEditionsSelected.map(
     (edition) => {
@@ -43,24 +40,28 @@ export default async function Page({
     },
   ) as unknown as Edition[];
 
-  // const transliterationEditionsSelectedData = transliterationEditionsSelected.map((edition) => {
-  //   return transliterationEditions.find(
-  //     (transliterationEdition) => transliterationEdition.id === Number.parseInt(edition),
-  //   );
-  // });
+  const quranEditionsFetched = await Promise.all(quranEditionsSelectedData.map(async (quranEdition) => {
+    const ayahs = await fetchAyahs(
+      quranEdition.id,
+      Number.parseInt(params!.number),
+      quranEdition.slug,
+    );
+    return { ...quranEdition, ayahs };
+  }));
 
-  const quranEditionsFetched = await Promise.all(
-    quranEditionsSelectedData.map(async (edition) => {
-      if (edition) {
-        return await fetchAyahs(
-          edition.id,
-          Number.parseInt(params!.number),
-          edition.name,
-        );
-      }
-      return null;
+  const translationEditionsFetched = await Promise.all(
+    translationEditionsSelectedData.map(async (translationEdition) => {
+      const ayahs = await fetchAyahs(
+        translationEdition.id,
+        Number.parseInt(params!.number),
+        translationEdition.slug,
+      );
+      return { ...translationEdition, ayahs };
     }),
   );
+
+  // Assuming the first Quran edition is the reference for ayah order
+  const referenceAyahs = quranEditionsFetched[0]!.ayahs;
 
   return (
     <main className="mt-20 flex gap-4 flex-col">
@@ -68,9 +69,9 @@ export default async function Page({
         <EditionMultiSelectForm
           edition={quranEditions}
           queryParam="q"
-          placeholder="Select Quran Edition"
+          placeholder="Select Quran Font"
           formName="Quran Editions"
-          description="Select the Quran edition you want to view"
+          description="Select the Quran Font you want to view"
         />
         <EditionMultiSelectForm
           edition={translationEditions}
@@ -80,30 +81,23 @@ export default async function Page({
           description="Select the translation edition you want to view"
         />
       </div>
-      {quranEditionsFetched.map((ayahAPI) => {
-        return ayahAPI?.map((ayah) => {
-          return (
-            <p
-              className="font-indopak text-8xl leading-loose"
-              key={ayah.id + ayah.editionId}
-            >
-              {ayah.text}
-            </p>
-          );
-        });
-      })}
-
-      {
-        /* <div className="mt-20">
-        {ayahAPI.map((ayah: Ayah) => {
-          return (
-            <p className="font-indopak text-8xl leading-loose" key={ayah.id}>
-              {ayah.text}
-            </p>
-          );
-        })}
-      </div> */
-      }
+      {referenceAyahs.map((ayah, index) => (
+        <div key={index} className="flex flex-col gap-6">
+          <h2>Ayah {index + 1}</h2>
+          {quranEditionsFetched.map((edition) => (
+            <div key={edition.id}>
+              {edition.ayahs[index]?.text && (
+                <Ayah text={edition.ayahs[index]!.text} editionId={edition.id} className="text-4xl" />
+              )}
+            </div>
+          ))}
+          {translationEditionsFetched.map((edition) => (
+            <div key={edition.id}>
+              {edition.ayahs[index]?.text && <Ayah text={edition.ayahs[index]!.text} editionId={edition.id} />}
+            </div>
+          ))}
+        </div>
+      ))}
     </main>
   );
 }

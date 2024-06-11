@@ -38,6 +38,10 @@ export class RemoteAyahService extends AyahService {
     surahNumber: number,
     editionName: string,
   ): Promise<Ayah[]> {
+    console.log(
+      `https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/${editionName}/${surahNumber}.json`,
+    );
+
     const response = await fetch(
       `https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/${editionName}/${surahNumber}.json`,
     );
@@ -60,11 +64,14 @@ export const fetchAyahs = async (
   surahNumber: number,
   editionName: string,
 ): Promise<Ayah[]> => {
+  console.log("jere", { editionId, surahNumber, editionName });
   const isLocalhost = await isLocalhostReachable();
   const service = isLocalhost
     ? new LocalAyahService()
     : new RemoteAyahService();
-  return service.fetchAyahs(editionId, surahNumber, editionName);
+  const data = await service.fetchAyahs(editionId, surahNumber, editionName);
+  console.log({ data });
+  return data;
 };
 
 export type Ayah = {
