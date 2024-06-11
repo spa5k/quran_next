@@ -1,25 +1,112 @@
 {
   "name": "quran",
+  "version": "0.1.0",
   "private": true,
+  "description": "Electron app for Quran",
+  "homepage": "https://quran.com",
+  "author": {
+    "name": "Quran.com",
+    "email": "abcd@gmail.com"
+  },
+  "main": "main/main.js",
   "scripts": {
-    "build": "turbo build",
-    "dev": "turbo dev",
-    "lint": "turbo lint",
+    "next:dev": "next dev",
+    "next:build": "next build",
+    "next:start": "next start",
+    "next:lint": "next lint",
     "format": "dprint fmt",
-    "electron": "pnpm --filter=./apps/electron",
-    "ui": "pnpm --filter=./packages/ui",
-    "ui:add": "pnpm --filter @quran/web ui:add",
-    "web": "pnpm --filter=./apps/web"
+    "postinstall": "electron-builder install-app-deps",
+    "electron:dist": "electron-builder --dir",
+    "electron:dist:deb": "electron-builder --linux deb",
+    "electron:postinstall": "electron-builder install-app-deps",
+    "electron:build": "tsup",
+    "build": "run-s next:build electron:build",
+    "dist": "run-s next:build electron:dist",
+    "dev": "npm-run-all --parallel electron:dev next:dev",
+    "electron:build_watch": "tsup --watch",
+    "electron:dev": "npm-run-all --parallel electron:build_watch electron:watch",
+    "electron:watch": "cross-env NODE_ENV='development' nodemon"
+  },
+  "dependencies": {
+    "@electron-toolkit/utils": "^3.0.0",
+    "@hono/node-server": "^1.11.2",
+    "@hono/swagger-ui": "^0.2.2",
+    "@hono/zod-openapi": "^0.14.1",
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-dropdown-menu": "^2.0.6",
+    "@radix-ui/react-label": "^2.0.2",
+    "@radix-ui/react-popover": "^1.0.7",
+    "@radix-ui/react-select": "^2.0.0",
+    "@radix-ui/react-separator": "^1.0.3",
+    "@radix-ui/react-slider": "^1.1.2",
+    "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-tooltip": "^1.0.7",
+    "better-sqlite3": "^11.0.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "cmdk": "^1.0.0",
+    "cobe": "^0.6.3",
+    "cross-env": "^7.0.3",
+    "drizzle-orm": "^0.31.0",
+    "electron-dl-manager": "^3.0.0",
+    "electron-log": "^5.1.5",
+    "electron-settings": "^4.0.4",
+    "framer-motion": "^11.2.10",
+    "get-port-please": "^3.1.2",
+    "hono": "^4.4.2",
+    "lucide-react": "^0.394.0",
+    "next": "14.2.3",
+    "node-cache": "^5.1.2",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-hook-form": "^7.51.5",
+    "react-spring": "^9.7.3",
+    "tailwind-merge": "^2.3.0",
+    "tailwindcss-animate": "^1.0.7",
+    "vaul": "^0.9.1",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@quran/eslint-config": "workspace:^",
-    "@quran/typescript-config": "workspace:^",
+    "@next/eslint-plugin-next": "^14.2.3",
+    "@types/better-sqlite3": "^7.6.10",
+    "@types/eslint": "^8.56.10",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
     "dprint": "^0.46.2",
-    "turbo": "latest"
+    "drizzle-kit": "^0.22.1",
+    "electron": "^30.0.9",
+    "electron-builder": "^24.13.3",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.3",
+    "nodemon": "^3.1.2",
+    "npm-run-all": "^4.1.5",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "tsup": "^8.0.2",
+    "typescript": "^5"
   },
-  "engines": {
-    "node": ">=18"
-  },
-  "dependencies": {},
-  "packageManager": "pnpm@9.3.0"
+  "packageManager": "bun@1.11.1",
+  "build": {
+    "asar": true,
+    "executableName": "Quran",
+    "files": [
+      "main"
+    ],
+    "productName": "Quran",
+    "extraFiles": [
+      {
+        "from": ".next/standalone",
+        "to": "web"
+      },
+      {
+        "from": ".next/static",
+        "to": "web/.next/static"
+      },
+      {
+        "from": "public",
+        "to": "web/public"
+      }
+    ]
+  }
 }
