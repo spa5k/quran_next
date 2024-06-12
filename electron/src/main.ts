@@ -1,5 +1,5 @@
 import { electronApp, is, optimizer } from "@electron-toolkit/utils";
-import { app, BrowserWindow, ipcMain, shell } from "electron";
+import { BrowserWindow, app, ipcMain, shell } from "electron";
 import log from "electron-log";
 import settings from "electron-settings";
 import { getPort } from "get-port-please";
@@ -18,16 +18,16 @@ let loadingWindow: BrowserWindow | null = null;
 
 function createLoadingWindow(): BrowserWindow {
   const loadingWindow = new BrowserWindow({
-    width: 300,
-    height: 200,
+    width: 380,
+    height: 500,
     frame: false,
-    transparent: true,
+    transparent: false,
     alwaysOnTop: true,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
     },
-    backgroundMaterial: "acrylic",
+    // backgroundMaterial: "acrylic",
   });
 
   const url = join(__dirname, "..", "public", "loading.html");
@@ -131,7 +131,7 @@ app.whenReady().then(async () => {
 
     const latestReleaseVersion = await getLatestReleaseVersion(
       "spa5k",
-      "quran_data",
+      "quran_data"
     );
 
     const lastReleaseVersion = await settings.get("lastReleaseVersion");
@@ -141,7 +141,7 @@ app.whenReady().then(async () => {
     if (latestReleaseVersion === lastReleaseVersion) {
       log.info(
         "No new release found in the repository. Last release is up to date.",
-        lastReleaseVersion,
+        lastReleaseVersion
       );
     } else {
       const latestReleaseUrl = await getLatestRelease("spa5k", "quran_data");
