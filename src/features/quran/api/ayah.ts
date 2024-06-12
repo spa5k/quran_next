@@ -1,4 +1,3 @@
-import { $fetch } from "ofetch";
 export async function isLocalhostReachable(): Promise<boolean> {
   try {
     const response = await fetch("http://localhost:50000/health", {
@@ -39,18 +38,34 @@ export class RemoteAyahService extends AyahService {
     surahNumber: number,
     editionName: string
   ): Promise<Ayah[]> {
-    const response = await $fetch(
+    const urls = [
       `https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/${editionName}/${surahNumber}.json`,
-      { cache: "force-cache" }
-    );
+      `https://rawcdn.githack.com/fawazahmed0/quran-api/ffd3f3a2d44f5206acf0579878e6a0e5634899fa/editions/${editionName}/${surahNumber}.json`,
+      `https://cdn.statically.io/gh/fawazahmed0/quran-api/1/editions/${editionName}/${surahNumber}.json`,
+      `https://raw.githubusercontent.com/fawazahmed0/quran-api/1/editions/${editionName}/${surahNumber}.json`,
+      `https://gitloaf.com/cdn/fawazahmed0/quran-api/1/editions/${editionName}/${surahNumber}.json`,
+    ];
 
-    const chapter = response.chapter;
+    for (const url of urls) {
+      try {
+        const response = await fetch(url, {
+          cache: "force-cache",
+        });
+        const data = await response.json();
+        return this.formatAyahs(data.chapter, editionId);
+      } catch (error) {
+        console.error("Failed to fetch from URL:", url, "; Error:", error);
+      }
+    }
 
-    // Format the data to be in the same format as the local API
+    throw new Error("All URLs failed to fetch data.");
+  }
+
+  formatAyahs(chapter: any[], editionId: number): Ayah[] {
     return chapter.map((ayah: AyahQuranApiAyah) => ({
       id: ayah.chapter,
       surahNumber: ayah.chapter,
-      ayahNumber: ayah,
+      ayahNumber: ayah.verse,
       editionId,
       text: ayah.text,
     }));
