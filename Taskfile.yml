@@ -7,7 +7,7 @@ tasks:
   next_dev:
     desc: "Development server for Next.js"
     cmds:
-      - "{{.BUN}} next dev"
+      - "{{.BUN}} next dev --turbo"
 
   next_build:
     desc: "Build Next.js project"

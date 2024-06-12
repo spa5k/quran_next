@@ -79,21 +79,13 @@ export const EditionMultiSelectForm = (
                   options={parsedEditions}
                   defaultValue={field.value}
                   onValueChange={(value) => {
-                    // Restrict the number of selectable items
-                    if (value.length <= maxSelectable) {
-                      field.onChange(value);
-                      updateQueryParam(value);
-                    } else {
-                      // Optionally, provide feedback to the user that the maximum limit has been reached
-                      toast({
-                        title: "Maximum limit reached",
-                        description: `You can only select up to ${maxSelectable} items.`,
-                      });
-                    }
+                    field.onChange(value);
+                    updateQueryParam(value);
                   }}
                   placeholder={placeholder}
                   variant="secondary"
                   animation={0}
+                  maxSelectable={maxSelectable}
                 />
               </FormControl>
               <FormDescription>

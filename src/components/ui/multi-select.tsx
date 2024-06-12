@@ -49,6 +49,7 @@ interface MultiSelectFormFieldProps
   className?: string;
   animation?: number;
   onValueChange: (value: string[]) => void;
+  maxSelectable?: number; // Optional prop to limit the number of selectable items
 }
 
 const MultiSelectFormField = React.forwardRef<
@@ -66,6 +67,7 @@ const MultiSelectFormField = React.forwardRef<
       disabled,
       placeholder,
       animation = 0,
+      maxSelectable,
       ...props
     },
     ref,
@@ -99,7 +101,7 @@ const MultiSelectFormField = React.forwardRef<
       if (selectedValuesSet.current.has(value)) {
         selectedValuesSet.current.delete(value);
         setSelectedValues(selectedValues.filter((v) => v !== value));
-      } else {
+      } else if (!maxSelectable || selectedValuesSet.current.size < maxSelectable) {
         selectedValuesSet.current.add(value);
         setSelectedValues([...selectedValues, value]);
       }
@@ -126,12 +128,8 @@ const MultiSelectFormField = React.forwardRef<
                         <Badge
                           key={value}
                           className={cn(
-                            isAnimating ? "animate-bounce" : "",
                             multiSelectVariants({ variant, className }),
                           )}
-                          style={{
-                            animationDuration: `${animation}s`,
-                          }}
                         >
                           {IconComponent && <IconComponent className="h-4 w-4 mr-2" />}
                           {option?.label}
