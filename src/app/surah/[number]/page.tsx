@@ -28,7 +28,6 @@ export default async function Page({
   };
   params?: { number: string };
 }): Promise<JSX.Element> {
-  console.log(searchParams);
   function parseEditions(editions: string): number[] {
     return editions.split(",").map((edition) => parseInt(edition.trim())).filter(edition => !isNaN(edition));
   }
