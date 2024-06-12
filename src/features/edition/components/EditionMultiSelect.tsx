@@ -1,6 +1,8 @@
 "use client";
+
 import { Form, FormControl, FormDescription, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import MultiSelectFormField from "@/components/ui/multi-select";
+import { useToast } from "@/components/ui/use-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -12,11 +14,14 @@ interface EditionMultiSelectFormProps {
   placeholder: string;
   description: string;
   defaultSelected?: string[]; // Optional prop for default selections
+  maxSelectable?: number; // Optional prop to limit the number of selectable items
 }
 
 export const EditionMultiSelectForm = (
-  { edition, queryParam, placeholder, description, defaultSelected = [] }: EditionMultiSelectFormProps,
+  { edition, queryParam, placeholder, description, defaultSelected = [], maxSelectable = 3 }:
+    EditionMultiSelectFormProps,
 ) => {
+  const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -74,8 +79,17 @@ export const EditionMultiSelectForm = (
                   options={parsedEditions}
                   defaultValue={field.value}
                   onValueChange={(value) => {
-                    field.onChange(value);
-                    updateQueryParam(value);
+                    // Restrict the number of selectable items
+                    if (value.length <= maxSelectable) {
+                      field.onChange(value);
+                      updateQueryParam(value);
+                    } else {
+                      // Optionally, provide feedback to the user that the maximum limit has been reached
+                      toast({
+                        title: "Maximum limit reached",
+                        description: `You can only select up to ${maxSelectable} items.`,
+                      });
+                    }
                   }}
                   placeholder={placeholder}
                   variant="secondary"

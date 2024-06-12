@@ -77,15 +77,14 @@ export default async function Page({
           edition={quranEditions}
           queryParam="q"
           placeholder="Select Quran Font"
-          formName="Quran Editions"
           description="Select the Quran Font you want to view"
           defaultSelected={quranEditionsSelected.map((edition) => edition.toString())}
+          maxSelectable={2}
         />
         <EditionMultiSelectForm
           edition={translationEditions}
           queryParam="t"
           placeholder="Select Translation Edition"
-          formName="Translation Editions"
           description="Select the translation edition you want to view"
           defaultSelected={translationEditionsSelected.map((edition) => edition.toString())}
         />
