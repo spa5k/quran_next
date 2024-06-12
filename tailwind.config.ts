@@ -66,6 +66,8 @@ const config = {
         primary: ["var(--font-lexend)"],
         arabic: ["var(--font-readex_pro)"],
         indopak: ["var(--font-indopak)"],
+        hindi: ["var(--font-hindi)"],
+        urdu: ["var(--font-urdu)"],
       },
       keyframes: {
         "accordion-down": {

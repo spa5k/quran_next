@@ -74,3 +74,7 @@
     @apply bg-background text-foreground;
   }
 }
+
+.ayah_text {
+  font-size: var(--ayah-font-size, 2rem);
+}

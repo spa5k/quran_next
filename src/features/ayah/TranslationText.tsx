@@ -3,12 +3,13 @@ import { twMerge } from "tailwind-merge";
 
 // Define font classes based on edition IDs using Tailwind CSS
 const fontClasses: { [key: number]: string } = {
-  120: "font-uthmanic", // Tailwind class for Uthmanic font
-  145: "font-indopak", // Tailwind class for IndoPak font
-  62: "font-indopak", // Tailwind class for IndoPak font
+  "211": "font-primary",
+  "101": "font-primary",
+  "244": "font-hindi",
+  "273": "font-urdu",
 };
 
-export const Ayah = (
+export const TranslationText = (
   { text, editionId, className, ...props }: { text: string; editionId: number; className?: string; [x: string]: any },
 ) => {
   // Determine the font class based on the edition ID

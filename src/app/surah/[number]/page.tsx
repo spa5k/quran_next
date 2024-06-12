@@ -1,9 +1,19 @@
 import { Ayah } from "@/features/ayah/Ayah";
+import { DynamicFontSizer } from "@/features/ayah/FontResizer";
 import { quranEditions } from "@/features/data/quranEditions";
 import { translationEditions } from "@/features/data/translationEditions";
 import type { Edition } from "@/features/edition/api/editions";
 import { EditionMultiSelectForm } from "@/features/edition/components/EditionMultiSelect";
 import { fetchAyahs } from "@/features/quran/api/ayah";
+import {
+  cormorant_garamond,
+  indopak,
+  lexend,
+  noto_nastaliq_urdu,
+  noto_sans_devanagari,
+  readex_pro,
+  taviraj,
+} from "@/lib/fonts";
 
 export default async function Page({
   searchParams,
@@ -18,33 +28,26 @@ export default async function Page({
   };
   params?: { number: string };
 }): Promise<JSX.Element> {
-  function parseEditions(editions: string): string[] {
-    return editions.split(",").map((edition) => edition.trim());
+  console.log(searchParams);
+  function parseEditions(editions: string): number[] {
+    return editions.split(",").map((edition) => parseInt(edition.trim())).filter(edition => !isNaN(edition));
   }
 
   const quranEditionsSelected = parseEditions(searchParams?.q ?? "145");
   const translationEditionsSelected = parseEditions(searchParams?.t ?? "211");
 
   const quranEditionsSelectedData: Edition[] = quranEditionsSelected.map(
-    (edition) => {
-      return quranEditions.find(
-        (quranEdition) => quranEdition.id === Number.parseInt(edition),
-      );
-    },
-  ) as unknown as Edition[];
+    (edition) => quranEditions.find((quranEdition) => quranEdition.id === edition),
+  ).filter((edition): edition is Edition => edition !== undefined);
 
   const translationEditionsSelectedData: Edition[] = translationEditionsSelected.map(
-    (edition) => {
-      return translationEditions.find(
-        (translationEdition) => translationEdition.id === Number.parseInt(edition),
-      );
-    },
-  ) as unknown as Edition[];
+    (edition) => translationEditions.find((translationEdition) => translationEdition.id === edition),
+  ).filter((edition): edition is Edition => edition !== undefined);
 
   const quranEditionsFetched = await Promise.all(quranEditionsSelectedData.map(async (quranEdition) => {
     const ayahs = await fetchAyahs(
       quranEdition.id,
-      Number.parseInt(params!.number),
+      parseInt(params?.number ?? "1"),
       quranEdition.slug,
     );
     return { ...quranEdition, ayahs };
@@ -54,7 +57,7 @@ export default async function Page({
     translationEditionsSelectedData.map(async (translationEdition) => {
       const ayahs = await fetchAyahs(
         translationEdition.id,
-        Number.parseInt(params!.number),
+        parseInt(params?.number ?? "1"),
         translationEdition.slug,
       );
       return { ...translationEdition, ayahs };
@@ -62,10 +65,13 @@ export default async function Page({
   );
 
   // Assuming the first Quran edition is the reference for ayah order
-  const referenceAyahs = quranEditionsFetched[0]!.ayahs;
+  const referenceAyahs = quranEditionsFetched[0]?.ayahs || [];
+
+  const fonts =
+    `${taviraj.variable} ${cormorant_garamond.variable} ${lexend.variable} ${readex_pro.variable} ${indopak.variable} font-primary ${noto_sans_devanagari.variable} ${noto_nastaliq_urdu.variable}`;
 
   return (
-    <main className="mt-20 flex gap-4 flex-col">
+    <main className={`mt-20 flex gap-4 flex-col ${fonts}`}>
       <div className="flex gap-4">
         <EditionMultiSelectForm
           edition={quranEditions}
@@ -73,6 +79,7 @@ export default async function Page({
           placeholder="Select Quran Font"
           formName="Quran Editions"
           description="Select the Quran Font you want to view"
+          defaultSelected={quranEditionsSelected.map((edition) => edition.toString())}
         />
         <EditionMultiSelectForm
           edition={translationEditions}
@@ -80,8 +87,10 @@ export default async function Page({
           placeholder="Select Translation Edition"
           formName="Translation Editions"
           description="Select the translation edition you want to view"
+          defaultSelected={translationEditionsSelected.map((edition) => edition.toString())}
         />
       </div>
+      <DynamicFontSizer />
       {referenceAyahs.map((ayah, index) => (
         <div key={index} className="flex flex-col gap-6">
           <h2>Ayah {index + 1}</h2>
