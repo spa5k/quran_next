@@ -67,6 +67,7 @@ const config = {
         arabic: ["var(--font-readex_pro)"],
         indopak: ["var(--font-indopak)"],
         hindi: ["var(--font-hindi)"],
+        uthmanic: ["var(--font-uthmanic)"],
         urdu: ["var(--font-urdu)"],
       },
       keyframes: {

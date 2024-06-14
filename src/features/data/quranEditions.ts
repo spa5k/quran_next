@@ -21,14 +21,4 @@ export const quranEditions: Edition[] = [
     enabled: true,
     language: "arabic",
   },
-  {
-    id: 62,
-    slug: "ara-quransimple",
-    author: "Quran Simple",
-    direction: "rtl",
-    type: "QURAN",
-    name: "Simple",
-    enabled: true,
-    language: "arabic",
-  },
 ];

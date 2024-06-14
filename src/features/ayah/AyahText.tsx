@@ -5,10 +5,9 @@ import { twMerge } from "tailwind-merge";
 const fontClasses: { [key: number]: string } = {
   120: "font-uthmanic", // Tailwind class for Uthmanic font
   145: "font-indopak", // Tailwind class for IndoPak font
-  62: "font-indopak", // Tailwind class for IndoPak font
 };
 
-export const Ayah = (
+export const AyahText = (
   { text, editionId, className, ...props }: { text: string; editionId: number; className?: string; [x: string]: any },
 ) => {
   // Determine the font class based on the edition ID
@@ -17,5 +16,5 @@ export const Ayah = (
   // Combine additional classes as needed using clsx and twMerge
   const combinedClassName = twMerge(clsx(fontClass, className, "ayah_text"));
 
-  return <p className={combinedClassName} {...props}>{text}</p>;
+  return <p className={combinedClassName} {...props} dir="rtl">{text}</p>;
 };

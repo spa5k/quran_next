@@ -1,5 +1,6 @@
-import { Ayah } from "@/features/ayah/Ayah";
+import { AyahText } from "@/features/ayah/AyahText";
 import { DynamicFontSizer } from "@/features/ayah/FontResizer";
+import { TranslationText } from "@/features/ayah/TranslationText";
 import { quranEditions } from "@/features/data/quranEditions";
 import { translationEditions } from "@/features/data/translationEditions";
 import type { Edition } from "@/features/edition/api/editions";
@@ -13,6 +14,7 @@ import {
   noto_sans_devanagari,
   readex_pro,
   taviraj,
+  uthmanic,
 } from "@/lib/fonts";
 
 export default async function Page({
@@ -67,10 +69,10 @@ export default async function Page({
   const referenceAyahs = quranEditionsFetched[0]?.ayahs || [];
 
   const fonts =
-    `${taviraj.variable} ${cormorant_garamond.variable} ${lexend.variable} ${readex_pro.variable} ${indopak.variable} font-primary ${noto_sans_devanagari.variable} ${noto_nastaliq_urdu.variable}`;
+    `${taviraj.variable} ${cormorant_garamond.variable} ${lexend.variable} ${readex_pro.variable} ${indopak.variable} font-primary ${noto_sans_devanagari.variable} ${noto_nastaliq_urdu.variable} ${uthmanic.variable}`;
 
   return (
-    <main className={`mt-20 flex gap-4 flex-col ${fonts}`}>
+    <main className={`mt-20 flex gap-4 flex-col ${fonts} items-center`}>
       <div className="flex gap-4">
         <EditionMultiSelectForm
           edition={quranEditions}
@@ -89,19 +91,21 @@ export default async function Page({
         />
       </div>
       <DynamicFontSizer />
-      {referenceAyahs.map((ayah, index) => (
-        <div key={index} className="flex flex-col gap-6">
-          <h2>Ayah {index + 1}</h2>
+
+      {referenceAyahs.map((_, index) => (
+        <div key={index} className="flex flex-col gap-6  w-1/2 justify-center">
           {quranEditionsFetched.map((edition) => (
             <div key={edition.id}>
               {edition.ayahs[index]?.text && (
-                <Ayah text={edition.ayahs[index]!.text} editionId={edition.id} className="text-4xl" />
+                <AyahText text={edition.ayahs[index]!.text} editionId={edition.id} className="text-4xl" />
               )}
             </div>
           ))}
           {translationEditionsFetched.map((edition) => (
             <div key={edition.id}>
-              {edition.ayahs[index]?.text && <Ayah text={edition.ayahs[index]!.text} editionId={edition.id} />}
+              {edition.ayahs[index]?.text && (
+                <TranslationText text={edition.ayahs[index]!.text} editionId={edition.id} />
+              )}
             </div>
           ))}
         </div>

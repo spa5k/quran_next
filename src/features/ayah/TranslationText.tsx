@@ -15,8 +15,11 @@ export const TranslationText = (
   // Determine the font class based on the edition ID
   const fontClass = fontClasses[editionId] || "font-primary"; // Default Tailwind class
 
-  // Combine additional classes as needed using clsx and twMerge
-  const combinedClassName = twMerge(clsx(fontClass, className, "ayah_text"));
+  // Determine the direction based on the edition ID
+  const dir = editionId === 273 ? "rtl" : "ltr"; // Set dir to "rtl" for Urdu, "ltr" for other editions
 
-  return <p className={combinedClassName} {...props}>{text}</p>;
+  // Combine additional classes as needed using clsx and twMerge
+  const combinedClassName = twMerge(clsx(fontClass, className, "translation_text"));
+
+  return <p className={combinedClassName} dir={dir} {...props}>{text}</p>;
 };

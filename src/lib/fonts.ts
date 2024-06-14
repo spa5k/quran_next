@@ -41,7 +41,7 @@ export const noto_sans_devanagari = Noto_Sans_Devanagari({
 });
 
 export const indopak = localFont({
-  src: "./fonts/hafs-uthmanic-v14-full.woff2",
+  src: "./fonts/indopak.woff2",
   display: "swap",
   variable: "--font-indopak",
 });
@@ -50,4 +50,10 @@ export const noto_nastaliq_urdu = Noto_Nastaliq_Urdu({
   subsets: ["arabic"],
   variable: "--font-urdu",
   weight: ["400", "700"],
+});
+
+export const uthmanic = localFont({
+  src: "./fonts/hafs-uthmanic-v14-full.woff2",
+  display: "swap",
+  variable: "--font-uthmanic",
 });
