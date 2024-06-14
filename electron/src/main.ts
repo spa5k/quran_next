@@ -1,5 +1,5 @@
 import { electronApp, is, optimizer } from "@electron-toolkit/utils";
-import { BrowserWindow, app, ipcMain, shell } from "electron";
+import { app, BrowserWindow, ipcMain, shell } from "electron";
 import log from "electron-log";
 import settings from "electron-settings";
 import { getPort } from "get-port-please";
@@ -131,7 +131,7 @@ app.whenReady().then(async () => {
 
     const latestReleaseVersion = await getLatestReleaseVersion(
       "spa5k",
-      "quran_data"
+      "quran_data",
     );
 
     const lastReleaseVersion = await settings.get("lastReleaseVersion");
@@ -141,7 +141,7 @@ app.whenReady().then(async () => {
     if (latestReleaseVersion === lastReleaseVersion) {
       log.info(
         "No new release found in the repository. Last release is up to date.",
-        lastReleaseVersion
+        lastReleaseVersion,
       );
     } else {
       const latestReleaseUrl = await getLatestRelease("spa5k", "quran_data");

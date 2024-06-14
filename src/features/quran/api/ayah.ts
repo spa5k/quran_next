@@ -15,7 +15,7 @@ abstract class AyahService {
   public abstract fetchAyahs(
     editionId: number,
     surahNumber: number,
-    editionName: string
+    editionName: string,
   ): Promise<Ayah[]>;
 }
 
@@ -23,10 +23,10 @@ export class LocalAyahService extends AyahService {
   public async fetchAyahs(
     editionId: number,
     surahNumber: number,
-    editionName: string
+    editionName: string,
   ): Promise<Ayah[]> {
     const response = await fetch(
-      `http://localhost:50000/surah/${surahNumber}/${editionId}`
+      `http://localhost:50000/surah/${surahNumber}/${editionId}`,
     );
     return await response.json();
   }
@@ -36,7 +36,7 @@ export class RemoteAyahService extends AyahService {
   public async fetchAyahs(
     editionId: number,
     surahNumber: number,
-    editionName: string
+    editionName: string,
   ): Promise<Ayah[]> {
     const urls = [
       `https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/${editionName}/${surahNumber}.json`,
@@ -75,7 +75,7 @@ export class RemoteAyahService extends AyahService {
 export const fetchAyahs = async (
   editionId: number,
   surahNumber: number,
-  editionName: string
+  editionName: string,
 ): Promise<Ayah[]> => {
   const isLocalhost = await isLocalhostReachable();
   const service = isLocalhost
