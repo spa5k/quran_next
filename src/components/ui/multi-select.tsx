@@ -3,6 +3,7 @@ import { CheckIcon, ChevronDown, WandSparkles, XCircle, XIcon } from "lucide-rea
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import clsx from "clsx";
 import { Badge } from "./badge";
 import { Button } from "./button";
 import {
@@ -38,6 +39,7 @@ interface MultiSelectFormFieldProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof multiSelectVariants>
 {
   asChild?: boolean;
+  variant?: "default" | "secondary" | "destructive" | "inverted";
   options: {
     label: string;
     value: string;
@@ -197,7 +199,12 @@ const MultiSelectFormField = React.forwardRef<
                         pointerEvents: "auto",
                         opacity: 1,
                       }}
-                      className="cursor-pointer"
+                      disabled={!isSelected && selectedValuesSet.current.size >= (maxSelectable || options.length)}
+                      className={clsx(
+                        "cursor-pointer",
+                        !isSelected && selectedValuesSet.current.size >= (maxSelectable || options.length)
+                          && "bg-neutral-300 text-opacity-60 text-accent-foreground cursor-not-allowed",
+                      )}
                     >
                       <div
                         className={cn(

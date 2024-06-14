@@ -1,53 +1,50 @@
 version: "3"
 
-vars:
-  BUN: bun run --bun
-
 tasks:
   next_dev:
     desc: "Development server for Next.js"
     cmds:
-      - "{{.BUN}} next dev --turbo"
+      - "pnpm next dev --turbo"
 
   next_build:
     desc: "Build Next.js project"
     cmds:
-      - "{{.BUN}} next build"
+      - "pnpm next build"
 
   next_start:
     desc: "Start Next.js project"
     cmds:
-      - "{{.BUN}} next start"
+      - "pnpm next start"
 
   next_lint:
     desc: "Lint Next.js project"
     cmds:
-      - "{{.BUN}} next lint"
+      - "pnpm next lint"
 
   format:
     desc: "Format code"
     cmds:
-      - "{{.BUN}} dprint fmt"
+      - "pnpm dprint fmt"
 
   postinstall:
     desc: "Install app dependencies for Electron"
     cmds:
-      - "{{.BUN}} electron-builder install-app-deps"
+      - "pnpm electron-builder install-app-deps"
 
   electron_dist:
     desc: "Build Electron for distribution in directory mode"
     cmds:
-      - "{{.BUN}} electron-builder --dir"
+      - "pnpm electron-builder --dir"
 
   electron_dist_deb:
     desc: "Build Electron for Debian distribution"
     cmds:
-      - "{{.BUN}} electron-builder --linux deb"
+      - "pnpm electron-builder --linux deb"
 
   electron_build:
     desc: "Build Electron using tsup"
     cmds:
-      - "{{.BUN}} tsup"
+      - "pnpm tsup"
 
   build:
     desc: "Build both Next.js and Electron projects"
@@ -66,9 +63,9 @@ tasks:
   electron_build_watch:
     desc: "Watch mode for Electron with tsup"
     cmds:
-      - "{{.BUN}} tsup --watch"
+      - "pnpm tsup --watch"
 
   electron_dev:
     desc: "Development mode for Electron"
     cmds:
-      - "{{.BUN}} cross-env NODE_ENV='development' nodemon"
+      - "pnpm cross-env NODE_ENV='development' nodemon"
