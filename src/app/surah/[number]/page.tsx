@@ -1,3 +1,4 @@
+import { Separator } from "@/components/ui/separator";
 import { AyahText } from "@/features/ayah/AyahText";
 import { DynamicFontSizer } from "@/features/ayah/FontResizer";
 import { TranslationText } from "@/features/ayah/TranslationText";
@@ -92,24 +93,32 @@ export default async function Page({
       </div>
       <DynamicFontSizer />
 
-      {referenceAyahs.map((_, index) => (
-        <div key={index} className="flex flex-col gap-6  w-1/2 justify-center">
-          {quranEditionsFetched.map((edition) => (
-            <div key={edition.id}>
-              {edition.ayahs[index]?.text && (
-                <AyahText text={edition.ayahs[index]!.text} editionId={edition.id} className="text-4xl" />
-              )}
-            </div>
-          ))}
-          {translationEditionsFetched.map((edition) => (
-            <div key={edition.id}>
-              {edition.ayahs[index]?.text && (
-                <TranslationText text={edition.ayahs[index]!.text} editionId={edition.id} />
-              )}
-            </div>
-          ))}
-        </div>
-      ))}
+      <div className="flex flex-col gap-8 w-1/2 justify-center">
+        {referenceAyahs.map((_, index) => (
+          <div key={index} className="flex flex-col gap-6 justify-center">
+            {quranEditionsFetched.map((edition) => (
+              edition.ayahs[index]?.text && (
+                <AyahText
+                  text={edition.ayahs[index]!.text}
+                  editionId={edition.id}
+                  className="text-6xl"
+                  number={index + 1}
+                  key={index}
+                />
+              )
+            ))}
+            {translationEditionsFetched.map((edition) => (
+              <div key={edition.id}>
+                {edition.ayahs[index]?.text && (
+                  <TranslationText text={edition.ayahs[index]!.text} editionId={edition.id} />
+                )}
+              </div>
+            ))}
+
+            <Separator />
+          </div>
+        ))}
+      </div>
     </main>
   );
 }

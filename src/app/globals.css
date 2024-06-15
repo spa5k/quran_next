@@ -76,7 +76,7 @@
 }
 
 .ayah_text {
-  font-size: var(--ayah-font-size, 2rem);
+  font-size: var(--ayah-font-size, 3.5rem);
 }
 
 .translation_text {

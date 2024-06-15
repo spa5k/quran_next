@@ -8,7 +8,13 @@ const fontClasses: { [key: number]: string } = {
 };
 
 export const AyahText = (
-  { text, editionId, className, ...props }: { text: string; editionId: number; className?: string; [x: string]: any },
+  { text, editionId, className, number, ...props }: {
+    text: string;
+    editionId: number;
+    className?: string;
+    number: number;
+    [x: string]: any;
+  },
 ) => {
   // Determine the font class based on the edition ID
   const fontClass = fontClasses[editionId] || "font-primary"; // Default Tailwind class
@@ -16,5 +22,32 @@ export const AyahText = (
   // Combine additional classes as needed using clsx and twMerge
   const combinedClassName = twMerge(clsx(fontClass, className, "ayah_text"));
 
-  return <p className={combinedClassName} {...props} dir="rtl">{text}</p>;
+  return <p className={combinedClassName} {...props} dir="rtl">{text} {convertToArabicNumerals(number)}</p>;
 };
+
+function convertToArabicNumerals(num: number): string {
+  // Mapping of normal digits to Arabic numerals
+  const arabicNumerals: { [key: number]: string } = {
+    0: "٠",
+    1: "١",
+    2: "٢",
+    3: "٣",
+    4: "٤",
+    5: "٥",
+    6: "٦",
+    7: "٧",
+    8: "٨",
+    9: "٩",
+  };
+
+  // Convert the number to a string
+  const numStr = num.toString();
+
+  // Replace each digit with the corresponding Arabic numeral
+  let arabicNumStr = "";
+  for (const digit of numStr) {
+    arabicNumStr += arabicNumerals[parseInt(digit)];
+  }
+
+  return arabicNumStr;
+}
