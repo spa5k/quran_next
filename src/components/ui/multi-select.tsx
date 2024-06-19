@@ -19,7 +19,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { Separator } from "./separator";
 
 const multiSelectVariants = cva(
-  "m-1 transition ease-in-out delay-150 hover:scale-110 duration-300",
+  "m-1",
   {
     variants: {
       variant: {
@@ -221,6 +221,7 @@ const MultiSelectFormField = React.forwardRef<
                     </CommandItem>
                   );
                 })}
+                <span className="text-sm text-muted-foreground mx-3">Can select up to {maxSelectable} items</span>
               </CommandGroup>
               <CommandSeparator />
               <CommandGroup>
@@ -241,6 +242,7 @@ const MultiSelectFormField = React.forwardRef<
                       >
                         Clear
                       </CommandItem>
+
                       <Separator
                         orientation="vertical"
                         className="flex min-h-6 h-full"

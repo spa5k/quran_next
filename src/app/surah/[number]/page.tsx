@@ -6,6 +6,7 @@ import { quranEditions } from "@/features/data/quranEditions";
 import { translationEditions } from "@/features/data/translationEditions";
 import type { Edition } from "@/features/edition/api/editions";
 import { EditionMultiSelectForm } from "@/features/edition/components/EditionMultiSelect";
+import { EditionSingleSelect } from "@/features/edition/components/EditionSingleSelect";
 import { fetchAyahs } from "@/features/quran/api/ayah";
 import {
   cormorant_garamond,
@@ -75,13 +76,12 @@ export default async function Page({
   return (
     <main className={`mt-20 flex gap-4 flex-col ${fonts} items-center`}>
       <div className="flex gap-4">
-        <EditionMultiSelectForm
+        <EditionSingleSelect
           edition={quranEditions}
           queryParam="q"
           placeholder="Select Quran Font"
           description="Select the Quran Font you want to view"
-          defaultSelected={quranEditionsSelected.map((edition) => edition.toString())}
-          maxSelectable={2}
+          defaultSelected={quranEditionsSelected[0].toString()}
         />
         <EditionMultiSelectForm
           edition={translationEditions}
@@ -94,8 +94,9 @@ export default async function Page({
       <DynamicFontSizer />
 
       <div className="flex flex-col gap-8 w-1/2 justify-center">
-        {referenceAyahs.map((_, index) => (
+        {referenceAyahs.map((ayah, index) => (
           <div key={index} className="flex flex-col gap-6 justify-center">
+            <p className="-m-2">{ayah.ayahNumber}</p>
             {quranEditionsFetched.map((edition) => (
               edition.ayahs[index]?.text && (
                 <AyahText

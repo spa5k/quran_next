@@ -83,7 +83,7 @@ export const EditionMultiSelectForm = (
                     updateQueryParam(value);
                   }}
                   placeholder={placeholder}
-                  variant="secondary"
+                  variant="inverted"
                   animation={0}
                   maxSelectable={maxSelectable}
                 />
