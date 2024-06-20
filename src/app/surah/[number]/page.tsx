@@ -13,6 +13,7 @@ import {
   indopak,
   lexend,
   noto_nastaliq_urdu,
+  noto_sans_arabic,
   noto_sans_devanagari,
   readex_pro,
   taviraj,
@@ -71,7 +72,7 @@ export default async function Page({
   const referenceAyahs = quranEditionsFetched[0]?.ayahs || [];
 
   const fonts =
-    `${taviraj.variable} ${cormorant_garamond.variable} ${lexend.variable} ${readex_pro.variable} ${indopak.variable} font-primary ${noto_sans_devanagari.variable} ${noto_nastaliq_urdu.variable} ${uthmanic.variable}`;
+    `${taviraj.variable} ${cormorant_garamond.variable} ${lexend.variable} ${readex_pro.variable} ${indopak.variable} font-primary ${noto_sans_devanagari.variable} ${noto_nastaliq_urdu.variable} ${uthmanic.variable} ${noto_sans_arabic.variable}`;
 
   return (
     <main className={`mt-20 flex gap-4 flex-col ${fonts} items-center`}>

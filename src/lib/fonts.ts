@@ -3,6 +3,7 @@ import {
   Inter,
   Lexend,
   Noto_Nastaliq_Urdu,
+  Noto_Sans_Arabic,
   Noto_Sans_Devanagari,
   Readex_Pro,
   Taviraj,
@@ -46,8 +47,14 @@ export const noto_nastaliq_urdu = Noto_Nastaliq_Urdu({
   weight: ["400", "700"],
 });
 
+export const noto_sans_arabic = Noto_Sans_Arabic({
+  subsets: ["arabic"],
+  variable: "--font-arabic",
+  weight: ["400", "700"],
+});
+
 export const indopak = localFont({
-  src: "./fonts/indopak-nastaleeq-waqf-lazim-v4.2.1.woff2",
+  src: "./fonts/nastaleeq-v10-full.woff2",
   display: "swap",
   variable: "--font-indopak",
 });

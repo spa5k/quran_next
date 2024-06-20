@@ -69,6 +69,7 @@ const config = {
         hindi: ["var(--font-hindi)"],
         uthmanic: ["var(--font-uthmanic)"],
         urdu: ["var(--font-urdu)"],
+        arabic_noto: ["var(--font-arabic)"],
       },
       keyframes: {
         "accordion-down": {
