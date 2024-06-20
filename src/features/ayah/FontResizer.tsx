@@ -3,56 +3,59 @@ import { Button } from "@/components/ui/button";
 import React, { useEffect, useState } from "react";
 
 export const DynamicFontSizer: React.FC = () => {
-  const step = 2;
-  const defaultFont = 28;
-  const minFont = 12;
-  const maxFont = 40;
+  const step = 1;
+  const minStep = 1;
+  const maxStep = 10;
+  const minFont = 30;
+  const maxFont = 110;
 
-  // Initialize font size state without a default value
-  const [fontSize, setFontSize] = useState<number>(defaultFont);
+  const stepToFontSize = (step: number) => {
+    return minFont + (step - 1) * ((maxFont - minFont) / (maxStep - minStep));
+  };
 
-  // Effect for initializing font size from local storage on client side
+  const defaultStep = 1;
+  const [fontStep, setFontStep] = useState<number>(defaultStep);
+
   useEffect(() => {
-    const storedFontSize = localStorage.getItem("ayahFontSize");
-    if (storedFontSize) {
-      setFontSize(parseInt(storedFontSize, 10));
+    const storedFontStep = localStorage.getItem("ayahFontStep");
+    if (storedFontStep) {
+      setFontStep(parseInt(storedFontStep, 10));
     }
   }, []);
 
-  // Update local storage whenever the font size changes
   useEffect(() => {
-    localStorage.setItem("ayahFontSize", fontSize.toString());
-  }, [fontSize]);
+    localStorage.setItem("ayahFontStep", fontStep.toString());
+    document.documentElement.style.setProperty("--ayah-font-size", `${stepToFontSize(fontStep)}px`);
+  }, [fontStep]);
 
-  const increaseFontSize = () => {
-    if (fontSize < maxFont) {
-      setFontSize(fontSize + step);
+  const increaseFontStep = () => {
+    if (fontStep < maxStep) {
+      setFontStep(fontStep + step);
     }
   };
 
-  const decreaseFontSize = () => {
-    if (fontSize > minFont) {
-      setFontSize(fontSize - step);
+  const decreaseFontStep = () => {
+    if (fontStep > minStep) {
+      setFontStep(fontStep - step);
     }
   };
 
-  const resetFontSize = () => {
-    setFontSize(defaultFont);
+  const resetFontStep = () => {
+    setFontStep(defaultStep);
   };
 
   return (
     <>
-      <div>
-        <Button onClick={decreaseFontSize} disabled={fontSize <= minFont}>-</Button>
-        <span style={{ margin: "0 10px" }}>{fontSize}px</span>
-        <Button onClick={increaseFontSize} disabled={fontSize >= maxFont}>+</Button>
-        <Button onClick={resetFontSize}>Reset</Button>
+      <div className="gap-2 flex">
+        <div>
+          <Button onClick={decreaseFontStep} disabled={fontStep <= minStep}>-</Button>
+          <span style={{ margin: "0 10px", display: "inline-block", width: "20px", textAlign: "center" }}>
+            {fontStep}
+          </span>
+          <Button onClick={increaseFontStep} disabled={fontStep >= maxStep}>+</Button>
+        </div>
+        <Button onClick={resetFontStep}>Reset</Button>
       </div>
-      <style jsx>
-        {`
-          :root { --ayah-font-size: ${fontSize}px; }
-        `}
-      </style>
     </>
   );
 };
