@@ -5,7 +5,6 @@ import { twMerge } from "tailwind-merge";
 const fontClasses: { [key: number]: string } = {
   120: "font-uthmanic", // Tailwind class for Uthmanic font
   145: "font-indopak", // Tailwind class for IndoPak font
-  // 145: "font-arabic2", // Tailwind class for Arabic font
   146: "font-arabic_noto", // Tailwind class for default font
   62: "font-indopak", // Tailwind class for primary font
 };

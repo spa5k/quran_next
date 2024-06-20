@@ -1,21 +1,24 @@
 "use client";
+
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { ArrowLeft, ArrowRight, Book, Clock, Home, LineChart, Moon, Settings } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation"; // Import useRouter
 import { useState } from "react";
 
 export const NavigationLinks = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [status, setStatus] = useState(false);
-
+  const pathname = usePathname();
   const handleToggle = () => {
     setStatus(true);
     setIsOpen(!isOpen);
     setTimeout(() => setStatus(false), 500);
   };
 
+  const isActive = (path: string) => pathname === path; // Function to check if the route is active
   return (
     <div
       className={cn(
@@ -38,7 +41,10 @@ export const NavigationLinks = () => {
               <TooltipTrigger asChild>
                 <Link
                   href="/"
-                  className="flex h-9 w-full px-4 items-center justify-items-start rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8"
+                  className={cn(
+                    "flex h-9 w-full px-4 items-center justify-items-start rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8",
+                    isActive("/") && "bg-accent text-accent-foreground", // Apply active background class
+                  )}
                 >
                   <Home className="h-5 w-5" />
                   <span className={isOpen ? "pl-4" : "sr-only"}>Home</span>
@@ -50,7 +56,10 @@ export const NavigationLinks = () => {
               <TooltipTrigger asChild>
                 <Link
                   href="/quran"
-                  className="flex h-9 w-full px-4 items-center justify-items-start rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8"
+                  className={cn(
+                    "flex h-9 w-full px-4 items-center justify-items-start rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8",
+                    isActive("/quran") && "bg-accent text-accent-foreground", // Apply active background class
+                  )}
                 >
                   <Book className="h-5 w-5" />
                   <span className={isOpen ? "pl-4" : "sr-only"}>Quran</span>
@@ -61,8 +70,11 @@ export const NavigationLinks = () => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  href="#"
-                  className="flex h-9 w-full px-4 items-center justify-items-start rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8"
+                  href="/salah"
+                  className={cn(
+                    "flex h-9 w-full px-4 items-center justify-items-start rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8",
+                    isActive("/salah") && "bg-accent text-accent-foreground", // Apply active background class
+                  )}
                 >
                   <Clock className="h-5 w-5" />
                   <span className={isOpen ? "pl-4" : "sr-only"}>Salah</span>
@@ -74,7 +86,10 @@ export const NavigationLinks = () => {
               <TooltipTrigger asChild>
                 <Link
                   href="#"
-                  className="flex h-9 w-full items-center px-4 justify-items-start rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8"
+                  className={cn(
+                    "flex h-9 w-full items-center px-4 justify-items-start rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8",
+                    isActive("#") && "bg-accent text-accent-foreground", // Apply active background class
+                  )}
                 >
                   <LineChart className="h-5 w-5" />
                   <span className={isOpen ? "pl-4" : "sr-only"}>Analytics</span>
@@ -88,7 +103,6 @@ export const NavigationLinks = () => {
                   href={"#"}
                   onClick={handleToggle}
                   className="flex h-9 w-full items-center px-4 justify-items-start rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8"
-                  // variant="ghost"
                 >
                   {isOpen ? <ArrowLeft className="h-5 w-5" /> : <ArrowRight className="h-5 w-5 " />}
                   <span className={isOpen ? "pl-4" : "sr-only"}>
@@ -108,7 +122,10 @@ export const NavigationLinks = () => {
             <TooltipTrigger asChild>
               <Link
                 href="#"
-                className="flex h-9 w-full items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8"
+                className={cn(
+                  "flex h-9 w-full items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8",
+                  isActive("#") && "bg-accent text-accent-foreground", // Apply active background class
+                )}
               >
                 <Settings className="h-5 w-5" />
                 <span className={isOpen ? "pl-4" : "sr-only"}>Settings</span>
