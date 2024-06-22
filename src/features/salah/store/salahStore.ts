@@ -1,9 +1,4 @@
-import {
-  CalculationMethod,
-  Coordinates,
-  PrayerTimes,
-  type CalculationParameters,
-} from "adhan";
+import { CalculationMethod, type CalculationParameters, Coordinates, Madhab, PrayerTimes } from "adhan";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -55,11 +50,13 @@ interface LocationState {
   longitude: string;
   meta: Meta | null;
   prayerTimes: PrayerTimes | null;
+  madhab: "shafi" | "hanafi";
   setLocationInput: (input: string) => void;
   fetchLocations: () => Promise<void>;
   setSelectedLocation: (location: Location) => void;
   fetchMeta: () => Promise<void>;
   calculatePrayerTimes: () => void;
+  setMadhab: (madhab: "shafi" | "hanafi") => void;
 }
 
 export const useLocationStore = create<LocationState>()(
@@ -72,6 +69,7 @@ export const useLocationStore = create<LocationState>()(
       longitude: "",
       meta: null,
       prayerTimes: null,
+      madhab: "shafi",
       setLocationInput: (input) => set({ locationInput: input }),
       fetchLocations: async () => {
         const { locationInput } = get();
@@ -82,7 +80,7 @@ export const useLocationStore = create<LocationState>()(
               headers: {
                 "X-Custom-Header": "your-random-value",
               },
-            }
+            },
           );
           const data = await response.json();
           if (data.success) {
@@ -104,7 +102,7 @@ export const useLocationStore = create<LocationState>()(
         const { latitude, longitude } = get();
         try {
           const response = await fetch(
-            `https://api.aladhan.com/v1/calendar/2024/6?latitude=${latitude}&longitude=${longitude}`
+            `https://api.aladhan.com/v1/calendar/2024/6?latitude=${latitude}&longitude=${longitude}`,
           );
           const data = await response.json();
           if (data.code === 200) {
@@ -118,7 +116,7 @@ export const useLocationStore = create<LocationState>()(
         }
       },
       calculatePrayerTimes: () => {
-        const { meta } = get();
+        const { meta, madhab } = get();
         if (!meta) {
           return;
         }
@@ -126,16 +124,18 @@ export const useLocationStore = create<LocationState>()(
         const params = getCalculationMethod(meta.method.name);
         params.fajrAngle = meta.method.params.Fajr;
         params.ishaAngle = meta.method.params.Isha;
+        params.madhab = madhab === "shafi" ? Madhab.Shafi : Madhab.Hanafi;
         const date = new Date();
         const prayerTimes = new PrayerTimes(coordinates, date, params);
         set({ prayerTimes });
       },
+      setMadhab: (madhab) => set({ madhab }),
     }),
     {
       name: "location-storage", // unique name
       storage: createJSONStorage(() => localStorage), // using localStorage for persistence
-    }
-  )
+    },
+  ),
 );
 
 const getCalculationMethod = (methodName: string): CalculationParameters => {

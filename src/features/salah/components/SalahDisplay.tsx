@@ -1,18 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
@@ -33,11 +27,11 @@ export function SalahDisplay() {
     setLocationInput,
     fetchLocations,
     setSelectedLocation,
-    fetchMeta,
-    calculatePrayerTimes,
     prayerTimes,
+    madhab,
+    setMadhab,
+    calculatePrayerTimes,
   } = useLocationStore();
-  console.log(prayerTimes);
 
   const formatTime = (time: Date | undefined) => {
     return time ? dayjs(time).tz(meta?.timezone).format("h:mm A") : "";
@@ -57,113 +51,103 @@ export function SalahDisplay() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Prayer Time Settings</DialogTitle>
-                <div className="grid gap-4 p-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
-                    <Input
-                      id="location"
-                      placeholder="Enter location"
-                      value={locationInput}
-                      onChange={(e) => setLocationInput(e.target.value)}
-                    />
-                    <Button onClick={fetchLocations}>Fetch Locations</Button>
-                  </div>
-                  {locations.length > 0 && (
+              </DialogHeader>
+              <Tabs defaultValue="settings" className="w-full">
+                <TabsList>
+                  <TabsTrigger value="settings">Settings</TabsTrigger>
+                  <TabsTrigger value="meta">meta</TabsTrigger>
+                </TabsList>
+                <TabsContent value="settings">
+                  <div className="grid gap-4 p-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="location">Location</Label>
+                      <Input
+                        id="location"
+                        placeholder="Enter location"
+                        value={locationInput}
+                        onChange={(e) => setLocationInput(e.target.value)}
+                      />
+                      <Button onClick={fetchLocations}>Fetch Locations</Button>
+                    </div>
+                    {locations.length > 0 && (
+                      <Select
+                        onValueChange={(value) => {
+                          const location = locations.find((loc) => loc.name === value);
+                          if (location) {
+                            setSelectedLocation(location);
+                          }
+                        }}
+                        defaultValue={selectedLocation?.name}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Location" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {locations.map((location, index) => (
+                            <SelectItem
+                              key={index}
+                              value={location.name}
+                              onClick={() => setSelectedLocation(location)}
+                            >
+                              {location.name}, {location.city ? `${location.city}, ` : ""}
+                              {location.country}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                     <Select
+                      defaultValue={madhab}
                       onValueChange={(value) => {
-                        const location = locations.find((loc) => loc.name === value);
-                        if (location) {
-                          setSelectedLocation(location);
+                        if (value === "shafi" || value === "hanafi") {
+                          setMadhab(value);
+                          calculatePrayerTimes();
                         }
                       }}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Theme" />
+                        <SelectValue placeholder="Select Madhab" />
                       </SelectTrigger>
                       <SelectContent>
-                        {locations.map((location, index) => (
-                          <SelectItem
-                            key={index}
-                            value={location.name}
-                            onClick={() => setSelectedLocation(location)}
-                          >
-                            {location.name}, {location.city ? `${location.city}, ` : ""}
-                            {location.country}
-                          </SelectItem>
-                        ))}
+                        <SelectItem value="hanafi">
+                          Hanafi
+                        </SelectItem>
+                        <SelectItem value="shafi">
+                          Shafi
+                        </SelectItem>
                       </SelectContent>
                     </Select>
-                  )}
-                  <div className="space-y-2">
-                    <Label htmlFor="latitude">Latitude</Label>
-                    <Input id="latitude" type="number" placeholder="Enter latitude" value={latitude} readOnly />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="longitude">Longitude</Label>
-                    <Input id="longitude" type="number" placeholder="Enter longitude" value={longitude} readOnly />
-                  </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="latitude">Latitude</Label>
+                      <Input id="latitude" type="number" placeholder="Enter latitude" value={latitude} readOnly />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="longitude">Longitude</Label>
+                      <Input id="longitude" type="number" placeholder="Enter longitude" value={longitude} readOnly />
+                    </div>
 
-                  <Button variant="ghost" className="w-full justify-start">
-                    Save Settings
-                  </Button>
-                </div>
-              </DialogHeader>
+                    <Button variant="ghost" className="w-full justify-start">
+                      Save Settings
+                    </Button>
+                  </div>
+                </TabsContent>
+                <TabsContent value="meta">
+                  {meta && (
+                    <Card className="w-[450px] overflow-auto">
+                      <CardHeader className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-2">
+                        Metadata
+                      </CardHeader>
+                      <CardContent className="overflow-auto w-full">
+                        <pre className="text-gray-800 dark:text-gray-200">
+                          {JSON.stringify(meta, null, 2)}
+                        </pre>
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
+              </Tabs>
             </DialogContent>
           </Dialog>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <SettingsIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-72">
-              <DropdownMenuLabel>Prayer Time Settings</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <div className="grid gap-4 p-4">
-                <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
-                  <Input
-                    id="location"
-                    placeholder="Enter location"
-                    value={locationInput}
-                    onChange={(e) => setLocationInput(e.target.value)}
-                  />
-                  <Button onClick={fetchLocations}>Fetch Locations</Button>
-                </div>
-                {locations.length > 0 && (
-                  <div className="space-y-2">
-                    <Label htmlFor="location-select">Select Location</Label>
-                    <select
-                      id="location-select"
-                      onChange={(e) => setSelectedLocation(locations[e.target.selectedIndex])}
-                      className="w-full p-2 border rounded"
-                    >
-                      {locations.map((location, index) => (
-                        <option key={index} value={location.name}>
-                          {location.name}, {location.city ? `${location.city}, ` : ""}
-                          {location.country}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-                <div className="space-y-2">
-                  <Label htmlFor="latitude">Latitude</Label>
-                  <Input id="latitude" type="number" placeholder="Enter latitude" value={latitude} readOnly />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="longitude">Longitude</Label>
-                  <Input id="longitude" type="number" placeholder="Enter longitude" value={longitude} readOnly />
-                </div>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Button variant="ghost" className="w-full justify-start">
-                  Save Settings
-                </Button>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
