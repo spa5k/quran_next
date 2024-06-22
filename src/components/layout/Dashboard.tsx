@@ -1,7 +1,11 @@
+import { NextPrayer } from "@/features/salah/components/CurrentSalahWidget";
+import { cn } from "@/lib/utils";
 import { BellIcon, Book, CalendarIcon, Compass, FileTextIcon, FormInputIcon, GlobeIcon, Settings } from "lucide-react";
 import { lazy, Suspense } from "react";
+import AnimatedGridPattern from "../ui/animated-grid-pattern";
 import { BentoCard, BentoGrid } from "../ui/bento-grid";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
+import Globe from "../ui/globe";
 import { GridPatternLinearGradient } from "../ui/grid-pattern";
 
 // Lazy load components
@@ -29,8 +33,8 @@ const features = [
     Icon: FormInputIcon,
     name: "Search Quran",
     description: "Search for specific verses or keywords in the Quran.",
-    href: "/",
-    cta: "Learn more",
+    href: "/quran",
+    cta: "Search now",
     background: (
       <Suspense fallback={<div>Loading...</div>}>
         <Command className="absolute right-10 top-10 w-[70%] origin-top translate-x-0 border transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_40%,#000_80%)] group-hover:-translate-x-10">
@@ -65,25 +69,23 @@ const features = [
     Icon: CalendarIcon,
     name: "Prayer Times",
     description: "Get accurate prayer times based on your location.",
-    href: "/",
-    cta: "Learn more",
+    href: "/salah",
+    cta: "View prayer times",
     background: (
-      <div className="h-[200px] w-full transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_10%,#000_60%)] group-hover:scale-105 sm:left-40 p-5">
-        Next prayer in <span className="text-2xl font-semibold">15 minutes</span>
-        <div className="flex flex-col gap-4 mt-4">
-          <div className="flex flex-col gap-1">
-            <span className="text-lg font-semibold">Fajr</span>
-            <span className="text-lg">5:30 AM</span>
-          </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-lg font-semibold">Sunrise</span>
-            <span className="text-lg">6:30 AM</span>
-          </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-lg font-semibold">Dhuhr</span>
-            <span className="text-lg">12:30 PM</span>
-          </div>
+      <div className="relative flex h-full w-full items-start justify-start overflow-hidden rounded-lg bg-background p-5">
+        <div className="z-10 whitespace-pre-wrap text-start text-2xl font-medium tracking-tighter text-black dark:text-white">
+          <NextPrayer />
         </div>
+        <AnimatedGridPattern
+          numSquares={30}
+          maxOpacity={0.5}
+          duration={3}
+          repeatDelay={1}
+          className={cn(
+            "[mask-image:radial-gradient(300px_circle_at_center,white,transparent)]",
+            "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12",
+          )}
+        />
       </div>
     ),
     className: "lg:col-start-3 lg:col-end-3 lg:row-start-1 lg:row-end-3",
@@ -104,10 +106,9 @@ const features = [
     href: "/",
     cta: "Learn more",
     background: (
-      <img className="absolute -right-20 -top-20 opacity-60" />
-      // <Suspense fallback={<div>Loading...</div>}>
-      //   {/* <Globe className="top-0 h-[600px] w-[600px] transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_30%,#000_100%)] group-hover:scale-105 sm:left-40" /> */}
-      // </Suspense>
+      <Suspense fallback={<div>Loading...</div>}>
+        <Globe className="top-0 h-[600px] w-[600px] transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_30%,#000_100%)] group-hover:scale-105 sm:left-40" />
+      </Suspense>
     ),
     className: "lg:col-start-1 lg:col-end-3 lg:row-start-4 lg:row-end-6",
   },

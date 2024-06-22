@@ -2,7 +2,6 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { CommandMenu } from "../generic/CommandMenu";
 
 export function Hero() {
   const fadeInRef = useRef(null);
@@ -58,7 +57,8 @@ export function Hero() {
                 Discover the wisdom and guidance of the Quran with our powerful search and exploration tools.
               </motion.p>
 
-              <motion.div
+              {
+                /* <motion.div
                 animate={fadeInInView ? "animate" : "initial"}
                 variants={fadeUpVariants}
                 className="flex flex-col gap-4 lg:flex-row"
@@ -71,7 +71,8 @@ export function Hero() {
                 }}
               >
                 <CommandMenu />
-              </motion.div>
+              </motion.div> */
+              }
             </div>
           </div>
         </div>
