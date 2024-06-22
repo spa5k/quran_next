@@ -89,13 +89,13 @@ export function SalahDisplay() {
         className="text-2xl px-4 md:text-4xl lg:text-5xl font-bold text-neutral-700 dark:text-white max-w-4xl leading-relaxed lg:leading-snug text-center mx-auto z-10 "
       >
         Pray on time, because life is just a{" "}
-        <Highlight>
+        <Highlight colorFrom="indigo-300" colorTo="purple-300" colorFromDark="indigo-500" colorToDark="purple-500">
           collection of moments
         </Highlight>
         <br />
         <br />
 
-        Today Prayer Times for <Highlight>{cityName}</Highlight>
+        {`Today's Prayer Times for`} <Highlight>{cityName}</Highlight>
       </motion.h1>
       <div className="flex gap-4 flex-col justify-center mt-20">
         <SalahTimesDisplay meta={meta} prayerTimes={prayerTimes} />

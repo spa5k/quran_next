@@ -32,6 +32,10 @@ export const MiniSalahWidget = () => {
     maximumAge: 0,
   });
 
+  const nextPrayer = prayerTimes?.nextPrayer && typeof prayerTimes.nextPrayer === "function"
+    ? prayerTimes.nextPrayer() === "none" ? "Fajr" : prayerTimes.nextPrayer()
+    : "Fajr";
+
   useEffect(() => {
     if (!loading && !error && latitude && longitude) {
       setCoordinates(latitude.toString(), longitude.toString());
@@ -81,7 +85,7 @@ export const MiniSalahWidget = () => {
     };
 
     calculateCurrentPrayer();
-    const interval = setInterval(calculateCurrentPrayer, 60000); // Update every minute
+    const interval = setInterval(calculateCurrentPrayer, 60_000); // Update every minute
 
     return () => clearInterval(interval);
   }, [prayerTimes, meta]);
@@ -94,7 +98,7 @@ export const MiniSalahWidget = () => {
     );
   }
 
-  if (retry) {
+  if (retry && !longitude) {
     return (
       <div className="flex items-center justify-center">
         <Button
@@ -109,29 +113,29 @@ export const MiniSalahWidget = () => {
 
   return (
     <Link href={"/salah"} prefetch={false}>
-      <div className="flex items-center justify-center w-1/2">
+      <div className="flex items-center justify-center w-full sm:w-1/2">
         <div className="relative w-full bg-gray-200 rounded-md overflow-hidden">
           <motion.div
             className="absolute top-0 left-0 h-full bg-gradient-to-r from-green-200 to-green-400"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 1, ease: "easeInOut" }}
-          >
-          </motion.div>
+          />
           <motion.div
             className="absolute top-0 left-0 h-full bg-gradient-to-r from-green-200 to-green-400 opacity-50"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ repeat: Infinity, duration: 5, ease: "anticipate" }}
-            // style={{ width: "200%" }}
-          >
-          </motion.div>
+          />
           <div className="relative z-10 text-center flex items-center justify-between p-2">
             <div className="flex text-center items-center gap-4">
-              <p className="text-xl font-bold">{currentPrayer}</p>
-              {currentPrayerTime}
+              <p className="text-sm font-bold sm:text-xl">{currentPrayer}</p>
+              <p className="hidden sm:flex">{currentPrayerTime}</p>
             </div>
-            <div className="text-md">{nextPrayerTime}</div>
+            <div className="flex text-center items-center gap-4">
+              <p className="text-sm font-bold sm:text-xl">{nextPrayer}</p>
+              <p className="hidden sm:flex">{nextPrayerTime}</p>
+            </div>
           </div>
         </div>
       </div>
