@@ -72,8 +72,8 @@ const features = [
     href: "/salah",
     cta: "View prayer times",
     background: (
-      <div className="relative flex h-full w-full items-start justify-start overflow-hidden rounded-lg bg-background p-5">
-        <div className="z-10 whitespace-pre-wrap text-start text-2xl font-medium tracking-tighter text-black dark:text-white">
+      <div className="relative flex h-full w-full items-start justify-start overflow-hidden rounded-lg bg-background p-5 [mask-image:linear-gradient(to_top,transparent_10%,#000_30%)]">
+        <div className="z-10 whitespace-pre-wrap text-start text-2xl font-medium tracking-tighter text-black dark:text-white ">
           <NextPrayer />
         </div>
         <AnimatedGridPattern

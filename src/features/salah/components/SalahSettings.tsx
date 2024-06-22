@@ -86,8 +86,9 @@ export const SalahSettingsDialog = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <SettingsIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+        <Button>
+          Salah Settings
+          <SettingsIcon className="h-6 w-6 ml-4" />
         </Button>
       </DialogTrigger>
       <DialogContent>

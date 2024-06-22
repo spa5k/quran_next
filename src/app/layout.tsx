@@ -19,6 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { MiniSalahWidget } from "@/features/salah/components/MiniSalahWidget";
 import { PanelLeft, Search, User } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -95,6 +96,10 @@ export default function RootLayout({
                     </BreadcrumbItem>
                   </BreadcrumbList>
                 </Breadcrumb>
+                <div className="relative ml-auto flex-1">
+                  <MiniSalahWidget />
+                </div>
+
                 <div className="relative ml-auto flex-1 md:grow-0">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
