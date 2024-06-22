@@ -5,6 +5,7 @@ import { useGeolocation } from "@uidotdev/usehooks";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useLocationStore } from "../store/salahStore";
@@ -16,6 +17,8 @@ export const MiniSalahWidget = () => {
   const { prayerTimes, meta, setCoordinates, fetchCityName, calculatePrayerTimes } = useLocationStore();
   const [currentPrayer, setCurrentPrayer] = useState("");
   const [currentPrayerTime, setCurrentPrayerTime] = useState("");
+  const [nextPrayerTime, setNextPrayerTime] = useState("");
+  const [progress, setProgress] = useState(0);
   const [retry, setRetry] = useState(false);
 
   const {
@@ -64,6 +67,14 @@ export const MiniSalahWidget = () => {
         if (now.isAfter(prayers[i].time)) {
           setCurrentPrayer(prayers[i].name);
           setCurrentPrayerTime(prayers[i].time.format("h:mm A"));
+          const nextPrayer = prayers[(i + 1) % prayers.length];
+          setNextPrayerTime(nextPrayer.time.format("h:mm A"));
+
+          const totalDuration = nextPrayer.time.diff(prayers[i].time);
+          const elapsedDuration = now.diff(prayers[i].time);
+          const progressPercentage = (elapsedDuration / totalDuration) * 100;
+          setProgress(progressPercentage);
+
           break;
         }
       }
@@ -98,10 +109,30 @@ export const MiniSalahWidget = () => {
 
   return (
     <Link href={"/salah"} prefetch={false}>
-      <div className="flex items-center justify-center">
-        <div className="text-center flex items-center gap-4">
-          <div className="text-xl font-bold">{currentPrayer}</div> started at
-          <div className="text-md">{currentPrayerTime}</div>
+      <div className="flex items-center justify-center w-1/2">
+        <div className="relative w-full bg-gray-200 rounded-md overflow-hidden">
+          <motion.div
+            className="absolute top-0 left-0 h-full bg-gradient-to-r from-green-200 to-green-400"
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 1, ease: "easeInOut" }}
+          >
+          </motion.div>
+          <motion.div
+            className="absolute top-0 left-0 h-full bg-gradient-to-r from-green-200 to-green-400 opacity-50"
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+            transition={{ repeat: Infinity, duration: 5, ease: "anticipate" }}
+            // style={{ width: "200%" }}
+          >
+          </motion.div>
+          <div className="relative z-10 text-center flex items-center justify-between p-2">
+            <div className="flex text-center items-center gap-4">
+              <p className="text-xl font-bold">{currentPrayer}</p>
+              {currentPrayerTime}
+            </div>
+            <div className="text-md">{nextPrayerTime}</div>
+          </div>
         </div>
       </div>
     </Link>
