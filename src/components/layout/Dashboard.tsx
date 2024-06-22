@@ -7,6 +7,7 @@ import { BentoCard, BentoGrid } from "../ui/bento-grid";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
 import Globe from "../ui/globe";
 import { GridPatternLinearGradient } from "../ui/grid-pattern";
+import { SearchBar } from "./SearchBar";
 
 // Lazy load components
 // const RecitationCard = lazy(() => import("@/src/features/recitation/components/RecitationCard"));
@@ -135,6 +136,8 @@ const features = [
 export const Dashboard = () => {
   return (
     <div className="flex flex-1 flex-col ">
+      <SearchBar />
+
       <BentoGrid className="lg:grid-rows-4">
         {features.map((feature) => (
           <Suspense key={feature.name} fallback={<div>Loading...</div>}>
