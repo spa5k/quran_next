@@ -1,17 +1,24 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DialogDescription } from "@radix-ui/react-dialog";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import { PencilIcon, SettingsIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useLocationStore } from "../store/salahStore";
+import { Location, useLocationStore } from "../store/salahStore";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -32,12 +39,13 @@ export const SalahSettingsDialog = () => {
     setMadhab,
     calculatePrayerTimes,
     setCoordinates,
-    cityName,
+    fetchCityName,
   } = useLocationStore();
 
   const [isEditing, setIsEditing] = useState(false);
   const [tempLatitude, setTempLatitude] = useState(latitude);
   const [tempLongitude, setTempLongitude] = useState(longitude);
+  const [locationSelected, setLocationSelected] = useState(false);
 
   useEffect(() => {
     setTempLatitude(latitude);
@@ -58,6 +66,7 @@ export const SalahSettingsDialog = () => {
           setTempLatitude(latitude.toString());
           setTempLongitude(longitude.toString());
           setCoordinates(latitude.toString(), longitude.toString());
+          fetchCityName(latitude.toString(), longitude.toString());
           calculatePrayerTimes();
         },
         (error) => {
@@ -67,6 +76,11 @@ export const SalahSettingsDialog = () => {
     } else {
       console.error("Geolocation is not supported by this browser.");
     }
+  };
+
+  const handleLocationSelect = (location: Location) => {
+    setSelectedLocation(location);
+    setLocationSelected(true);
   };
 
   return (
@@ -100,14 +114,14 @@ export const SalahSettingsDialog = () => {
                 />
                 <Button onClick={fetchLocations}>Fetch Locations</Button>
               </div>
-              {locations.length > 0 && (
+              {locations.length > 0 && !locationSelected && (
                 <>
                   <Label htmlFor="location">Select Location</Label>
                   <Select
                     onValueChange={(value) => {
                       const location = locations.find((loc) => loc.name === value);
                       if (location) {
-                        setSelectedLocation(location);
+                        handleLocationSelect(location);
                       }
                     }}
                     defaultValue={selectedLocation?.name}
@@ -120,7 +134,7 @@ export const SalahSettingsDialog = () => {
                         <SelectItem
                           key={index}
                           value={location.name}
-                          onClick={() => setSelectedLocation(location)}
+                          onClick={() => handleLocationSelect(location)}
                         >
                           {location.name}, {location.city ? `${location.city}, ` : ""}
                           {location.country}
@@ -197,7 +211,7 @@ export const SalahSettingsDialog = () => {
                 </CardHeader>
                 <CardContent className="overflow-auto w-full">
                   <pre className="text-gray-800 dark:text-gray-200">
-                          {JSON.stringify(meta, null, 2)}
+                    {JSON.stringify(meta, null, 2)}
                   </pre>
                 </CardContent>
               </Card>
