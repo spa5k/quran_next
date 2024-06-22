@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,7 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
-import { SettingsIcon } from "lucide-react";
+import { PencilIcon, SettingsIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useLocationStore } from "../store/salahStore";
 
 dayjs.extend(utc);
@@ -31,10 +32,26 @@ export function SalahDisplay() {
     madhab,
     setMadhab,
     calculatePrayerTimes,
+    setCoordinates,
   } = useLocationStore();
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [tempLatitude, setTempLatitude] = useState(latitude);
+  const [tempLongitude, setTempLongitude] = useState(longitude);
+
+  useEffect(() => {
+    setTempLatitude(latitude);
+    setTempLongitude(longitude);
+  }, [latitude, longitude]);
 
   const formatTime = (time: Date | undefined) => {
     return time ? dayjs(time).tz(meta?.timezone).format("h:mm A") : "";
+  };
+
+  const handleUpdatePrayerTimes = () => {
+    setIsEditing(false);
+    setCoordinates(tempLatitude, tempLongitude);
+    calculatePrayerTimes();
   };
 
   return (
@@ -48,14 +65,14 @@ export function SalahDisplay() {
                 <SettingsIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent aria-describedby="dialog-description">
               <DialogHeader>
-                <DialogTitle>Prayer Time Settings</DialogTitle>
+                <DialogTitle className="dialog-description">Prayer Time Settings</DialogTitle>
               </DialogHeader>
               <Tabs defaultValue="settings" className="w-full">
                 <TabsList>
                   <TabsTrigger value="settings">Settings</TabsTrigger>
-                  <TabsTrigger value="meta">meta</TabsTrigger>
+                  <TabsTrigger value="meta">Meta</TabsTrigger>
                 </TabsList>
                 <TabsContent value="settings">
                   <div className="grid gap-4 p-4">
@@ -70,32 +87,36 @@ export function SalahDisplay() {
                       <Button onClick={fetchLocations}>Fetch Locations</Button>
                     </div>
                     {locations.length > 0 && (
-                      <Select
-                        onValueChange={(value) => {
-                          const location = locations.find((loc) => loc.name === value);
-                          if (location) {
-                            setSelectedLocation(location);
-                          }
-                        }}
-                        defaultValue={selectedLocation?.name}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Location" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {locations.map((location, index) => (
-                            <SelectItem
-                              key={index}
-                              value={location.name}
-                              onClick={() => setSelectedLocation(location)}
-                            >
-                              {location.name}, {location.city ? `${location.city}, ` : ""}
-                              {location.country}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <>
+                        <Label htmlFor="location">Select Location</Label>
+                        <Select
+                          onValueChange={(value) => {
+                            const location = locations.find((loc) => loc.name === value);
+                            if (location) {
+                              setSelectedLocation(location);
+                            }
+                          }}
+                          defaultValue={selectedLocation?.name}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Location" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {locations.map((location, index) => (
+                              <SelectItem
+                                key={index}
+                                value={location.name}
+                                onClick={() => setSelectedLocation(location)}
+                              >
+                                {location.name}, {location.city ? `${location.city}, ` : ""}
+                                {location.country}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </>
                     )}
+                    <Label htmlFor="madhab">Madhab</Label>
                     <Select
                       defaultValue={madhab}
                       onValueChange={(value) => {
@@ -109,26 +130,48 @@ export function SalahDisplay() {
                         <SelectValue placeholder="Select Madhab" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="hanafi">
-                          Hanafi
-                        </SelectItem>
-                        <SelectItem value="shafi">
-                          Shafi
-                        </SelectItem>
+                        <SelectItem value="hanafi">Hanafi</SelectItem>
+                        <SelectItem value="shafi">Shafi</SelectItem>
                       </SelectContent>
                     </Select>
                     <div className="space-y-2">
                       <Label htmlFor="latitude">Latitude</Label>
-                      <Input id="latitude" type="number" placeholder="Enter latitude" value={latitude} readOnly />
+                      <div className="flex items-center">
+                        <Input
+                          id="latitude"
+                          type="number"
+                          placeholder="Enter latitude"
+                          value={isEditing ? tempLatitude : latitude}
+                          onChange={(e) => setTempLatitude(e.target.value)}
+                          readOnly={!isEditing}
+                          disabled={!isEditing}
+                        />
+                        <Button variant="ghost" size="icon" onClick={() => setIsEditing(!isEditing)}>
+                          <PencilIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                        </Button>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="longitude">Longitude</Label>
-                      <Input id="longitude" type="number" placeholder="Enter longitude" value={longitude} readOnly />
+                      <div className="flex items-center">
+                        <Input
+                          id="longitude"
+                          type="number"
+                          placeholder="Enter longitude"
+                          value={isEditing ? tempLongitude : longitude}
+                          onChange={(e) => setTempLongitude(e.target.value)}
+                          readOnly={!isEditing}
+                          disabled={!isEditing}
+                        />
+                        <Button variant="ghost" size="icon" onClick={() => setIsEditing(!isEditing)}>
+                          <PencilIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                        </Button>
+                      </div>
                     </div>
-
-                    <Button variant="ghost" className="w-full justify-start">
-                      Save Settings
-                    </Button>
+                    {isEditing && <Button onClick={handleUpdatePrayerTimes}>Update Prayer Times</Button>}
+                    <DialogFooter className="text-muted-foreground text-sm">
+                      Changes are automatically saved
+                    </DialogFooter>
                   </div>
                 </TabsContent>
                 <TabsContent value="meta">

@@ -1,4 +1,10 @@
-import { CalculationMethod, type CalculationParameters, Coordinates, Madhab, PrayerTimes } from "adhan";
+import {
+  CalculationMethod,
+  Coordinates,
+  Madhab,
+  PrayerTimes,
+  type CalculationParameters,
+} from "adhan";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -57,6 +63,7 @@ interface LocationState {
   fetchMeta: () => Promise<void>;
   calculatePrayerTimes: () => void;
   setMadhab: (madhab: "shafi" | "hanafi") => void;
+  setCoordinates: (latitude: string, longitude: string) => void;
 }
 
 export const useLocationStore = create<LocationState>()(
@@ -70,6 +77,10 @@ export const useLocationStore = create<LocationState>()(
       meta: null,
       prayerTimes: null,
       madhab: "shafi",
+      setCoordinates(latitude, longitude) {
+        set({ latitude, longitude });
+        get().fetchMeta();
+      },
       setLocationInput: (input) => set({ locationInput: input }),
       fetchLocations: async () => {
         const { locationInput } = get();
@@ -80,7 +91,7 @@ export const useLocationStore = create<LocationState>()(
               headers: {
                 "X-Custom-Header": "your-random-value",
               },
-            },
+            }
           );
           const data = await response.json();
           if (data.success) {
@@ -102,7 +113,7 @@ export const useLocationStore = create<LocationState>()(
         const { latitude, longitude } = get();
         try {
           const response = await fetch(
-            `https://api.aladhan.com/v1/calendar/2024/6?latitude=${latitude}&longitude=${longitude}`,
+            `https://api.aladhan.com/v1/calendar/2024/6?latitude=${latitude}&longitude=${longitude}`
           );
           const data = await response.json();
           if (data.code === 200) {
@@ -134,8 +145,8 @@ export const useLocationStore = create<LocationState>()(
     {
       name: "location-storage", // unique name
       storage: createJSONStorage(() => localStorage), // using localStorage for persistence
-    },
-  ),
+    }
+  )
 );
 
 const getCalculationMethod = (methodName: string): CalculationParameters => {
