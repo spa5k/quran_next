@@ -7,19 +7,21 @@ import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocationStore } from "../store/salahStore";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
 export const MiniSalahWidget = () => {
-  const { prayerTimes, meta, setCoordinates, fetchCityName, calculatePrayerTimes } = useLocationStore();
+  const { prayerTimes, meta, setCoordinates, fetchCityName, calculatePrayerTimes, playAdhan, selectedLocation } =
+    useLocationStore();
   const [currentPrayer, setCurrentPrayer] = useState("");
   const [currentPrayerTime, setCurrentPrayerTime] = useState("");
   const [nextPrayerTime, setNextPrayerTime] = useState("");
   const [progress, setProgress] = useState(0);
   const [retry, setRetry] = useState(false);
+  const adhanAudioRef = useRef<HTMLAudioElement>(null);
 
   const {
     loading,
@@ -37,7 +39,16 @@ export const MiniSalahWidget = () => {
     : "Fajr";
 
   useEffect(() => {
+    if (selectedLocation) {
+      // If a location is already selected, use it and skip geolocation
+      setCoordinates(selectedLocation.lat, selectedLocation.lng);
+      fetchCityName(selectedLocation.lat, selectedLocation.lng);
+      calculatePrayerTimes();
+      setRetry(false);
+      return;
+    }
     if (!loading && !error && latitude && longitude) {
+      // Use geolocation if no location is selected
       setCoordinates(latitude.toString(), longitude.toString());
       fetchCityName(latitude.toString(), longitude.toString());
       calculatePrayerTimes();
@@ -50,7 +61,7 @@ export const MiniSalahWidget = () => {
         setRetry(true);
       }
     }
-  }, [loading, latitude, longitude, error, setCoordinates, fetchCityName, calculatePrayerTimes]);
+  }, [loading, latitude, longitude, error, setCoordinates, fetchCityName, calculatePrayerTimes, selectedLocation]);
 
   useEffect(() => {
     if (!(prayerTimes && meta)) {
@@ -79,6 +90,13 @@ export const MiniSalahWidget = () => {
           const progressPercentage = (elapsedDuration / totalDuration) * 100;
           setProgress(progressPercentage);
 
+          // Play Adhan and show notification if enabled and not already played and time is within 1 minute
+          if (playAdhan && adhanAudioRef.current && !isAdhanPlayed(prayers[i].name) && progressPercentage > 99) {
+            adhanAudioRef.current.play();
+            showNotification(prayers[i].name); // Show notification
+            markAdhanAsPlayed(prayers[i].name); // Mark Adhan as played
+          }
+
           break;
         }
       }
@@ -88,9 +106,39 @@ export const MiniSalahWidget = () => {
     const interval = setInterval(calculateCurrentPrayer, 60_000); // Update every minute
 
     return () => clearInterval(interval);
-  }, [prayerTimes, meta]);
+  }, [prayerTimes, meta, playAdhan]);
 
-  if (loading) {
+  const showNotification = (prayerName: string) => {
+    if (Notification.permission === "granted") {
+      new Notification("Prayer Time", {
+        body: `It's time for ${prayerName} prayer.`,
+        icon: "/path/to/icon.png", // Replace with your icon path
+      });
+    }
+  };
+
+  const isAdhanPlayed = (prayerName: string) => {
+    const playedPrayers = JSON.parse(localStorage.getItem("playedPrayers") || "[]");
+    return playedPrayers.includes(prayerName);
+  };
+
+  const markAdhanAsPlayed = (prayerName: string) => {
+    const playedPrayers = JSON.parse(localStorage.getItem("playedPrayers") || "[]");
+    playedPrayers.push(prayerName);
+    localStorage.setItem("playedPrayers", JSON.stringify(playedPrayers));
+  };
+
+  useEffect(() => {
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
+          console.log("Notification permission granted.");
+        }
+      });
+    }
+  }, []);
+
+  if (loading && !selectedLocation) {
     return (
       <div className="flex items-center justify-center">
         <div className="text-center">Loading...</div>
@@ -113,7 +161,7 @@ export const MiniSalahWidget = () => {
 
   return (
     <Link href={"/salah"} prefetch={false}>
-      <div className="flex items-center justify-center w-full sm:w-1/2">
+      <div className="flex items-center justify-center w-full ">
         <div className="relative w-full bg-gray-200 rounded-md overflow-hidden">
           <motion.div
             className="absolute top-0 left-0 h-full bg-gradient-to-r from-green-200 to-green-400"
@@ -139,6 +187,7 @@ export const MiniSalahWidget = () => {
           </div>
         </div>
       </div>
+      <audio ref={adhanAudioRef} src="/azan1.mp3" />
     </Link>
   );
 };

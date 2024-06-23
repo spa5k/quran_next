@@ -52,6 +52,7 @@ interface LocationState {
   meta: Meta | null;
   prayerTimes: PrayerTimes | null;
   madhab: "shafi" | "hanafi";
+  playAdhan: boolean; // Add playAdhan state
   setLocationInput: (input: string) => void;
   fetchLocations: () => Promise<void>;
   setSelectedLocation: (location: Location) => void;
@@ -60,6 +61,7 @@ interface LocationState {
   setMadhab: (madhab: "shafi" | "hanafi") => void;
   setCoordinates: (latitude: string, longitude: string) => void;
   fetchCityName: (latitude: string, longitude: string) => void;
+  toggleAdhan: (playAdhan: boolean) => void; // Add toggleAdhan function
 }
 
 export const useLocationStore = create<LocationState>()(
@@ -74,6 +76,7 @@ export const useLocationStore = create<LocationState>()(
       meta: null,
       prayerTimes: null,
       madhab: "shafi",
+      playAdhan: true,
       setCoordinates(latitude, longitude) {
         set({ latitude, longitude });
         get().fetchMeta();
@@ -159,6 +162,7 @@ export const useLocationStore = create<LocationState>()(
           console.error("Error fetching city name:", error);
         }
       },
+      toggleAdhan: (playAdhan) => set({ playAdhan }), // Add toggleAdhan function
     }),
     {
       name: "location-storage", // unique name

@@ -12,12 +12,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
-import { PencilIcon, SettingsIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Pause, PencilIcon, Play, SettingsIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Location, useLocationStore } from "../store/salahStore";
 
 dayjs.extend(utc);
@@ -40,12 +41,18 @@ export const SalahSettingsDialog = () => {
     calculatePrayerTimes,
     setCoordinates,
     fetchCityName,
+    playAdhan,
+    toggleAdhan,
+    cityName,
   } = useLocationStore();
 
   const [isEditing, setIsEditing] = useState(false);
   const [tempLatitude, setTempLatitude] = useState(latitude);
   const [tempLongitude, setTempLongitude] = useState(longitude);
   const [locationSelected, setLocationSelected] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false); // Track if Adhan is playing
+  const [hasSearched, setHasSearched] = useState(false); // Track if user has searched for location
+  const adhanAudioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     setTempLatitude(latitude);
@@ -83,6 +90,35 @@ export const SalahSettingsDialog = () => {
     setLocationSelected(true);
   };
 
+  const showNotification = (prayerName: string) => {
+    if (Notification.permission === "granted") {
+      new Notification("Prayer Time", {
+        body: `It's time for ${prayerName} prayer.`,
+        icon: "/path/to/icon.png", // Replace with your icon path
+      });
+    }
+  };
+
+  const handlePlayPauseAdhan = () => {
+    if (adhanAudioRef.current) {
+      if (isPlaying) {
+        adhanAudioRef.current.pause();
+        adhanAudioRef.current.currentTime = 0;
+        setIsPlaying(false);
+      } else {
+        adhanAudioRef.current.play();
+        // send notification to user that adhan is playing
+        showNotification(prayerTimes?.currentPrayer() || "Fajr");
+        setIsPlaying(true);
+      }
+    }
+  };
+
+  const handleFetchLocations = async () => {
+    await fetchLocations();
+    setHasSearched(true); // Set hasSearched to true when user searches for location
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -113,9 +149,9 @@ export const SalahSettingsDialog = () => {
                   value={locationInput}
                   onChange={(e) => setLocationInput(e.target.value)}
                 />
-                <Button onClick={fetchLocations}>Fetch Locations</Button>
+                <Button onClick={handleFetchLocations}>Fetch Locations</Button>
               </div>
-              {locations.length > 0 && !locationSelected && (
+              {hasSearched && locations.length > 0 && !locationSelected && (
                 <>
                   <Label htmlFor="location">Select Location</Label>
                   <Select
@@ -145,6 +181,18 @@ export const SalahSettingsDialog = () => {
                   </Select>
                 </>
               )}
+              <Label htmlFor="playAdhan">Play Adhan</Label>
+              <div className="flex justify-between items-center">
+                <Switch
+                  id="playAdhan"
+                  checked={playAdhan}
+                  onCheckedChange={toggleAdhan}
+                />
+                <Button onClick={handlePlayPauseAdhan} size="icon">
+                  {isPlaying ? <Pause /> : <Play />}
+                </Button>
+              </div>
+
               <Label htmlFor="madhab">Madhab</Label>
               <Select
                 defaultValue={madhab}
@@ -220,6 +268,7 @@ export const SalahSettingsDialog = () => {
           </TabsContent>
         </Tabs>
       </DialogContent>
+      <audio ref={adhanAudioRef} src="/azan1.mp3" />
     </Dialog>
   );
 };

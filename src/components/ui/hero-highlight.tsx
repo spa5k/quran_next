@@ -63,17 +63,9 @@ export const HeroHighlight = ({
 export const Highlight = ({
   children,
   className,
-  colorFrom = "indigo-300",
-  colorTo = "purple-300",
-  colorFromDark = "indigo-500",
-  colorToDark = "purple-500",
 }: {
   children: React.ReactNode;
   className?: string;
-  colorFrom?: string;
-  colorTo?: string;
-  colorFromDark?: string;
-  colorToDark?: string;
 }) => {
   return (
     <motion.span
@@ -94,8 +86,7 @@ export const Highlight = ({
         display: "inline",
       }}
       className={cn(
-        `relative inline-block pb-1 px-1 rounded-lg bg-gradient-to-r `,
-        `from-${colorFrom} to-${colorTo} dark:from-${colorFromDark} dark:to-${colorToDark}`,
+        `relative inline-block pb-1   px-1 rounded-lg bg-gradient-to-r from-red-300 to-orange-300 dark:from-red-500 dark:to-orange-500`,
         className,
       )}
     >
