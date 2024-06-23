@@ -26,14 +26,12 @@ dayjs.extend(timezone);
 
 export const SalahSettingsDialog = () => {
   const {
-    locations,
-    selectedLocation,
     locationInput,
     latitude,
     longitude,
     meta,
     setLocationInput,
-    fetchLocation: fetchLocations,
+    fetchLocations,
     setSelectedLocation,
     prayerTimes,
     madhab,
@@ -43,15 +41,12 @@ export const SalahSettingsDialog = () => {
     fetchCityName,
     playAdhan,
     toggleAdhan,
-    cityName,
   } = useLocationStore();
 
   const [isEditing, setIsEditing] = useState(false);
   const [tempLatitude, setTempLatitude] = useState(latitude);
   const [tempLongitude, setTempLongitude] = useState(longitude);
-  const [locationSelected, setLocationSelected] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false); // Track if Adhan is playing
-  const [hasSearched, setHasSearched] = useState(false); // Track if user has searched for location
   const adhanAudioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
@@ -88,7 +83,6 @@ export const SalahSettingsDialog = () => {
   const handleLocationSelect = (location: Location) => {
     console.log(location);
     setSelectedLocation(location);
-    setLocationSelected(true);
   };
 
   useEffect(() => {
@@ -137,7 +131,6 @@ export const SalahSettingsDialog = () => {
 
   const handleFetchLocations = async () => {
     await fetchLocations();
-    setHasSearched(true); // Set hasSearched to true when user searches for location
   };
 
   return (
@@ -172,38 +165,7 @@ export const SalahSettingsDialog = () => {
                 />
                 <Button onClick={handleFetchLocations}>Fetch Location</Button>
               </div>
-              {
-                /* {locations.length > 0 && !locationSelected && (
-                <>
-                  <Label htmlFor="location">Select Location</Label>
-                  <Select
-                    onValueChange={(value) => {
-                      const location = locations.find((loc) => loc.name === value);
-                      if (location) {
-                        handleLocationSelect(location);
-                      }
-                    }}
-                    defaultValue={selectedLocation?.name}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Location" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {locations.map((location, index) => (
-                        <SelectItem
-                          key={index}
-                          value={location.name}
-                          onClick={() => handleLocationSelect(location)}
-                        >
-                          {location.name}, {location.city ? `${location.city}, ` : ""}
-                          {location.country}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </>
-              )} */
-              }
+
               <Label htmlFor="playAdhan">Play Adhan</Label>
               <div className="flex justify-between items-center">
                 <Switch

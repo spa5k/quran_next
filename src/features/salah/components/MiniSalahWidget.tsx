@@ -23,6 +23,7 @@ export const MiniSalahWidget = () => {
     playAdhan,
     selectedLocation,
     latitude: currentLatitude,
+    rehydrated,
   } = useLocationStore();
   const [currentPrayer, setCurrentPrayer] = useState("");
   const [currentPrayerTime, setCurrentPrayerTime] = useState("");
@@ -45,43 +46,6 @@ export const MiniSalahWidget = () => {
   const nextPrayer = prayerTimes?.nextPrayer && typeof prayerTimes.nextPrayer === "function"
     ? prayerTimes.nextPrayer() === "none" ? "Fajr" : prayerTimes.nextPrayer()
     : "Fajr";
-
-  useEffect(() => {
-    console.log("useEffect", { loading, latitude, longitude, error, selectedLocation });
-    if (selectedLocation?.city) {
-      console.log("using selected location:", { prayerTimes, meta, selectedLocation });
-      calculatePrayerTimes();
-      return;
-    }
-
-    if (!loading && !error && !selectedLocation?.city && latitude && longitude) {
-      console.log("using geolocation:", { prayerTimes, meta, selectedLocation });
-      setCoordinates(latitude.toString(), longitude.toString());
-      // fetchCityName(latitude.toString(), longitude.toString());
-      calculatePrayerTimes();
-      setRetry(false);
-      return;
-    }
-
-    if (error) {
-      console.error("Error fetching location:", error);
-      if (error.code === error.PERMISSION_DENIED) {
-        setRetry(true);
-      }
-    }
-  }, [
-    loading,
-    latitude,
-    longitude,
-    error,
-    setCoordinates,
-    fetchCityName,
-    calculatePrayerTimes,
-    selectedLocation,
-    currentLatitude,
-    prayerTimes,
-    meta,
-  ]);
 
   useEffect(() => {
     if (!(prayerTimes && meta)) {
@@ -188,6 +152,12 @@ export const MiniSalahWidget = () => {
         <div className="text-center">Loading...</div>
       </div>
     );
+  }
+
+  // if location permission is granted, and the state is rehydrated, and the latitude/longitude from state is null, then fetch the geocoordinates
+  if (latitude && longitude && rehydrated && !currentLatitude) {
+    setCoordinates(latitude.toString(), longitude.toString());
+    calculatePrayerTimes();
   }
 
   if (retry && !longitude) {
