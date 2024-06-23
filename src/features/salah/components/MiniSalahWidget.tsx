@@ -14,8 +14,16 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 export const MiniSalahWidget = () => {
-  const { prayerTimes, meta, setCoordinates, fetchCityName, calculatePrayerTimes, playAdhan, selectedLocation } =
-    useLocationStore();
+  const {
+    prayerTimes,
+    meta,
+    setCoordinates,
+    fetchCityName,
+    calculatePrayerTimes,
+    playAdhan,
+    selectedLocation,
+    latitude: currentLatitude,
+  } = useLocationStore();
   const [currentPrayer, setCurrentPrayer] = useState("");
   const [currentPrayerTime, setCurrentPrayerTime] = useState("");
   const [nextPrayerTime, setNextPrayerTime] = useState("");
@@ -39,29 +47,41 @@ export const MiniSalahWidget = () => {
     : "Fajr";
 
   useEffect(() => {
-    if (selectedLocation) {
-      // If a location is already selected, use it and skip geolocation
-      setCoordinates(selectedLocation.lat, selectedLocation.lng);
-      fetchCityName(selectedLocation.lat, selectedLocation.lng);
+    console.log("useEffect", { loading, latitude, longitude, error, selectedLocation });
+    if (selectedLocation?.city) {
+      console.log("using selected location:", { prayerTimes, meta, selectedLocation });
       calculatePrayerTimes();
-      setRetry(false);
       return;
     }
-    if (!loading && !error && latitude && longitude) {
-      // Use geolocation if no location is selected
+
+    if (!loading && !error && !selectedLocation?.city && latitude && longitude) {
+      console.log("using geolocation:", { prayerTimes, meta, selectedLocation });
       setCoordinates(latitude.toString(), longitude.toString());
-      fetchCityName(latitude.toString(), longitude.toString());
+      // fetchCityName(latitude.toString(), longitude.toString());
       calculatePrayerTimes();
       setRetry(false);
       return;
     }
+
     if (error) {
       console.error("Error fetching location:", error);
       if (error.code === error.PERMISSION_DENIED) {
         setRetry(true);
       }
     }
-  }, [loading, latitude, longitude, error, setCoordinates, fetchCityName, calculatePrayerTimes, selectedLocation]);
+  }, [
+    loading,
+    latitude,
+    longitude,
+    error,
+    setCoordinates,
+    fetchCityName,
+    calculatePrayerTimes,
+    selectedLocation,
+    currentLatitude,
+    prayerTimes,
+    meta,
+  ]);
 
   useEffect(() => {
     if (!(prayerTimes && meta)) {
@@ -90,11 +110,14 @@ export const MiniSalahWidget = () => {
           const progressPercentage = (elapsedDuration / totalDuration) * 100;
           setProgress(progressPercentage);
 
-          // Play Adhan and show notification if enabled and not already played and time is within 1 minute
-          if (playAdhan && adhanAudioRef.current && !isAdhanPlayed(prayers[i].name) && progressPercentage > 99) {
+          // Play Adhan and show notification if enabled and not already played
+          if (
+            playAdhan && adhanAudioRef.current && !isAdhanPlayed(prayers[i].name)
+            && now.isSame(prayers[i].time, "minute")
+          ) {
             adhanAudioRef.current.play();
-            showNotification(prayers[i].name); // Show notification
-            markAdhanAsPlayed(prayers[i].name); // Mark Adhan as played
+            showNotification(prayerTimes.nextPrayer()); // Show notification
+            markAdhanAsPlayed(prayerTimes.nextPrayer()); // Mark Adhan as played
           }
 
           break;
@@ -137,6 +160,27 @@ export const MiniSalahWidget = () => {
       });
     }
   }, []);
+
+  useEffect(() => {
+    if (!(adhanAudioRef.current && navigator.mediaSession)) {
+      return;
+    }
+    navigator.mediaSession.setActionHandler("play", () => {
+      adhanAudioRef.current?.play();
+    });
+
+    navigator.mediaSession.setActionHandler("pause", () => {
+      adhanAudioRef.current?.pause();
+    });
+
+    adhanAudioRef.current.addEventListener("play", () => {
+      navigator.mediaSession.playbackState = "playing";
+    });
+
+    adhanAudioRef.current.addEventListener("pause", () => {
+      navigator.mediaSession.playbackState = "paused";
+    });
+  }, [adhanAudioRef]);
 
   if (loading && !selectedLocation) {
     return (
@@ -187,7 +231,7 @@ export const MiniSalahWidget = () => {
           </div>
         </div>
       </div>
-      <audio ref={adhanAudioRef} src="/azan1.mp3" />
+      <audio ref={adhanAudioRef} src="/path/to/adhan.mp3" />
     </Link>
   );
 };

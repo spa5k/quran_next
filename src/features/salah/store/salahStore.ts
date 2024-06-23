@@ -52,16 +52,16 @@ interface LocationState {
   meta: Meta | null;
   prayerTimes: PrayerTimes | null;
   madhab: "shafi" | "hanafi";
-  playAdhan: boolean; // Add playAdhan state
+  playAdhan: boolean;
   setLocationInput: (input: string) => void;
-  fetchLocations: () => Promise<void>;
+  fetchLocation: () => Promise<void>;
   setSelectedLocation: (location: Location) => void;
   fetchMeta: () => Promise<void>;
   calculatePrayerTimes: () => void;
   setMadhab: (madhab: "shafi" | "hanafi") => void;
   setCoordinates: (latitude: string, longitude: string) => void;
   fetchCityName: (latitude: string, longitude: string) => void;
-  toggleAdhan: (playAdhan: boolean) => void; // Add toggleAdhan function
+  toggleAdhan: () => void;
 }
 
 export const useLocationStore = create<LocationState>()(
@@ -77,12 +77,8 @@ export const useLocationStore = create<LocationState>()(
       prayerTimes: null,
       madhab: "shafi",
       playAdhan: true,
-      setCoordinates(latitude, longitude) {
-        set({ latitude, longitude });
-        get().fetchMeta();
-      },
       setLocationInput: (input) => set({ locationInput: input }),
-      fetchLocations: async () => {
+      fetchLocation: async () => {
         const { locationInput } = get();
         try {
           const response = await fetch(
@@ -95,13 +91,19 @@ export const useLocationStore = create<LocationState>()(
           );
           const data = await response.json();
           if (data.success) {
-            set({ locations: data.result });
+            set({
+              selectedLocation: data.result[0],
+              cityName: data.result[0].name,
+              latitude: data.result[0].lat,
+              longitude: data.result[0].lng,
+            });
           }
         } catch (error) {
           console.error("Error fetching locations:", error);
         }
       },
       setSelectedLocation: (location) => {
+        console.log(location);
         set({
           selectedLocation: location,
           latitude: location.lat,
@@ -118,9 +120,7 @@ export const useLocationStore = create<LocationState>()(
           );
           const data = await response.json();
           if (data.code === 200) {
-            set({
-              meta: data.data[0].meta,
-            });
+            set({ meta: data.data[0].meta });
             get().calculatePrayerTimes();
           }
         } catch (error) {
@@ -129,25 +129,27 @@ export const useLocationStore = create<LocationState>()(
       },
       calculatePrayerTimes: () => {
         const { meta, madhab } = get();
-        if (!meta) {
-          return;
-        }
+        if (!meta) return;
+
         const coordinates = new Coordinates(meta.latitude, meta.longitude);
         const params = getCalculationMethod(meta.method.name);
         params.fajrAngle = meta.method.params.Fajr;
         params.ishaAngle = meta.method.params.Isha;
         params.madhab = madhab === "shafi" ? Madhab.Shafi : Madhab.Hanafi;
-        const date = new Date();
-        const prayerTimes = new PrayerTimes(coordinates, date, params);
+
+        const prayerTimes = new PrayerTimes(coordinates, new Date(), params);
         set({ prayerTimes });
 
-        // fetch city
         get().fetchCityName(
           meta.latitude.toString(),
           meta.longitude.toString(),
         );
       },
       setMadhab: (madhab) => set({ madhab }),
+      setCoordinates: (latitude, longitude) => {
+        set({ latitude, longitude });
+        get().fetchMeta();
+      },
       fetchCityName: async (latitude: string, longitude: string) => {
         try {
           const response = await fetch(
@@ -155,18 +157,17 @@ export const useLocationStore = create<LocationState>()(
           );
           const data = await response.json();
           if (data.city) {
-            set({ cityName: data.city });
-            set({ locationInput: data.city });
+            set({ cityName: data.city, locationInput: data.city });
           }
         } catch (error) {
           console.error("Error fetching city name:", error);
         }
       },
-      toggleAdhan: (playAdhan) => set({ playAdhan }), // Add toggleAdhan function
+      toggleAdhan: () => set((state) => ({ playAdhan: !state.playAdhan })),
     }),
     {
-      name: "location-storage", // unique name
-      storage: createJSONStorage(() => localStorage), // using localStorage for persistence
+      name: "location-storage",
+      storage: createJSONStorage(() => localStorage),
     },
   ),
 );

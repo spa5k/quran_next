@@ -33,7 +33,7 @@ export const SalahSettingsDialog = () => {
     longitude,
     meta,
     setLocationInput,
-    fetchLocations,
+    fetchLocation: fetchLocations,
     setSelectedLocation,
     prayerTimes,
     madhab,
@@ -86,9 +86,31 @@ export const SalahSettingsDialog = () => {
   };
 
   const handleLocationSelect = (location: Location) => {
+    console.log(location);
     setSelectedLocation(location);
     setLocationSelected(true);
   };
+
+  useEffect(() => {
+    if (!(adhanAudioRef.current && navigator.mediaSession)) {
+      return;
+    }
+    navigator.mediaSession.setActionHandler("play", () => {
+      adhanAudioRef.current?.play();
+    });
+
+    navigator.mediaSession.setActionHandler("pause", () => {
+      adhanAudioRef.current?.pause();
+    });
+
+    adhanAudioRef.current.addEventListener("play", () => {
+      navigator.mediaSession.playbackState = "playing";
+    });
+
+    adhanAudioRef.current.addEventListener("pause", () => {
+      navigator.mediaSession.playbackState = "paused";
+    });
+  }, [adhanAudioRef]);
 
   const showNotification = (prayerName: string) => {
     if (Notification.permission === "granted") {
@@ -107,7 +129,6 @@ export const SalahSettingsDialog = () => {
         setIsPlaying(false);
       } else {
         adhanAudioRef.current.play();
-        // send notification to user that adhan is playing
         showNotification(prayerTimes?.currentPrayer() || "Fajr");
         setIsPlaying(true);
       }
@@ -149,9 +170,10 @@ export const SalahSettingsDialog = () => {
                   value={locationInput}
                   onChange={(e) => setLocationInput(e.target.value)}
                 />
-                <Button onClick={handleFetchLocations}>Fetch Locations</Button>
+                <Button onClick={handleFetchLocations}>Fetch Location</Button>
               </div>
-              {hasSearched && locations.length > 0 && !locationSelected && (
+              {
+                /* {locations.length > 0 && !locationSelected && (
                 <>
                   <Label htmlFor="location">Select Location</Label>
                   <Select
@@ -180,7 +202,8 @@ export const SalahSettingsDialog = () => {
                     </SelectContent>
                   </Select>
                 </>
-              )}
+              )} */
+              }
               <Label htmlFor="playAdhan">Play Adhan</Label>
               <div className="flex justify-between items-center">
                 <Switch
