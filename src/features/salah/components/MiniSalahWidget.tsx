@@ -106,7 +106,7 @@ export const MiniSalahWidget = () => {
     if (Notification.permission === "granted") {
       new Notification("Prayer Time", {
         body: `It's time for ${prayerName} prayer.`,
-        icon: "/path/to/icon.png", // Replace with your icon path
+        icon: "/aqsa.jpg", // Replace with your icon path
       });
     }
   };

@@ -1,11 +1,4 @@
-import {
-  CalculationMethod,
-  Coordinates,
-  Madhab,
-  PrayerTimes,
-  SunnahTimes,
-  type CalculationParameters,
-} from "adhan";
+import { CalculationMethod, type CalculationParameters, Coordinates, Madhab, PrayerTimes, SunnahTimes } from "adhan";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -97,7 +90,7 @@ export const useLocationStore = create<LocationState>()(
               headers: {
                 "X-Custom-Header": "your-random-value",
               },
-            }
+            },
           );
           const data = await response.json();
           if (data.success) {
@@ -106,7 +99,7 @@ export const useLocationStore = create<LocationState>()(
             try {
               cityName = await get().fetchCityName(
                 data.result[0].lat,
-                data.result[0].lng
+                data.result[0].lng,
               );
             } catch (error) {
               console.error("Error fetching city name:", error);
@@ -127,7 +120,7 @@ export const useLocationStore = create<LocationState>()(
         const { latitude, longitude } = get();
         try {
           const response = await fetch(
-            `https://api.aladhan.com/v1/calendar/2024/6?latitude=${latitude}&longitude=${longitude}`
+            `https://api.aladhan.com/v1/calendar/2024/6?latitude=${latitude}&longitude=${longitude}`,
           );
           const data = await response.json();
           if (data.code === 200) {
@@ -156,8 +149,7 @@ export const useLocationStore = create<LocationState>()(
       },
       setMadhab: (madhab) => set({ madhab }),
       setCoordinates: (latitude, longitude) => {
-        const { latitude: currentLatitude, longitude: currentLongitude } =
-          get();
+        const { latitude: currentLatitude, longitude: currentLongitude } = get();
         if (!(latitude !== currentLatitude || longitude !== currentLongitude)) {
           return;
         }
@@ -167,11 +159,11 @@ export const useLocationStore = create<LocationState>()(
       },
       fetchCityName: async (
         latitude: string,
-        longitude: string
+        longitude: string,
       ): Promise<string> => {
         try {
           const response = await fetch(
-            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
           );
           const data = await response.json();
           if (data.city) {
@@ -190,8 +182,8 @@ export const useLocationStore = create<LocationState>()(
       onRehydrateStorage: () => (state) => {
         state!.rehydrated = true;
       },
-    }
-  )
+    },
+  ),
 );
 
 const getCalculationMethod = (methodName: string): CalculationParameters => {

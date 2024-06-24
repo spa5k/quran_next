@@ -100,11 +100,12 @@ export const SalahSettingsDialog = () => {
     });
   }, [adhanAudioRef]);
 
-  const showNotification = (prayerName: string) => {
+  const showNotification = (prayerName?: string) => {
     if (Notification.permission === "granted") {
       new Notification("Prayer Time", {
-        body: `It's time for ${prayerName} prayer.`,
-        icon: "/path/to/icon.png", // Replace with your icon path
+        body: `It's time for ${prayerName ?? ""} prayer.`,
+        icon: "/aqsa.jpg",
+        badge: "/aqsa.jpg",
       });
     }
   };
@@ -117,7 +118,12 @@ export const SalahSettingsDialog = () => {
         setIsPlaying(false);
       } else {
         adhanAudioRef.current.play();
-        showNotification(prayerTimes?.currentPrayer() || "Fajr");
+        if (prayerTimes?.currentPrayer) {
+          showNotification(prayerTimes.currentPrayer());
+        } else {
+          console.error("Prayer times are not available");
+          showNotification();
+        }
         setIsPlaying(true);
       }
     }
