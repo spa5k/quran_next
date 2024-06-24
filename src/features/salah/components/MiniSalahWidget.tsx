@@ -171,15 +171,25 @@ export const MiniSalahWidget = () => {
     );
   }
 
-  if (retry && !longitude) {
+  if (retry) {
     return (
       <div className="flex items-center justify-center">
         <Button
           onClick={() => setRetry(false)}
-          className="px-4 py-2 bg-blue-500 text-white rounded-md"
+          className="px-4 py-2"
         >
-          Manually add location
+          Add location
         </Button>
+      </div>
+    );
+  }
+
+  if (!longitude || !latitude || !prayerTimes) {
+    return (
+      <div className="flex items-center justify-center">
+        <Link href={"/salah"} prefetch={false}>
+          <Button className="px-4 py- rounded-md">Add location</Button>
+        </Link>
       </div>
     );
   }
