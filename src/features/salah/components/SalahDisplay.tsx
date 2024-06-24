@@ -94,8 +94,7 @@ export function SalahDisplay() {
         </Highlight>
         <br />
         <br />
-
-        {`Today's Prayer Times for`} <Highlight>{cityName}</Highlight>
+        {`Today's Prayer Times`} {cityName ? <Highlight>for {cityName}</Highlight> : null}
       </motion.h1>
       <div className="flex gap-4 flex-col justify-center mt-20">
         <SalahTimesDisplay meta={meta} prayerTimes={prayerTimes} />

@@ -18,12 +18,12 @@ export const MiniSalahWidget = () => {
     prayerTimes,
     meta,
     setCoordinates,
-    fetchCityName,
     calculatePrayerTimes,
     playAdhan,
     selectedLocation,
     latitude: currentLatitude,
     rehydrated,
+    sunnahTimes,
   } = useLocationStore();
   const [currentPrayer, setCurrentPrayer] = useState("");
   const [currentPrayerTime, setCurrentPrayerTime] = useState("");
@@ -36,7 +36,6 @@ export const MiniSalahWidget = () => {
     loading,
     latitude,
     longitude,
-    error,
   } = useGeolocation({
     enableHighAccuracy: true,
     timeout: 10_000,
@@ -53,6 +52,7 @@ export const MiniSalahWidget = () => {
     }
     const calculateCurrentPrayer = () => {
       const now = dayjs().tz(meta.timezone);
+
       const prayers = [
         { name: "Fajr", time: dayjs(prayerTimes.fajr).tz(meta.timezone) },
         { name: "Sunrise", time: dayjs(prayerTimes.sunrise).tz(meta.timezone) },
@@ -61,6 +61,13 @@ export const MiniSalahWidget = () => {
         { name: "Maghrib", time: dayjs(prayerTimes.maghrib).tz(meta.timezone) },
         { name: "Isha", time: dayjs(prayerTimes.isha).tz(meta.timezone) },
       ];
+
+      if (sunnahTimes) {
+        prayers.push(
+          { name: "Last Third of the Night", time: dayjs(sunnahTimes.lastThirdOfTheNight).tz(meta.timezone) },
+          { name: "Midnight", time: dayjs(sunnahTimes.middleOfTheNight).tz(meta.timezone) },
+        );
+      }
 
       for (let i = prayers.length - 1; i >= 0; i--) {
         if (now.isAfter(prayers[i].time)) {
@@ -93,7 +100,7 @@ export const MiniSalahWidget = () => {
     const interval = setInterval(calculateCurrentPrayer, 60_000); // Update every minute
 
     return () => clearInterval(interval);
-  }, [prayerTimes, meta, playAdhan]);
+  }, [prayerTimes, meta, playAdhan, sunnahTimes]);
 
   const showNotification = (prayerName: string) => {
     if (Notification.permission === "granted") {
@@ -145,6 +152,16 @@ export const MiniSalahWidget = () => {
       navigator.mediaSession.playbackState = "paused";
     });
   }, [adhanAudioRef]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // if location permission is granted, and the state is rehydrated, and the latitude/longitude from state is null, then fetch the geocoordinates
+      if (!loading && latitude && longitude && rehydrated && !currentLatitude) {
+        setCoordinates(latitude.toString(), longitude.toString());
+        calculatePrayerTimes();
+      }
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [loading, latitude, longitude, rehydrated, currentLatitude]);
 
   if (loading && !selectedLocation) {
     return (
@@ -154,12 +171,6 @@ export const MiniSalahWidget = () => {
     );
   }
 
-  // if location permission is granted, and the state is rehydrated, and the latitude/longitude from state is null, then fetch the geocoordinates
-  if (latitude && longitude && rehydrated && !currentLatitude) {
-    setCoordinates(latitude.toString(), longitude.toString());
-    calculatePrayerTimes();
-  }
-
   if (retry && !longitude) {
     return (
       <div className="flex items-center justify-center">
@@ -167,7 +178,7 @@ export const MiniSalahWidget = () => {
           onClick={() => setRetry(false)}
           className="px-4 py-2 bg-blue-500 text-white rounded-md"
         >
-          Retry for location
+          Manually add location
         </Button>
       </div>
     );
@@ -191,17 +202,19 @@ export const MiniSalahWidget = () => {
           />
           <div className="relative z-10 text-center flex items-center justify-between p-2">
             <div className="flex text-center items-center gap-4">
-              <p className="text-sm font-bold sm:text-xl">{currentPrayer}</p>
+              <p className="text-sm font-bold sm:text-xl">
+                {currentPrayer.charAt(0).toUpperCase() + currentPrayer.slice(1)}
+              </p>
               <p className="hidden sm:flex">{currentPrayerTime}</p>
             </div>
             <div className="flex text-center items-center gap-4">
-              <p className="text-sm font-bold sm:text-xl">{nextPrayer}</p>
+              <p className="text-sm font-bold sm:text-xl">{nextPrayer.charAt(0).toUpperCase() + nextPrayer.slice(1)}</p>
               <p className="hidden sm:flex">{nextPrayerTime}</p>
             </div>
           </div>
         </div>
       </div>
-      <audio ref={adhanAudioRef} src="/path/to/adhan.mp3" />
+      <audio ref={adhanAudioRef} src="/adhan1.mp3" />
     </Link>
   );
 };

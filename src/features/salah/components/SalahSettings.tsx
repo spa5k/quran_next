@@ -19,7 +19,7 @@ import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import { Pause, PencilIcon, Play, SettingsIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Location, useLocationStore } from "../store/salahStore";
+import { useLocationStore } from "../store/salahStore";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -32,7 +32,6 @@ export const SalahSettingsDialog = () => {
     meta,
     setLocationInput,
     fetchLocations,
-    setSelectedLocation,
     prayerTimes,
     madhab,
     setMadhab,
@@ -78,11 +77,6 @@ export const SalahSettingsDialog = () => {
     } else {
       console.error("Geolocation is not supported by this browser.");
     }
-  };
-
-  const handleLocationSelect = (location: Location) => {
-    console.log(location);
-    setSelectedLocation(location);
   };
 
   useEffect(() => {

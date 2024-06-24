@@ -3,6 +3,7 @@ import {
   Coordinates,
   Madhab,
   PrayerTimes,
+  SunnahTimes,
   type CalculationParameters,
 } from "adhan";
 import { create } from "zustand";
@@ -57,17 +58,17 @@ interface LocationState {
   longitude: string;
   meta: Meta | null;
   prayerTimes: PrayerTimes | null;
+  sunnahTimes: SunnahTimes | null;
   madhab: "shafi" | "hanafi";
   playAdhan: boolean;
-  rehydrated: boolean; // Add rehydrated state
+  rehydrated: boolean;
   setLocationInput: (input: string) => void;
   fetchLocations: () => Promise<void>;
-  setSelectedLocation: (location: Location) => void;
   fetchMeta: () => Promise<void>;
   calculatePrayerTimes: () => void;
   setMadhab: (madhab: "shafi" | "hanafi") => void;
   setCoordinates: (latitude: string, longitude: string) => void;
-  fetchCityName: (latitude: string, longitude: string) => void;
+  fetchCityName: (latitude: string, longitude: string) => Promise<string>;
   toggleAdhan: () => void;
 }
 
@@ -84,6 +85,7 @@ export const useLocationStore = create<LocationState>()(
       prayerTimes: null,
       madhab: "shafi",
       playAdhan: true,
+      sunnahTimes: null,
       rehydrated: false, // Initialize rehydrated state
       setLocationInput: (input) => set({ locationInput: input }),
       fetchLocations: async () => {
@@ -99,9 +101,20 @@ export const useLocationStore = create<LocationState>()(
           );
           const data = await response.json();
           if (data.success) {
+            let cityName = data.result[0].name;
+
+            try {
+              cityName = await get().fetchCityName(
+                data.result[0].lat,
+                data.result[0].lng
+              );
+            } catch (error) {
+              console.error("Error fetching city name:", error);
+            }
+
             set({
               selectedLocation: data.result[0],
-              cityName: data.result[0].name,
+              cityName,
               latitude: data.result[0].lat,
               longitude: data.result[0].lng,
             });
@@ -109,15 +122,6 @@ export const useLocationStore = create<LocationState>()(
         } catch (error) {
           console.error("Error fetching locations:", error);
         }
-      },
-      setSelectedLocation: (location) => {
-        set({
-          selectedLocation: location,
-          latitude: location.lat,
-          longitude: location.lng,
-        });
-        get().fetchCityName(location.lat, location.lng);
-        get().fetchMeta();
       },
       fetchMeta: async () => {
         const { latitude, longitude } = get();
@@ -145,33 +149,37 @@ export const useLocationStore = create<LocationState>()(
         params.madhab = madhab === "shafi" ? Madhab.Shafi : Madhab.Hanafi;
 
         const prayerTimes = new PrayerTimes(coordinates, new Date(), params);
-        set({ prayerTimes });
 
-        get().fetchCityName(
-          meta.latitude.toString(),
-          meta.longitude.toString()
-        );
+        const sunnahTimes = new SunnahTimes(prayerTimes);
+
+        set({ prayerTimes, sunnahTimes });
       },
       setMadhab: (madhab) => set({ madhab }),
       setCoordinates: (latitude, longitude) => {
         const { latitude: currentLatitude, longitude: currentLongitude } =
           get();
-        if (latitude !== currentLatitude || longitude !== currentLongitude) {
-          set({ latitude, longitude });
-          get().fetchMeta();
+        if (!(latitude !== currentLatitude || longitude !== currentLongitude)) {
+          return;
         }
+        set({ latitude, longitude });
+        get().calculatePrayerTimes();
+        get().fetchMeta();
       },
-      fetchCityName: async (latitude: string, longitude: string) => {
+      fetchCityName: async (
+        latitude: string,
+        longitude: string
+      ): Promise<string> => {
         try {
           const response = await fetch(
             `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
           );
           const data = await response.json();
           if (data.city) {
-            set({ cityName: data.city, locationInput: data.city });
+            return data.city as string;
           }
+          throw new Error("City name not found");
         } catch (error) {
-          console.error("Error fetching city name:", error);
+          throw new Error("Error fetching city name");
         }
       },
       toggleAdhan: () => set((state) => ({ playAdhan: !state.playAdhan })),
