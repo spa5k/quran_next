@@ -18,7 +18,7 @@ import { useGeolocation } from "@uidotdev/usehooks";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
-import { Pause, PencilIcon, Play, Search, SettingsIcon } from "lucide-react";
+import { Copy, Pause, PencilIcon, Play, Search, SettingsIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocationStore } from "../store/salahStore";
 
@@ -151,13 +151,13 @@ export const SalahSettingsDialog = () => {
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">Prayer Time Settings</DialogTitle>
         </DialogHeader>
-        <Tabs defaultValue="settings" className="w-full">
-          <TabsList className="flex justify-around">
+        <Tabs defaultValue="settings" className="w-[450px]">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="settings">Settings</TabsTrigger>
             <TabsTrigger value="meta">Meta</TabsTrigger>
           </TabsList>
           <TabsContent value="settings">
-            <div className="grid gap-4 p-4">
+            <div className="grid gap-4 p-4 w-full">
               <div className="space-y-2 mb-3">
                 <Label htmlFor="location">Location</Label>
                 <div className="flex items-center justify-between">
@@ -262,11 +262,19 @@ export const SalahSettingsDialog = () => {
           </TabsContent>
           <TabsContent value="meta">
             {meta && (
-              <Card className="w-full overflow-auto">
+              <Card className="h-[600px] overflow-scroll">
                 <CardHeader className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-2">
                   Metadata
+                  <Button
+                    onClick={() => {
+                      navigator.clipboard.writeText(JSON.stringify(meta, null, 2));
+                    }}
+                    size="icon"
+                  >
+                    <Copy />
+                  </Button>
                 </CardHeader>
-                <CardContent className="overflow-auto w-full">
+                <CardContent className="overflow-auto ">
                   <pre className="text-gray-800 dark:text-gray-200">
                   {JSON.stringify(meta, null, 2)}
                   </pre>
