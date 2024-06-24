@@ -229,20 +229,20 @@ export const MiniSalahWidget = () => {
       <div className="flex items-center justify-center w-full ">
         <div className="relative w-full bg-gray-200 rounded-md overflow-hidden">
           <motion.div
-            className="absolute top-0 left-0 h-full bg-gradient-to-r from-green-200 to-green-400"
+            className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary to-green-400"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 1, ease: "easeInOut" }}
           />
           <motion.div
-            className="absolute top-0 left-0 h-full bg-gradient-to-r from-green-200 to-green-400 opacity-50"
+            className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary to-green-400 opacity-50"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ repeat: Infinity, duration: 5, ease: "anticipate" }}
           />
           <div className="relative z-10 text-center flex items-center justify-between p-2">
             <div className="flex text-center items-center gap-4">
-              <p className="text-sm font-bold sm:text-xl">
+              <p className="text-sm font-bold sm:text-xl ">
                 {currentPrayer.charAt(0).toUpperCase() + currentPrayer.slice(1)}
               </p>
               <p className="hidden sm:flex">{currentPrayerTime}</p>
