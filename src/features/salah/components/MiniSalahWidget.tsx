@@ -42,10 +42,6 @@ export const MiniSalahWidget = () => {
     maximumAge: 0,
   });
 
-  const nextPrayer = prayerTimes?.nextPrayer && typeof prayerTimes.nextPrayer === "function"
-    ? prayerTimes.nextPrayer() === "none" ? "Fajr" : prayerTimes.nextPrayer()
-    : "Fajr";
-
   useEffect(() => {
     if (!(prayerTimes && meta)) {
       return;
@@ -87,8 +83,8 @@ export const MiniSalahWidget = () => {
             && now.isSame(prayers[i].time, "minute")
           ) {
             adhanAudioRef.current.play();
-            showNotification(prayerTimes.nextPrayer()); // Show notification
-            markAdhanAsPlayed(prayerTimes.nextPrayer()); // Mark Adhan as played
+            showNotification(nextPrayer.name); // Show notification
+            markAdhanAsPlayed(nextPrayer.name); // Mark Adhan as played
           }
 
           break;
@@ -152,6 +148,7 @@ export const MiniSalahWidget = () => {
       navigator.mediaSession.playbackState = "paused";
     });
   }, [adhanAudioRef]);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       // if location permission is granted, and the state is rehydrated, and the latitude/longitude from state is null, then fetch the geocoordinates
@@ -162,6 +159,37 @@ export const MiniSalahWidget = () => {
     }, 3000);
     return () => clearTimeout(timer);
   }, [loading, latitude, longitude, rehydrated, currentLatitude]);
+
+  const getNextPrayer = () => {
+    if (!prayerTimes || !meta) {
+      return "";
+    }
+
+    const now = dayjs().tz(meta.timezone);
+    const prayers = [
+      { name: "Fajr", time: dayjs(prayerTimes.fajr).tz(meta.timezone) },
+      { name: "Sunrise", time: dayjs(prayerTimes.sunrise).tz(meta.timezone) },
+      { name: "Dhuhr", time: dayjs(prayerTimes.dhuhr).tz(meta.timezone) },
+      { name: "Asr", time: dayjs(prayerTimes.asr).tz(meta.timezone) },
+      { name: "Maghrib", time: dayjs(prayerTimes.maghrib).tz(meta.timezone) },
+      { name: "Isha", time: dayjs(prayerTimes.isha).tz(meta.timezone) },
+    ];
+
+    if (sunnahTimes) {
+      prayers.push(
+        { name: "Last Third of the Night", time: dayjs(sunnahTimes.lastThirdOfTheNight).tz(meta.timezone) },
+        { name: "Midnight", time: dayjs(sunnahTimes.middleOfTheNight).tz(meta.timezone) },
+      );
+    }
+
+    for (let i = 0; i < prayers.length; i++) {
+      if (now.isBefore(prayers[i].time)) {
+        return prayers[i].name;
+      }
+    }
+
+    return prayers[0].name; // Return the first prayer if all have passed
+  };
 
   if (loading && !selectedLocation) {
     return (
@@ -184,7 +212,7 @@ export const MiniSalahWidget = () => {
     );
   }
 
-  if (!longitude || !latitude || !prayerTimes) {
+  if (!prayerTimes && (!longitude || !latitude)) {
     return (
       <div className="flex items-center justify-center">
         <Link href={"/salah"} prefetch={false}>
@@ -193,6 +221,8 @@ export const MiniSalahWidget = () => {
       </div>
     );
   }
+
+  const nextPrayer = getNextPrayer();
 
   return (
     <Link href={"/salah"} prefetch={false}>

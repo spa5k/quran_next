@@ -111,6 +111,10 @@ export const useLocationStore = create<LocationState>()(
               latitude: data.result[0].lat,
               longitude: data.result[0].lng,
             });
+
+            get().fetchMeta();
+
+            get().calculatePrayerTimes();
           }
         } catch (error) {
           console.error("Error fetching locations:", error);

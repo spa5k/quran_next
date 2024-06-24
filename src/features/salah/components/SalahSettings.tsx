@@ -14,10 +14,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useGeolocation } from "@uidotdev/usehooks";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
-import { Pause, PencilIcon, Play, SettingsIcon } from "lucide-react";
+import { Pause, PencilIcon, Play, Search, SettingsIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocationStore } from "../store/salahStore";
 
@@ -47,6 +48,8 @@ export const SalahSettingsDialog = () => {
   const [tempLongitude, setTempLongitude] = useState(longitude);
   const [isPlaying, setIsPlaying] = useState(false); // Track if Adhan is playing
   const adhanAudioRef = useRef<HTMLAudioElement>(null);
+
+  const { error } = useGeolocation({ enableHighAccuracy: true, timeout: 10_000, maximumAge: 1_000_000 });
 
   useEffect(() => {
     setTempLatitude(latitude);
@@ -136,67 +139,81 @@ export const SalahSettingsDialog = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>
-          Salah Settings
-          <SettingsIcon className="h-6 w-6 ml-4" />
+        <Button className="flex items-center">
+          {locationInput ? "Edit Location" : "Add Location"}
+          <SettingsIcon className="h-6 w-6 ml-2" />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-lg w-full">
         <DialogDescription className="sr-only">
           Prayer Time Settings
         </DialogDescription>
         <DialogHeader>
-          <DialogTitle className="dialog-description">Prayer Time Settings</DialogTitle>
+          <DialogTitle className="text-lg font-semibold">Prayer Time Settings</DialogTitle>
         </DialogHeader>
         <Tabs defaultValue="settings" className="w-full">
-          <TabsList>
+          <TabsList className="flex justify-around">
             <TabsTrigger value="settings">Settings</TabsTrigger>
             <TabsTrigger value="meta">Meta</TabsTrigger>
           </TabsList>
           <TabsContent value="settings">
             <div className="grid gap-4 p-4">
-              <div className="space-y-2">
+              <div className="space-y-2 mb-3">
                 <Label htmlFor="location">Location</Label>
-                <Input
-                  id="location"
-                  placeholder="Enter location"
-                  value={locationInput}
-                  onChange={(e) => setLocationInput(e.target.value)}
-                />
-                <Button onClick={handleFetchLocations}>Fetch Location</Button>
+                <div className="flex items-center justify-between">
+                  <Input
+                    id="location"
+                    placeholder="Search for your city"
+                    value={locationInput}
+                    onChange={(e) => setLocationInput(e.target.value)}
+                    className="flex-grow mr-2"
+                  />
+                  <Button onClick={handleFetchLocations} size="icon">
+                    <Search className="h-5 w-20" />
+                  </Button>
+                </div>
               </div>
 
-              <Label htmlFor="playAdhan">Play Adhan</Label>
               <div className="flex justify-between items-center">
-                <Switch
-                  id="playAdhan"
-                  checked={playAdhan}
-                  onCheckedChange={toggleAdhan}
-                />
+                <Label htmlFor="playAdhan">Play Adhan</Label>
+                <div className="flex justify-between items-center">
+                  <Switch
+                    id="playAdhan"
+                    checked={playAdhan}
+                    onCheckedChange={toggleAdhan}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <Label htmlFor="adhan">Adhan</Label>
                 <Button onClick={handlePlayPauseAdhan} size="icon">
-                  {isPlaying ? <Pause /> : <Play />}
+                  {isPlaying ? <Pause className="h-5 w-20" /> : <Play className="h-5 w-20" />}
                 </Button>
               </div>
 
-              <Label htmlFor="madhab">Madhab</Label>
-              <Select
-                defaultValue={madhab}
-                onValueChange={(value) => {
-                  if (value === "shafi" || value === "hanafi") {
-                    setMadhab(value);
-                    calculatePrayerTimes();
-                  }
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Madhab" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="hanafi">Hanafi</SelectItem>
-                  <SelectItem value="shafi">Shafi</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="space-y-2">
+              <div className="space-y-2 mb-3">
+                <Label htmlFor="madhab">Madhab</Label>
+                <Select
+                  defaultValue={madhab}
+                  onValueChange={(value) => {
+                    if (value === "shafi" || value === "hanafi") {
+                      setMadhab(value);
+                      calculatePrayerTimes();
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Madhab" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="hanafi">Hanafi</SelectItem>
+                    <SelectItem value="shafi">Shafi</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2 mb-3">
                 <Label htmlFor="latitude">Latitude</Label>
                 <div className="flex items-center">
                   <Input
@@ -207,13 +224,15 @@ export const SalahSettingsDialog = () => {
                     onChange={(e) => setTempLatitude(e.target.value)}
                     readOnly={!isEditing}
                     disabled={!isEditing}
+                    className="flex-grow mr-2"
                   />
                   <Button variant="ghost" size="icon" onClick={() => setIsEditing(!isEditing)}>
                     <PencilIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                   </Button>
                 </div>
               </div>
-              <div className="space-y-2">
+
+              <div className="space-y-2 mb-3">
                 <Label htmlFor="longitude">Longitude</Label>
                 <div className="flex items-center">
                   <Input
@@ -224,14 +243,18 @@ export const SalahSettingsDialog = () => {
                     onChange={(e) => setTempLongitude(e.target.value)}
                     readOnly={!isEditing}
                     disabled={!isEditing}
+                    className="flex-grow mr-2"
                   />
                   <Button variant="ghost" size="icon" onClick={() => setIsEditing(!isEditing)}>
                     <PencilIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                   </Button>
                 </div>
               </div>
+
               {isEditing && <Button onClick={handleUpdatePrayerTimes}>Update Prayer Times</Button>}
-              <Button onClick={handleFetchLocation}>Use My Location</Button>
+              <Button onClick={handleFetchLocation}>
+                {error ? "Location Denied" : "Use My Location"}
+              </Button>
               <DialogFooter className="text-muted-foreground text-sm">
                 Changes are automatically saved
               </DialogFooter>
@@ -239,13 +262,13 @@ export const SalahSettingsDialog = () => {
           </TabsContent>
           <TabsContent value="meta">
             {meta && (
-              <Card className="w-[450px] overflow-auto">
+              <Card className="w-full overflow-auto">
                 <CardHeader className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-2">
                   Metadata
                 </CardHeader>
                 <CardContent className="overflow-auto w-full">
                   <pre className="text-gray-800 dark:text-gray-200">
-                    {JSON.stringify(meta, null, 2)}
+                  {JSON.stringify(meta, null, 2)}
                   </pre>
                 </CardContent>
               </Card>

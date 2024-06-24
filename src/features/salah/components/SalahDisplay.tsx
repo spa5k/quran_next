@@ -1,5 +1,6 @@
 "use client";
 
+import { Spinner } from "@/components/icons/spinner";
 import { Highlight } from "@/components/ui/hero-highlight";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
@@ -24,6 +25,7 @@ export function SalahDisplay() {
   } = useLocationStore();
 
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>();
 
   useEffect(() => {
     const triggerGeolocation = () => {
@@ -38,13 +40,15 @@ export function SalahDisplay() {
           },
           (error) => {
             console.error("Error fetching location:", error);
+            setError("Cannot get your location. Please add your location.");
             setLoading(false);
           },
         );
-      } else {
-        console.error("Geolocation is not supported by this browser.");
-        setLoading(false);
+        return;
       }
+      console.error("Geolocation is not supported by this browser.");
+      setError("Cannot get your location. Please add your location.");
+      setLoading(false);
     };
 
     if (!meta || !meta.latitude || !meta.longitude) {
@@ -54,18 +58,19 @@ export function SalahDisplay() {
     }
   }, [meta, setCoordinates, fetchCityName, calculatePrayerTimes]);
 
-  if (loading) {
+  if (loading || (error && !prayerTimes)) {
     return (
       <main className="flex flex-col items-center h-full">
-        <div className="text-center text-lg">Loading...</div>
+        <Spinner />
+        <div className="text-center text-lg mt-4">{loading ? "Loading..." : error}</div>
       </main>
     );
   }
 
-  if (!prayerTimes || !meta) {
+  if (!meta || !prayerTimes) {
     return (
-      <main className="flex flex-col items-center h-full">
-        <div className="text-center text-lg">Unable to fetch prayer times. Please update your location.</div>
+      <main className="flex flex-col items-center h-full gap-4 justify-between">
+        <div className="text-center text-lg text-red-500">{error}</div>
         <SalahSettingsDialog />
       </main>
     );
@@ -98,6 +103,8 @@ export function SalahDisplay() {
       </motion.h1>
       <div className="flex gap-4 flex-col justify-center mt-20">
         <SalahTimesDisplay meta={meta} prayerTimes={prayerTimes} />
+      </div>
+      <div className="mt-10">
         <SalahSettingsDialog />
       </div>
     </main>
