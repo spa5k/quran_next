@@ -43,9 +43,6 @@ export interface Meta {
 }
 
 interface LocationState {
-  locations: Location[];
-  selectedLocation: Location | null;
-  locationInput: string;
   cityName: string;
   latitude: string;
   longitude: string;
@@ -55,38 +52,40 @@ interface LocationState {
   madhab: "shafi" | "hanafi";
   playAdhan: boolean;
   rehydrated: boolean;
-  setLocationInput: (input: string) => void;
   calculatePrayerTimes: () => void;
   setMadhab: (madhab: "shafi" | "hanafi") => void;
   setCoordinates: (latitude: string, longitude: string) => void;
   toggleAdhan: () => void;
   setMeta: (meta: Meta) => void;
   setCityName: (cityName: string) => void;
+  setState: (state: Partial<LocationState>) => void;
 }
 
 export const useLocationStore = create<LocationState>()(
   persist(
     (set, get) => ({
-      locations: [],
-      selectedLocation: null,
-      locationInput: "",
       latitude: "",
       longitude: "",
       cityName: "",
       meta: null,
       prayerTimes: null,
-      madhab: "shafi",
+      madhab: "shafi" as const,
       playAdhan: true,
       sunnahTimes: null,
       rehydrated: false, // Initialize rehydrated state
-      setLocationInput: (input) => set({ locationInput: input }),
       setCityName: (cityName) => set({ cityName }),
       setMeta(meta) {
         set({ meta });
       },
+      setState(state) {
+        set(state);
+      },
       calculatePrayerTimes: () => {
         const { meta, madhab } = get();
-        if (!meta) return;
+        if (!meta) {
+          console.error("No metadata found", { meta, madhab });
+          return;
+        }
 
         const coordinates = new Coordinates(meta.latitude, meta.longitude);
         const params = getCalculationMethod(meta.method.name);

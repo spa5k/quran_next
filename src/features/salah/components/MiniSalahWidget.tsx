@@ -7,6 +7,7 @@ import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useLocationStore } from "../store/salahStore";
 
@@ -20,7 +21,6 @@ export const MiniSalahWidget = () => {
     setCoordinates,
     calculatePrayerTimes,
     playAdhan,
-    selectedLocation,
     latitude: currentLatitude,
     rehydrated,
     sunnahTimes,
@@ -31,6 +31,8 @@ export const MiniSalahWidget = () => {
   const [progress, setProgress] = useState(0);
   const [retry, setRetry] = useState(false);
   const adhanAudioRef = useRef<HTMLAudioElement>(null);
+
+  const path = usePathname();
 
   const {
     loading,
@@ -191,7 +193,7 @@ export const MiniSalahWidget = () => {
     return prayers[0].name; // Return the first prayer if all have passed
   };
 
-  if (loading && !selectedLocation) {
+  if (loading && !latitude && !longitude) {
     return (
       <div className="flex items-center justify-center">
         <div className="text-center">Loading...</div>
@@ -199,7 +201,7 @@ export const MiniSalahWidget = () => {
     );
   }
 
-  if (retry) {
+  if (retry && path != "/salah") {
     return (
       <div className="flex items-center justify-center">
         <Button
@@ -215,9 +217,11 @@ export const MiniSalahWidget = () => {
   if (!prayerTimes && (!longitude || !latitude)) {
     return (
       <div className="flex items-center justify-center">
-        <Link href={"/salah"} prefetch={false}>
-          <Button className="px-4 py- rounded-md">Add location</Button>
-        </Link>
+        {path == "/salah" || (
+          <Link href={"/salah"} prefetch={false}>
+            <Button className="px-4 py- rounded-md">Add location</Button>
+          </Link>
+        )}
       </div>
     );
   }

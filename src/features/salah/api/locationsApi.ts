@@ -23,17 +23,16 @@ export const fetchLocationData = async (
     }
     const location = locationData.result[0];
     let cityName = location.name;
-    let country = location.country;
+    const country = location.country;
     try {
       // Fetch city name
       const cityNameResponse = await fetch(
         `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${location.lat}&longitude=${location.lng}&localityLanguage=en`,
       );
       const cityNameData = await cityNameResponse.json();
-      if (!cityNameData.city) {
-        throw new Error("City name not found");
+      if (cityNameData.city) {
+        cityName = cityNameData.city;
       }
-      cityName = cityNameData.city;
     } catch (err) {
       console.error("Error fetching city name:", err);
     }
@@ -47,6 +46,15 @@ export const fetchLocationData = async (
       throw new Error("Failed to fetch metadata");
     }
     const meta = metaData.data[0].meta;
+
+    console.log({
+      country,
+      lat: location.lat,
+      lng: location.lng,
+      name: location.name,
+      city: cityName,
+      meta,
+    });
 
     return {
       country,

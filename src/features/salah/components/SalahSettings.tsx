@@ -39,7 +39,8 @@ export const SalahSettingsDialog = () => {
     setCoordinates,
     playAdhan,
     toggleAdhan,
-    setCityName,
+    cityName,
+    setState,
   } = useLocationStore();
 
   const [locationInput, setLocationInput] = useState<string>("");
@@ -49,7 +50,7 @@ export const SalahSettingsDialog = () => {
   const [tempLongitude, setTempLongitude] = useState(longitude);
   const [isPlaying, setIsPlaying] = useState(false);
   const adhanAudioRef = useRef<HTMLAudioElement>(null);
-  const { data: locationData, refetch, isLoading } = useFetchLocationData(finalLocation);
+  const { data: locationData, refetch, isLoading, error: fetchError } = useFetchLocationData(finalLocation);
   const { latitude: geoLatitude, longitude: geoLongitude, loading: geoLoading, error: geoError } = useGeolocation({
     enableHighAccuracy: true,
     maximumAge: 30_000,
@@ -68,35 +69,10 @@ export const SalahSettingsDialog = () => {
     }
   }, [locationData]);
 
-  useEffect(() => {
-    if (!(adhanAudioRef.current && navigator.mediaSession)) {
-      return;
-    }
-    navigator.mediaSession.setActionHandler("play", () => {
-      adhanAudioRef.current?.play();
-    });
-
-    navigator.mediaSession.setActionHandler("pause", () => {
-      adhanAudioRef.current?.pause();
-    });
-
-    adhanAudioRef.current.addEventListener("play", () => {
-      navigator.mediaSession.playbackState = "playing";
-    });
-
-    adhanAudioRef.current.addEventListener("pause", () => {
-      navigator.mediaSession.playbackState = "paused";
-    });
-  }, [adhanAudioRef]);
-
   const handleUpdatePrayerTimes = () => {
     setIsEditing(false);
     setCoordinates(tempLatitude, tempLongitude);
     calculatePrayerTimes();
-  };
-
-  const handleFetchLocations = async () => {
-    await refetch();
   };
 
   const showNotification = (prayerName?: string) => {
@@ -128,12 +104,19 @@ export const SalahSettingsDialog = () => {
     }
   };
 
-  if (locationData && finalLocation) {
+  useEffect(() => {
+    if (!(locationData && finalLocation)) {
+      return;
+    }
     setFinalLocation("");
-    setCoordinates(locationData.lat, locationData.lng);
-    setCityName(locationData.name);
+    setState({
+      latitude: locationData.lat,
+      longitude: locationData.lng,
+      cityName: locationData.name,
+      meta: locationData.meta,
+    });
     calculatePrayerTimes();
-  }
+  }, [finalLocation, locationData]);
 
   const updateLocationUsingGeolocation = () => {
     if (geoLatitude && geoLongitude && !geoError && !geoLoading) {
@@ -146,7 +129,7 @@ export const SalahSettingsDialog = () => {
     <Dialog>
       <DialogTrigger asChild>
         <Button className="flex items-center">
-          {locationInput ? "Edit Location" : "Add Location"}
+          {cityName ? "Edit Location" : "Add Location"}
           <SettingsIcon className="h-6 w-6 ml-2" />
         </Button>
       </DialogTrigger>
@@ -170,16 +153,21 @@ export const SalahSettingsDialog = () => {
                   <Input
                     id="location"
                     placeholder="Search for your city"
-                    value={locationInput}
+                    value={locationInput ? locationInput : cityName}
                     onChange={(e) => setLocationInput(e.target.value)}
                     className="flex-grow mr-2"
                   />
-                  <Button onClick={handleFetchLocations} size="icon" disabled={isLoading}>
+                  <Button onClick={() => setFinalLocation(locationInput)} size="icon" disabled={isLoading}>
                     {isLoading
-                      ? <Spinner className="h-5 w-20" />
-                      : <Search className="h-5 w-20" onClick={() => setFinalLocation(locationInput)} />}
+                      ? <Spinner className="h-5 w-5" />
+                      : <Search className="h-5 w-5" />}
                   </Button>
                 </div>
+                {fetchError && (
+                  <p className="text-red-500">
+                    Failed to fetch location data. Please try again {JSON.stringify(fetchError)}
+                  </p>
+                )}
               </div>
 
               <div className="flex justify-between items-center">
@@ -196,7 +184,7 @@ export const SalahSettingsDialog = () => {
               <div className="flex justify-between items-center">
                 <Label htmlFor="adhan">Adhan</Label>
                 <Button onClick={handlePlayPauseAdhan} size="icon">
-                  {isPlaying ? <Pause className="h-5 w-20" /> : <Play className="h-5 w-20" />}
+                  {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
                 </Button>
               </div>
 
@@ -260,7 +248,7 @@ export const SalahSettingsDialog = () => {
               </div>
 
               {isEditing && <Button onClick={handleUpdatePrayerTimes}>Update Prayer Times</Button>}
-              <Button onClick={updateLocationUsingGeolocation}>
+              <Button onClick={updateLocationUsingGeolocation} disabled={geoError?.PERMISSION_DENIED ? true : false}>
                 {geoError ? "Location Denied" : "Use My Location"}
               </Button>
               <DialogFooter className="text-muted-foreground text-sm">
