@@ -56,13 +56,12 @@ interface LocationState {
   playAdhan: boolean;
   rehydrated: boolean;
   setLocationInput: (input: string) => void;
-  fetchLocations: () => Promise<void>;
-  fetchMeta: () => Promise<void>;
   calculatePrayerTimes: () => void;
   setMadhab: (madhab: "shafi" | "hanafi") => void;
   setCoordinates: (latitude: string, longitude: string) => void;
-  fetchCityName: (latitude: string, longitude: string) => Promise<string>;
   toggleAdhan: () => void;
+  setMeta: (meta: Meta) => void;
+  setCityName: (cityName: string) => void;
 }
 
 export const useLocationStore = create<LocationState>()(
@@ -81,59 +80,9 @@ export const useLocationStore = create<LocationState>()(
       sunnahTimes: null,
       rehydrated: false, // Initialize rehydrated state
       setLocationInput: (input) => set({ locationInput: input }),
-      fetchLocations: async () => {
-        const { locationInput } = get();
-        try {
-          const response = await fetch(
-            `https://quran-location.remtl.workers.dev/api/location/${locationInput}`,
-            {
-              headers: {
-                "X-Custom-Header": "your-random-value",
-              },
-            },
-          );
-          const data = await response.json();
-          if (data.success) {
-            let cityName = data.result[0].name;
-
-            try {
-              cityName = await get().fetchCityName(
-                data.result[0].lat,
-                data.result[0].lng,
-              );
-            } catch (error) {
-              console.error("Error fetching city name:", error);
-            }
-
-            set({
-              selectedLocation: data.result[0],
-              cityName,
-              latitude: data.result[0].lat,
-              longitude: data.result[0].lng,
-            });
-
-            get().fetchMeta();
-
-            get().calculatePrayerTimes();
-          }
-        } catch (error) {
-          console.error("Error fetching locations:", error);
-        }
-      },
-      fetchMeta: async () => {
-        const { latitude, longitude } = get();
-        try {
-          const response = await fetch(
-            `https://api.aladhan.com/v1/calendar/2024/6?latitude=${latitude}&longitude=${longitude}`,
-          );
-          const data = await response.json();
-          if (data.code === 200) {
-            set({ meta: data.data[0].meta });
-            get().calculatePrayerTimes();
-          }
-        } catch (error) {
-          console.error("Error fetching metadata:", error);
-        }
+      setCityName: (cityName) => set({ cityName }),
+      setMeta(meta) {
+        set({ meta });
       },
       calculatePrayerTimes: () => {
         const { meta, madhab } = get();
@@ -159,24 +108,6 @@ export const useLocationStore = create<LocationState>()(
         }
         set({ latitude, longitude });
         get().calculatePrayerTimes();
-        get().fetchMeta();
-      },
-      fetchCityName: async (
-        latitude: string,
-        longitude: string,
-      ): Promise<string> => {
-        try {
-          const response = await fetch(
-            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
-          );
-          const data = await response.json();
-          if (data.city) {
-            return data.city as string;
-          }
-          throw new Error("City name not found");
-        } catch (error) {
-          throw new Error("Error fetching city name");
-        }
       },
       toggleAdhan: () => set((state) => ({ playAdhan: !state.playAdhan })),
     }),

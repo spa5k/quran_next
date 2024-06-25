@@ -1,3 +1,4 @@
+import { Spinner } from "@/components/icons/spinner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
@@ -20,6 +21,7 @@ import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import { Copy, Pause, PencilIcon, Play, Search, SettingsIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useFetchLocationData } from "../hooks/locationHooks";
 import { useLocationStore } from "../store/salahStore";
 
 dayjs.extend(utc);
@@ -27,60 +29,44 @@ dayjs.extend(timezone);
 
 export const SalahSettingsDialog = () => {
   const {
-    locationInput,
     latitude,
     longitude,
     meta,
-    setLocationInput,
-    fetchLocations,
     prayerTimes,
     madhab,
     setMadhab,
     calculatePrayerTimes,
     setCoordinates,
-    fetchCityName,
     playAdhan,
     toggleAdhan,
+    setCityName,
   } = useLocationStore();
 
+  const [locationInput, setLocationInput] = useState<string>("");
+  const [finalLocation, setFinalLocation] = useState<string>("");
   const [isEditing, setIsEditing] = useState(false);
   const [tempLatitude, setTempLatitude] = useState(latitude);
   const [tempLongitude, setTempLongitude] = useState(longitude);
-  const [isPlaying, setIsPlaying] = useState(false); // Track if Adhan is playing
+  const [isPlaying, setIsPlaying] = useState(false);
   const adhanAudioRef = useRef<HTMLAudioElement>(null);
-
-  const { error } = useGeolocation({ enableHighAccuracy: true, timeout: 10_000, maximumAge: 1_000_000 });
+  const { data: locationData, refetch, isLoading } = useFetchLocationData(finalLocation);
+  const { latitude: geoLatitude, longitude: geoLongitude, loading: geoLoading, error: geoError } = useGeolocation({
+    enableHighAccuracy: true,
+    maximumAge: 30_000,
+    timeout: 27_000,
+  });
 
   useEffect(() => {
     setTempLatitude(latitude);
     setTempLongitude(longitude);
   }, [latitude, longitude]);
 
-  const handleUpdatePrayerTimes = () => {
-    setIsEditing(false);
-    setCoordinates(tempLatitude, tempLongitude);
-    calculatePrayerTimes();
-  };
-
-  const handleFetchLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setTempLatitude(latitude.toString());
-          setTempLongitude(longitude.toString());
-          setCoordinates(latitude.toString(), longitude.toString());
-          fetchCityName(latitude.toString(), longitude.toString());
-          calculatePrayerTimes();
-        },
-        (error) => {
-          console.error("Error fetching location:", error);
-        },
-      );
-    } else {
-      console.error("Geolocation is not supported by this browser.");
+  useEffect(() => {
+    if (locationData) {
+      setTempLatitude(locationData.lat);
+      setTempLongitude(locationData.lng);
     }
-  };
+  }, [locationData]);
 
   useEffect(() => {
     if (!(adhanAudioRef.current && navigator.mediaSession)) {
@@ -102,6 +88,16 @@ export const SalahSettingsDialog = () => {
       navigator.mediaSession.playbackState = "paused";
     });
   }, [adhanAudioRef]);
+
+  const handleUpdatePrayerTimes = () => {
+    setIsEditing(false);
+    setCoordinates(tempLatitude, tempLongitude);
+    calculatePrayerTimes();
+  };
+
+  const handleFetchLocations = async () => {
+    await refetch();
+  };
 
   const showNotification = (prayerName?: string) => {
     if (Notification.permission === "granted") {
@@ -132,8 +128,18 @@ export const SalahSettingsDialog = () => {
     }
   };
 
-  const handleFetchLocations = async () => {
-    await fetchLocations();
+  if (locationData && finalLocation) {
+    setFinalLocation("");
+    setCoordinates(locationData.lat, locationData.lng);
+    setCityName(locationData.name);
+    calculatePrayerTimes();
+  }
+
+  const updateLocationUsingGeolocation = () => {
+    if (geoLatitude && geoLongitude && !geoError && !geoLoading) {
+      setCoordinates(geoLatitude.toString(), geoLongitude.toString());
+      calculatePrayerTimes();
+    }
   };
 
   return (
@@ -168,8 +174,10 @@ export const SalahSettingsDialog = () => {
                     onChange={(e) => setLocationInput(e.target.value)}
                     className="flex-grow mr-2"
                   />
-                  <Button onClick={handleFetchLocations} size="icon">
-                    <Search className="h-5 w-20" />
+                  <Button onClick={handleFetchLocations} size="icon" disabled={isLoading}>
+                    {isLoading
+                      ? <Spinner className="h-5 w-20" />
+                      : <Search className="h-5 w-20" onClick={() => setFinalLocation(locationInput)} />}
                   </Button>
                 </div>
               </div>
@@ -252,8 +260,8 @@ export const SalahSettingsDialog = () => {
               </div>
 
               {isEditing && <Button onClick={handleUpdatePrayerTimes}>Update Prayer Times</Button>}
-              <Button onClick={handleFetchLocation}>
-                {error ? "Location Denied" : "Use My Location"}
+              <Button onClick={updateLocationUsingGeolocation}>
+                {geoError ? "Location Denied" : "Use My Location"}
               </Button>
               <DialogFooter className="text-muted-foreground text-sm">
                 Changes are automatically saved

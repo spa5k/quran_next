@@ -1,3 +1,5 @@
+import type { Meta } from "./store/salahStore";
+
 export interface LocationResponse {
   success: boolean;
   result: Location[];
@@ -9,4 +11,5 @@ export interface Location {
   country: string;
   lat: string;
   lng: string;
+  meta?: Meta;
 }
