@@ -1,4 +1,4 @@
-import { NextPrayer } from "@/features/salah/components/CurrentSalahWidget";
+import { NextPrayerWidget } from "@/features/salah/components/NextPrayerWidget";
 import { cn } from "@/lib/utils";
 import { BellIcon, Book, CalendarIcon, Compass, FileTextIcon, FormInputIcon, GlobeIcon, Settings } from "lucide-react";
 import { lazy, Suspense } from "react";
@@ -75,7 +75,7 @@ const features = [
     background: (
       <div className="relative flex h-full w-full items-start justify-start overflow-hidden rounded-lg bg-background p-5 [mask-image:linear-gradient(to_top,transparent_10%,#000_30%)]">
         <div className="z-10 whitespace-pre-wrap text-start text-2xl font-medium tracking-tighter text-primary-foreground">
-          <NextPrayer />
+          <NextPrayerWidget />
         </div>
         <AnimatedGridPattern
           numSquares={30}

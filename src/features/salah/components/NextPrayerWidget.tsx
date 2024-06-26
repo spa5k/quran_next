@@ -5,73 +5,64 @@ import duration from "dayjs/plugin/duration";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import { useEffect, useState } from "react";
-import { useLocationStore } from "../store/salahStore";
+import { getPrayerTimes, useLocationStore } from "../store/salahStore";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(duration);
 
-export const NextPrayer = () => {
-  const { prayerTimes, meta } = useLocationStore();
+export const NextPrayerWidget = () => {
+  const { prayerTimes, meta, sunnahTimes } = useLocationStore();
   const [nextPrayer, setNextPrayer] = useState("");
   const [timeRemaining, setTimeRemaining] = useState("");
   const [nextPrayerTime, setNextPrayerTime] = useState("");
   const [currentPrayer, setCurrentPrayer] = useState("");
 
   useEffect(() => {
-    if (prayerTimes && meta) {
-      const calculateNextPrayer = () => {
-        const now = dayjs().tz(meta.timezone);
-        const prayers = [
-          { name: "Fajr", time: dayjs(prayerTimes.fajr).tz(meta.timezone) },
-          { name: "Sunrise", time: dayjs(prayerTimes.sunrise).tz(meta.timezone) },
-          { name: "Dhuhr", time: dayjs(prayerTimes.dhuhr).tz(meta.timezone) },
-          { name: "Asr", time: dayjs(prayerTimes.asr).tz(meta.timezone) },
-          { name: "Maghrib", time: dayjs(prayerTimes.maghrib).tz(meta.timezone) },
-          { name: "Isha", time: dayjs(prayerTimes.isha).tz(meta.timezone) },
-        ];
-
-        let foundNextPrayer = false;
-
-        for (let i = 0; i < prayers.length; i++) {
-          if (now.isBefore(prayers[i].time)) {
-            setNextPrayer(prayers[i].name);
-            setNextPrayerTime(prayers[i].time.format("h:mm A"));
-            const diff = prayers[i].time.diff(now);
-            const duration = dayjs.duration(diff);
-            const hours = duration.hours();
-            const minutes = duration.minutes();
-            setTimeRemaining(`${hours}hr ${minutes}mins`);
-            foundNextPrayer = true;
-            break;
-          }
-        }
-
-        if (!foundNextPrayer) {
-          setNextPrayer("Fajr");
-          const nextFajrTime = dayjs(prayerTimes.fajr).tz(meta.timezone).add(1, "day");
-          setNextPrayerTime(nextFajrTime.format("h:mm A"));
-          const diff = nextFajrTime.diff(now);
-          const duration = dayjs.duration(diff);
-          const hours = duration.hours();
-          const minutes = duration.minutes();
-          setTimeRemaining(`${hours}hr ${minutes}mins`);
-        }
-
-        for (let i = prayers.length - 1; i >= 0; i--) {
-          if (now.isAfter(prayers[i].time)) {
-            setCurrentPrayer(prayers[i].name);
-            break;
-          }
-        }
-      };
-
-      calculateNextPrayer();
-      const interval = setInterval(calculateNextPrayer, 60000); // Update every minute
-
-      return () => clearInterval(interval);
+    if (!(prayerTimes && meta && sunnahTimes)) {
+      return;
     }
-  }, [prayerTimes, meta]);
+    const calculateNextPrayer = () => {
+      const now = dayjs().tz(meta.timezone);
+      const prayers = [
+        { name: "Fajr", time: dayjs(prayerTimes.fajr).tz(meta.timezone) },
+        { name: "Sunrise", time: dayjs(prayerTimes.sunrise).tz(meta.timezone) },
+        { name: "Dhuhr", time: dayjs(prayerTimes.dhuhr).tz(meta.timezone) },
+        { name: "Asr", time: dayjs(prayerTimes.asr).tz(meta.timezone) },
+        { name: "Maghrib", time: dayjs(prayerTimes.maghrib).tz(meta.timezone) },
+        { name: "Isha", time: dayjs(prayerTimes.isha).tz(meta.timezone) },
+        { name: "Last Third of the Night", time: dayjs(sunnahTimes.lastThirdOfTheNight).tz(meta.timezone) },
+        { name: "Midnight", time: dayjs(sunnahTimes.middleOfTheNight).tz(meta.timezone) },
+      ];
+
+      const prayerDetails = getPrayerTimes();
+
+      const currentPrayerName = prayerDetails?.prayerTimes.currentPrayer();
+      const nextPrayerName = prayerDetails?.prayerTimes.nextPrayer();
+      const timeForNextPrayer = prayers.find((prayer) => prayer.name.toLowerCase() === nextPrayerName)?.time;
+      const currentPrayerDetails = prayers.find((prayer) => prayer.name.toLowerCase() === currentPrayerName);
+
+      if (currentPrayerDetails) {
+        setCurrentPrayer(currentPrayerDetails.name);
+      }
+
+      if (!timeForNextPrayer) {
+        return;
+      }
+      setNextPrayer(nextPrayerName!);
+      setNextPrayerTime(timeForNextPrayer.format("h:mm A"));
+      const diff = timeForNextPrayer.diff(now);
+      const duration = dayjs.duration(diff);
+      const hours = duration.hours();
+      const minutes = duration.minutes();
+      setTimeRemaining(`${hours}hr ${minutes}mins`);
+    };
+
+    calculateNextPrayer();
+    const interval = setInterval(calculateNextPrayer, 60_000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, [prayerTimes, meta, sunnahTimes]);
 
   return (
     <div className="h-[200px] w-full transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_10%,#000_60%)] sm:left-40 p-5">
