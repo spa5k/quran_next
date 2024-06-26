@@ -16,10 +16,10 @@ importers:
         version: 1.11.4
       '@hono/swagger-ui':
         specifier: ^0.3.0
-        version: 0.3.0(hono@4.4.7)
+        version: 0.3.0(hono@4.4.8)
       '@hono/zod-openapi':
         specifier: ^0.14.5
-        version: 0.14.5(hono@4.4.7)(zod@3.23.8)
+        version: 0.14.5(hono@4.4.8)(zod@3.23.8)
       '@radix-ui/react-dialog':
         specifier: ^1.1.1
         version: 1.1.1(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -99,14 +99,14 @@ importers:
         specifier: ^4.0.4
         version: 4.0.4(electron@30.1.2)
       framer-motion:
-        specifier: ^11.2.11
-        version: 11.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^11.2.12
+        version: 11.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       get-port-please:
         specifier: ^3.1.2
         version: 3.1.2
       hono:
-        specifier: ^4.4.7
-        version: 4.4.7
+        specifier: ^4.4.8
+        version: 4.4.8
       lucide-react:
         specifier: ^0.396.0
         version: 0.396.0(react@18.3.1)
@@ -3838,8 +3838,8 @@ packages:
     resolution: {integrity: sha512-ETEklSGi5t0QMZuiXoA/Q6vcnxcLQP5vdugSpuAyi6SVGi2clPPp+xgEhuMaHC+zGgn31Kd235W35f7Hykkaww==}
     engines: {node: '>= 6'}
 
-  framer-motion@11.2.11:
-    resolution: {integrity: sha512-n+ozoEzgJu/2h9NoQMokF+CwNqIRVyuRC4RwMPwklfrrTjbVV32k9uBIgqYAwn7Jfpt5LuDVCtT57MWz1FbaLw==}
+  framer-motion@11.2.12:
+    resolution: {integrity: sha512-lCjkV4nA9rWOy2bhR4RZzkp2xpB++kFmUZ6D44V9VQaxk+JDmbDd5lq+u58DjJIIllE8AZEXp9OG/TyDN4FB/w==}
     peerDependencies:
       '@emotion/is-prop-valid': '*'
       react: ^18.0.0
@@ -4031,8 +4031,8 @@ packages:
     resolution: {integrity: sha512-cnN7bQUm65UWOy6cbGcCcZ3rpwW8Q/j4OP5aWRhEry4Z2t2aR1cjrbp0BS+KiBN0smvP1caBgAuxutvyvJILzQ==}
     engines: {node: '>=8'}
 
-  hono@4.4.7:
-    resolution: {integrity: sha512-WoQWFQyVFEVRtIzP5sHPv7nvIw+RYL/HRnvnOCDxj6A+BtrwuC9S0vryZbV4IyFcNgOJ87r/phDiC1x2eEo4Gg==}
+  hono@4.4.8:
+    resolution: {integrity: sha512-eewnSgTzdWgFVn97kPV24h+9UVNUQ+9mj6IRxr7dBseTaTBSHtFo/T/vRNcqJkQFysVoXyecflr3Xe/fdvzEpQ==}
     engines: {node: '>=16.0.0'}
 
   hosted-git-info@2.8.9:
@@ -7518,20 +7518,20 @@ snapshots:
 
   '@hono/node-server@1.11.4': {}
 
-  '@hono/swagger-ui@0.3.0(hono@4.4.7)':
+  '@hono/swagger-ui@0.3.0(hono@4.4.8)':
     dependencies:
-      hono: 4.4.7
+      hono: 4.4.8
 
-  '@hono/zod-openapi@0.14.5(hono@4.4.7)(zod@3.23.8)':
+  '@hono/zod-openapi@0.14.5(hono@4.4.8)(zod@3.23.8)':
     dependencies:
       '@asteasolutions/zod-to-openapi': 7.1.1(zod@3.23.8)
-      '@hono/zod-validator': 0.2.2(hono@4.4.7)(zod@3.23.8)
-      hono: 4.4.7
+      '@hono/zod-validator': 0.2.2(hono@4.4.8)(zod@3.23.8)
+      hono: 4.4.8
       zod: 3.23.8
 
-  '@hono/zod-validator@0.2.2(hono@4.4.7)(zod@3.23.8)':
+  '@hono/zod-validator@0.2.2(hono@4.4.8)(zod@3.23.8)':
     dependencies:
-      hono: 4.4.7
+      hono: 4.4.8
       zod: 3.23.8
 
   '@humanwhocodes/config-array@0.11.14':
@@ -10379,7 +10379,7 @@ snapshots:
       combined-stream: 1.0.8
       mime-types: 2.1.35
 
-  framer-motion@11.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  framer-motion@11.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       tslib: 2.6.3
     optionalDependencies:
@@ -10586,7 +10586,7 @@ snapshots:
     dependencies:
       source-map: 0.7.4
 
-  hono@4.4.7: {}
+  hono@4.4.8: {}
 
   hosted-git-info@2.8.9: {}
 
