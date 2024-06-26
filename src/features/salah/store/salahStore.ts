@@ -150,3 +150,30 @@ const getCalculationMethod = (methodName: string): CalculationParameters => {
       return CalculationMethod.Other();
   }
 };
+
+const NormalStore = useLocationStore.getState();
+
+export const getPrayerTimes = () => {
+  const { meta, madhab } = NormalStore;
+
+  if (!meta) {
+    console.error("No metadata found", { meta, madhab });
+    return;
+  }
+
+  const coordinates = new Coordinates(meta.latitude, meta.longitude);
+
+  const params = getCalculationMethod(meta.method.name);
+
+  params.fajrAngle = meta.method.params.Fajr;
+
+  params.ishaAngle = meta.method.params.Isha;
+
+  params.madhab = madhab === "shafi" ? Madhab.Shafi : Madhab.Hanafi;
+
+  const prayerTimes = new PrayerTimes(coordinates, new Date(), params);
+
+  const sunnahTimes = new SunnahTimes(prayerTimes);
+
+  return { prayerTimes, sunnahTimes };
+};

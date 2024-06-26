@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { useLocationStore } from "../store/salahStore";
+import { getPrayerTimes, useLocationStore } from "../store/salahStore";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -26,6 +26,7 @@ export const MiniSalahWidget = () => {
     sunnahTimes,
   } = useLocationStore();
   const [currentPrayer, setCurrentPrayer] = useState("");
+  const [nextPrayer, setNextPrayer] = useState("");
   const [currentPrayerTime, setCurrentPrayerTime] = useState("");
   const [nextPrayerTime, setNextPrayerTime] = useState("");
   const [progress, setProgress] = useState(0);
@@ -45,7 +46,7 @@ export const MiniSalahWidget = () => {
   });
 
   useEffect(() => {
-    if (!(prayerTimes && meta)) {
+    if (!(prayerTimes && meta && sunnahTimes)) {
       return;
     }
     const calculateCurrentPrayer = () => {
@@ -58,40 +59,37 @@ export const MiniSalahWidget = () => {
         { name: "Asr", time: dayjs(prayerTimes.asr).tz(meta.timezone) },
         { name: "Maghrib", time: dayjs(prayerTimes.maghrib).tz(meta.timezone) },
         { name: "Isha", time: dayjs(prayerTimes.isha).tz(meta.timezone) },
+        { name: "Last Third of the Night", time: dayjs(sunnahTimes.lastThirdOfTheNight).tz(meta.timezone) },
+        { name: "Midnight", time: dayjs(sunnahTimes.middleOfTheNight).tz(meta.timezone) },
       ];
 
-      if (sunnahTimes) {
-        prayers.push(
-          { name: "Last Third of the Night", time: dayjs(sunnahTimes.lastThirdOfTheNight).tz(meta.timezone) },
-          { name: "Midnight", time: dayjs(sunnahTimes.middleOfTheNight).tz(meta.timezone) },
-        );
+      const prayerDetails = getPrayerTimes();
+
+      const currentPrayerName = prayerDetails?.prayerTimes.currentPrayer();
+      const nextPrayerName = prayerDetails?.prayerTimes.nextPrayer();
+      const timeForNextPrayer = prayers.find((prayer) => prayer.name.toLowerCase() === nextPrayerName)?.time;
+      const currentPrayerDetails = prayers.find((prayer) => prayer.name.toLowerCase() === currentPrayerName);
+
+      setCurrentPrayer(currentPrayerName!);
+      setNextPrayer(nextPrayerName!);
+      setCurrentPrayerTime(currentPrayerDetails?.time.format("h:mm A")!);
+      setNextPrayerTime(timeForNextPrayer?.format("h:mm A")!);
+      const totalDuration = timeForNextPrayer?.diff(currentPrayerDetails?.time);
+      const elapsedDuration = now.diff(currentPrayerDetails?.time);
+      const progressPercentage = (elapsedDuration / totalDuration!) * 100;
+
+      setProgress(progressPercentage);
+
+      // Play Adhan and show notification if enabled and not already played
+      if (
+        !(playAdhan && adhanAudioRef.current && !isAdhanPlayed(currentPrayerName!)
+          && now.isSame(currentPrayerDetails?.time, "minute"))
+      ) {
+        return;
       }
-
-      for (let i = prayers.length - 1; i >= 0; i--) {
-        if (now.isAfter(prayers[i].time)) {
-          setCurrentPrayer(prayers[i].name);
-          setCurrentPrayerTime(prayers[i].time.format("h:mm A"));
-          const nextPrayer = prayers[(i + 1) % prayers.length];
-          setNextPrayerTime(nextPrayer.time.format("h:mm A"));
-
-          const totalDuration = nextPrayer.time.diff(prayers[i].time);
-          const elapsedDuration = now.diff(prayers[i].time);
-          const progressPercentage = (elapsedDuration / totalDuration) * 100;
-          setProgress(progressPercentage);
-
-          // Play Adhan and show notification if enabled and not already played
-          if (
-            playAdhan && adhanAudioRef.current && !isAdhanPlayed(prayers[i].name)
-            && now.isSame(prayers[i].time, "minute")
-          ) {
-            adhanAudioRef.current.play();
-            showNotification(nextPrayer.name); // Show notification
-            markAdhanAsPlayed(nextPrayer.name); // Mark Adhan as played
-          }
-
-          break;
-        }
-      }
+      adhanAudioRef.current.play();
+      showNotification(nextPrayerName!); // Show notification
+      markAdhanAsPlayed(nextPrayerName!); // Mark Adhan as played
     };
 
     calculateCurrentPrayer();
@@ -162,37 +160,6 @@ export const MiniSalahWidget = () => {
     return () => clearTimeout(timer);
   }, [loading, latitude, longitude, rehydrated, currentLatitude]);
 
-  const getNextPrayer = () => {
-    if (!prayerTimes || !meta) {
-      return "";
-    }
-
-    const now = dayjs().tz(meta.timezone);
-    const prayers = [
-      { name: "Fajr", time: dayjs(prayerTimes.fajr).tz(meta.timezone) },
-      { name: "Sunrise", time: dayjs(prayerTimes.sunrise).tz(meta.timezone) },
-      { name: "Dhuhr", time: dayjs(prayerTimes.dhuhr).tz(meta.timezone) },
-      { name: "Asr", time: dayjs(prayerTimes.asr).tz(meta.timezone) },
-      { name: "Maghrib", time: dayjs(prayerTimes.maghrib).tz(meta.timezone) },
-      { name: "Isha", time: dayjs(prayerTimes.isha).tz(meta.timezone) },
-    ];
-
-    if (sunnahTimes) {
-      prayers.push(
-        { name: "Last Third of the Night", time: dayjs(sunnahTimes.lastThirdOfTheNight).tz(meta.timezone) },
-        { name: "Midnight", time: dayjs(sunnahTimes.middleOfTheNight).tz(meta.timezone) },
-      );
-    }
-
-    for (let i = 0; i < prayers.length; i++) {
-      if (now.isBefore(prayers[i].time)) {
-        return prayers[i].name;
-      }
-    }
-
-    return prayers[0].name; // Return the first prayer if all have passed
-  };
-
   if (loading && !latitude && !longitude) {
     return (
       <div className="flex items-center justify-center">
@@ -225,8 +192,6 @@ export const MiniSalahWidget = () => {
       </div>
     );
   }
-
-  const nextPrayer = getNextPrayer();
 
   return (
     <Link href={"/salah"} prefetch={false}>
