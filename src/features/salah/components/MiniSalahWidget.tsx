@@ -193,6 +193,14 @@ export const MiniSalahWidget = () => {
     );
   }
 
+  if (!currentPrayer || !nextPrayer) {
+    return (
+      <div className="flex items-center justify-center">
+        <div className="text-center">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <Link href={"/salah"} prefetch={false}>
       <div className="flex items-center justify-center w-full ">
