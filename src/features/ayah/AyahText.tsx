@@ -25,7 +25,7 @@ export const AyahText = (
   const combinedClassName = twMerge(clsx(fontClass, className, "ayah_text", "text-pretty", "leading-loose"));
 
   return (
-    <p className={combinedClassName} {...props} dir="rtl">
+    <p className={combinedClassName} dir="rtl" {...props}>
       {text}
       {/* {convertToArabicNumerals(number)} */}
     </p>

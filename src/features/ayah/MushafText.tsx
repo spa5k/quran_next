@@ -1,23 +1,31 @@
 "use client";
+import clsx from "clsx";
 import { useEffect } from "react";
+import { twMerge } from "tailwind-merge";
 import { loadFont } from "./utils/fontLoader";
 
-export const MushafText = ({ page, text, type = "mushaf" }: {
+export const MushafText = ({ page, text, type = "v1", className, ...props }: {
   page: string;
   text: string;
-  type?: "mushaf" | "mushaf2";
+  type?: "v1" | "v2";
+  className?: string;
+  [x: string]: any;
 }) => {
+  // add extra zeroes on front until the text is 3 characters long
+  const paddedPage = page.padStart(3, "0");
   useEffect(() => {
-    loadFont(page, type);
-  }, [page, type]);
+    loadFont(paddedPage, type);
+  }, [paddedPage, type]);
 
-  const fontFamily = `${type === "mushaf" ? "Mushaf Page" : "Mushaf2 Page"} ${page}`;
+  const fontFamily = `${type === "v1" ? "Mushaf Page" : "Mushaf2 Page"} ${paddedPage}`;
 
   // if text contains "number,", or any number with comma then delete it
   text = text.replace(/(\d+),/g, "");
 
+  const combinedClassName = twMerge(clsx(className, "ayah_text", "text-pretty", "leading-loose"));
+
   return (
-    <p style={{ fontFamily: `'${fontFamily}', sans-serif` }} className="text-2xl">
+    <p style={{ fontFamily: `'${fontFamily}', sans-serif` }} className={combinedClassName} dir="rtl" {...props}>
       {text}
     </p>
   );

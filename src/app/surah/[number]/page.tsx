@@ -1,13 +1,14 @@
 import { Separator } from "@/components/ui/separator";
 import { AyahText } from "@/features/ayah/AyahText";
 import { DynamicFontSizer } from "@/features/ayah/FontResizer";
+import { MushafText } from "@/features/ayah/MushafText";
 import { TranslationText } from "@/features/ayah/TranslationText";
 import { quranEditions } from "@/features/data/quranEditions";
 import { translationEditions } from "@/features/data/translationEditions";
 import type { Edition } from "@/features/edition/api/editions";
 import { EditionMultiSelectForm } from "@/features/edition/components/EditionMultiSelect";
 import { EditionSingleSelect } from "@/features/edition/components/EditionSingleSelect";
-import { fetchAyahs } from "@/features/quran/api/ayah";
+import { type Ayah, type AyahQFC, fetchAyahs, fetchAyahsQFC } from "@/features/quran/api/ayah";
 import {
   cormorant_garamond,
   indopak,
@@ -49,12 +50,21 @@ export default async function Page({
   ).filter((edition): edition is Edition => edition !== undefined);
 
   const quranEditionsFetched = await Promise.all(quranEditionsSelectedData.map(async (quranEdition) => {
-    const ayahs = await fetchAyahs(
-      quranEdition.id,
-      parseInt(params?.number ?? "1"),
-      quranEdition.slug,
-    );
-    return { ...quranEdition, ayahs };
+    if (quranEdition.type === "QURAN_QFC") {
+      const version = quranEdition.id === 1 ? "v1" : "v2";
+      const ayahs = await fetchAyahsQFC(
+        version,
+        parseInt(params?.number ?? "1"),
+      );
+      return { ...quranEdition, ayahs };
+    } else {
+      const ayahs = await fetchAyahs(
+        quranEdition.id,
+        parseInt(params?.number ?? "1"),
+        quranEdition.slug,
+      );
+      return { ...quranEdition, ayahs };
+    }
   }));
 
   const translationEditionsFetched = await Promise.all(
@@ -73,6 +83,10 @@ export default async function Page({
 
   const fonts =
     `${taviraj.variable} ${cormorant_garamond.variable} ${lexend.variable} ${readex_pro.variable} ${indopak.variable} font-primary ${noto_sans_devanagari.variable} ${noto_nastaliq_urdu.variable} ${uthmanic.variable} ${noto_sans_arabic.variable}`;
+
+  function isAyahQFC(ayah: AyahQFC | Ayah): ayah is AyahQFC {
+    return (ayah as AyahQFC).page !== undefined;
+  }
 
   return (
     <main className={`mt-20 flex gap-4 flex-col ${fonts} items-center`}>
@@ -97,17 +111,27 @@ export default async function Page({
       <div className="flex flex-col gap-8 w-1/2 justify-center">
         {referenceAyahs.map((ayah, index) => (
           <div key={index} className="flex flex-col gap-6 justify-center">
-            <p className="-m-2">{ayah.ayahNumber}</p>
+            <p className="-m-2">{ayah.ayah}</p>
             {quranEditionsFetched.map((edition) => (
-              edition.ayahs[index]?.text && (
-                <AyahText
-                  text={edition.ayahs[index]!.text}
-                  editionId={edition.id}
-                  className="text-6xl"
-                  number={index + 1}
-                  key={index}
-                />
-              )
+              <div key={edition.id}>
+                {isAyahQFC(edition.ayahs[index])
+                  ? (
+                    <MushafText
+                      // @ts-ignore
+                      page={edition.ayahs[index].page.toString()}
+                      text={edition.ayahs[index].text}
+                      type={edition.id === 1 ? "v1" : "v2"}
+                    />
+                  )
+                  : (
+                    <AyahText
+                      text={edition.ayahs[index]!.text}
+                      editionId={edition.id}
+                      className="text-6xl"
+                      number={ayah.ayah}
+                    />
+                  )}
+              </div>
             ))}
             {translationEditionsFetched.map((edition) => (
               <div key={edition.id}>
@@ -116,7 +140,6 @@ export default async function Page({
                 )}
               </div>
             ))}
-
             <Separator />
           </div>
         ))}

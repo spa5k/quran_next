@@ -88,8 +88,9 @@ export const MiniSalahWidget = () => {
         return;
       }
       adhanAudioRef.current.play();
-      showNotification(nextPrayerName!); // Show notification
-      markAdhanAsPlayed(nextPrayerName!); // Mark Adhan as played
+
+      showNotification(currentPrayerName!); // Show notification
+      markAdhanAsPlayed(currentPrayerName!); // Mark Adhan as played
     };
 
     calculateCurrentPrayer();
