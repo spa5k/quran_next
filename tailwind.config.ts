@@ -71,6 +71,7 @@ const config = {
         uthmanic: ["var(--font-uthmanic)"],
         urdu: ["var(--font-urdu)"],
         arabic_noto: ["var(--font-arabic)"],
+        "mushaf-ligatures": ["\"Mushaf Ligatures\"", "sans-serif"],
       },
       keyframes: {
         "accordion-down": {
