@@ -83,7 +83,8 @@ export const MiniSalahWidget = () => {
       // Play Adhan and show notification if enabled and not already played
       if (
         !(playAdhan && adhanAudioRef.current && !isAdhanPlayed(currentPrayerName!)
-          && now.isSame(currentPrayerDetails?.time, "minute"))
+          && now.isSame(currentPrayerDetails?.time, "minute")
+          && (currentPrayerName === "none" || currentPrayerName === "sunrise"))
       ) {
         return;
       }

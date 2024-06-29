@@ -1,8 +1,6 @@
-import { Separator } from "@/components/ui/separator";
-import { AyahText } from "@/features/ayah/AyahText";
+import { AyahList } from "@/features/ayah/AyahList";
 import { DynamicFontSizer } from "@/features/ayah/FontResizer";
-import { MushafText } from "@/features/ayah/MushafText";
-import { TranslationText } from "@/features/ayah/TranslationText";
+import { QFCAyahList } from "@/features/ayah/QFCAyahList";
 import { quranEditions } from "@/features/data/quranEditions";
 import { translationEditions } from "@/features/data/translationEditions";
 import type { Edition } from "@/features/edition/api/editions";
@@ -50,31 +48,41 @@ export default async function Page({
   ).filter((edition): edition is Edition => edition !== undefined);
 
   const quranEditionsFetched = await Promise.all(quranEditionsSelectedData.map(async (quranEdition) => {
-    if (quranEdition.type === "QURAN_QFC") {
-      const version = quranEdition.id === 1 ? "v1" : "v2";
-      const ayahs = await fetchAyahsQFC(
-        version,
-        parseInt(params?.number ?? "1"),
-      );
-      return { ...quranEdition, ayahs };
-    } else {
-      const ayahs = await fetchAyahs(
-        quranEdition.id,
-        parseInt(params?.number ?? "1"),
-        quranEdition.slug,
-      );
-      return { ...quranEdition, ayahs };
+    try {
+      if (quranEdition.type === "QURAN_QFC") {
+        const version = quranEdition.id === 1 ? "v1" : "v2";
+        const ayahs = await fetchAyahsQFC(
+          version,
+          parseInt(params?.number ?? "1"),
+        );
+        return { ...quranEdition, ayahs };
+      } else {
+        const ayahs = await fetchAyahs(
+          quranEdition.id,
+          parseInt(params?.number ?? "1"),
+          quranEdition.slug,
+        );
+        return { ...quranEdition, ayahs };
+      }
+    } catch (error) {
+      console.error(`Failed to fetch ayahs for edition ${quranEdition.id}:`, error);
+      return { ...quranEdition, ayahs: [] };
     }
   }));
 
   const translationEditionsFetched = await Promise.all(
     translationEditionsSelectedData.map(async (translationEdition) => {
-      const ayahs = await fetchAyahs(
-        translationEdition.id,
-        parseInt(params?.number ?? "1"),
-        translationEdition.slug,
-      );
-      return { ...translationEdition, ayahs };
+      try {
+        const ayahs = await fetchAyahs(
+          translationEdition.id,
+          parseInt(params?.number ?? "1"),
+          translationEdition.slug,
+        );
+        return { ...translationEdition, ayahs };
+      } catch (error) {
+        console.error(`Failed to fetch ayahs for translation edition ${translationEdition.id}:`, error);
+        return { ...translationEdition, ayahs: [] };
+      }
     }),
   );
 
@@ -109,40 +117,23 @@ export default async function Page({
       <DynamicFontSizer />
 
       <div className="flex flex-col gap-8 w-1/2 justify-center">
-        {referenceAyahs.map((ayah, index) => (
-          <div key={index} className="flex flex-col gap-6 justify-center">
-            <p className="-m-2">{ayah.ayah}</p>
-            {quranEditionsFetched.map((edition) => (
-              <div key={edition.id}>
-                {isAyahQFC(edition.ayahs[index])
-                  ? (
-                    <MushafText
-                      // @ts-ignore
-                      page={edition.ayahs[index].page.toString()}
-                      text={edition.ayahs[index].text}
-                      type={edition.id === 1 ? "v1" : "v2"}
-                    />
-                  )
-                  : (
-                    <AyahText
-                      text={edition.ayahs[index]!.text}
-                      editionId={edition.id}
-                      className="text-6xl"
-                      number={ayah.ayah}
-                    />
-                  )}
-              </div>
-            ))}
-            {translationEditionsFetched.map((edition) => (
-              <div key={edition.id}>
-                {edition.ayahs[index]?.text && (
-                  <TranslationText text={edition.ayahs[index]!.text} editionId={edition.id} />
-                )}
-              </div>
-            ))}
-            <Separator />
-          </div>
-        ))}
+        {isAyahQFC(referenceAyahs[0])
+          ? (
+            <QFCAyahList
+              ayahs={quranEditionsFetched[0].ayahs as AyahQFC[]}
+              translationEditionsFetched={translationEditionsFetched}
+              version={quranEditionsFetched[0].id === 1 ? "v1" : "v2"}
+              key={quranEditionsFetched[0].id}
+            />
+          )
+          : (
+            <AyahList
+              quranEditionsFetched={quranEditionsFetched}
+              referenceAyahs={referenceAyahs as Ayah[]}
+              translationEditionsFetched={translationEditionsFetched}
+              key={quranEditionsFetched[0].id}
+            />
+          )}
       </div>
     </main>
   );
