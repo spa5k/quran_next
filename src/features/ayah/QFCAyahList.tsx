@@ -1,6 +1,6 @@
 "use client";
 
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@radix-ui/react-dropdown-menu";
 import { Virtuoso } from "react-virtuoso";
 import { type AyahQFC } from "../quran/api/ayah";
 import { MushafText } from "./MushafText";
@@ -14,14 +14,14 @@ interface QFCAyahListProps {
 
 export function QFCAyahList({ ayahs, version, translationEditionsFetched }: QFCAyahListProps) {
   return (
-    <div style={{ height: `800px`, overflow: "auto", position: "relative" }}>
+    <div>
       <Virtuoso
-        style={{ height: "100%" }}
+        useWindowScroll
         totalCount={ayahs.length}
         itemContent={(index) => {
           const ayah = ayahs[index];
           return (
-            <div className="flex flex-col gap-4" style={{ padding: "10px 0" }}>
+            <div>
               <MushafText page={ayah.page.toString()} text={ayah.text} type={version} />
               {translationEditionsFetched.map((edition: any) => (
                 <div key={edition.id}>
