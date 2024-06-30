@@ -4,15 +4,17 @@ import { AyahText } from "./AyahText";
 import { TranslationText } from "./TranslationText";
 
 type AyahListProps = {
-  referenceAyahs: Ayah[];
+  ayahs: Ayah[];
   quranEditionsFetched: { id: number; ayahs: (Ayah | AyahQFC)[] }[];
   translationEditionsFetched: { id: number; ayahs: { text: string }[] }[];
 };
 
-export const AyahList = ({ referenceAyahs, quranEditionsFetched, translationEditionsFetched }: AyahListProps) => {
+export const AyahList = (
+  { ayahs, quranEditionsFetched, translationEditionsFetched }: AyahListProps,
+) => {
   return (
     <>
-      {referenceAyahs.map((ayah, index) => (
+      {ayahs.map((ayah, index) => (
         <div key={index} className="flex flex-col gap-6 justify-center">
           <p className="-m-2">{ayah.ayah}</p>
           {quranEditionsFetched.map((edition) => (

@@ -129,7 +129,7 @@ export default async function Page({
           : (
             <AyahList
               quranEditionsFetched={quranEditionsFetched}
-              referenceAyahs={referenceAyahs as Ayah[]}
+              ayahs={referenceAyahs as Ayah[]}
               translationEditionsFetched={translationEditionsFetched}
               key={quranEditionsFetched[0].id}
             />

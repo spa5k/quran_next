@@ -1,4 +1,3 @@
-"use client";
 import clsx from "clsx";
 import { useEffect } from "react";
 import { twMerge } from "tailwind-merge";
@@ -11,8 +10,8 @@ export const MushafText = ({ page, text, type = "v1", className, ...props }: {
   className?: string;
   [x: string]: any;
 }) => {
-  // add extra zeroes on front until the text is 3 characters long
   const paddedPage = page.padStart(3, "0");
+
   useEffect(() => {
     loadFont(paddedPage, type);
   }, [paddedPage, type]);
