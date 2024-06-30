@@ -1,6 +1,5 @@
 import { AyahList } from "@/features/ayah/AyahList";
 import { DynamicFontSizer } from "@/features/ayah/FontResizer";
-import { QFCAyahList } from "@/features/ayah/QFCAyahList";
 import { quranEditions } from "@/features/data/quranEditions";
 import { translationEditions } from "@/features/data/translationEditions";
 import type { Edition } from "@/features/edition/api/editions";
@@ -18,6 +17,9 @@ import {
   taviraj,
   uthmanic,
 } from "@/lib/fonts";
+import dynamic from "next/dynamic";
+
+const QFCAyahList = dynamic(() => import("@/features/ayah/QFCAyahList"), { ssr: false });
 
 export default async function Page({
   searchParams,

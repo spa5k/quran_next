@@ -9,7 +9,7 @@ tasks:
   next_build:
     desc: "Build Next.js project"
     cmds:
-      - "pnpm next build"
+      - "NODE_ENV=production pnpm next build"
 
   next_start:
     desc: "Start Next.js project"

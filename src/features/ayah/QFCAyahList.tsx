@@ -29,7 +29,7 @@ const AyahItem = ({ index, data }: { index: number; data: any }) => {
   );
 };
 
-export function QFCAyahList({ ayahs, version, translationEditionsFetched }: QFCAyahListProps) {
+function QFCAyahList({ ayahs, version, translationEditionsFetched }: QFCAyahListProps) {
   return (
     <div className="flex flex-col gap-5">
       <WindowVirtualizer>
@@ -40,3 +40,5 @@ export function QFCAyahList({ ayahs, version, translationEditionsFetched }: QFCA
     </div>
   );
 }
+
+export default QFCAyahList;
