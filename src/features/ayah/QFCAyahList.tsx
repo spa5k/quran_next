@@ -2,7 +2,7 @@
 
 import { Separator } from "@/components/ui/separator";
 import { type AyahQFC } from "../quran/api/ayah";
-import { MushafText } from "./MushafText";
+import MushafText from "./MushafText";
 import { TranslationText } from "./TranslationText";
 
 interface QFCAyahListProps {

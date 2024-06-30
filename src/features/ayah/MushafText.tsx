@@ -1,9 +1,9 @@
 import clsx from "clsx";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { twMerge } from "tailwind-merge";
 import { loadFont } from "./utils/fontLoader";
 
-export const MushafText = ({ page, text, type = "v1", className, ...props }: {
+const MushafText = ({ page, text, type = "v1", className, ...props }: {
   page: string;
   text: string;
   type?: "v1" | "v2";
@@ -29,3 +29,6 @@ export const MushafText = ({ page, text, type = "v1", className, ...props }: {
     </p>
   );
 };
+
+// Memoize the component
+export default React.memo(MushafText);
