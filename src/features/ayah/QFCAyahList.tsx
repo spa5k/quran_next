@@ -1,7 +1,7 @@
 "use client";
 
 import { Separator } from "@/components/ui/separator";
-import { Virtuoso } from "react-virtuoso";
+import { WindowVirtualizer } from "virtua";
 import { type AyahQFC } from "../quran/api/ayah";
 import MushafText from "./MushafText";
 import { TranslationText } from "./TranslationText";
@@ -17,7 +17,7 @@ const AyahItem = ({ index, data }: { index: number; data: any }) => {
   const ayah = ayahs[index];
 
   return (
-    <div key={index} className="p-5">
+    <div key={index} className="m-8">
       <MushafText page={ayah.page.toString()} text={ayah.text} type={version} />
       {translationEditionsFetched.map((edition: any) => (
         <div key={edition.id}>
@@ -30,14 +30,13 @@ const AyahItem = ({ index, data }: { index: number; data: any }) => {
 };
 
 export function QFCAyahList({ ayahs, version, translationEditionsFetched }: QFCAyahListProps) {
-  const itemCount = ayahs.length;
-
   return (
-    <Virtuoso
-      useWindowScroll
-      totalCount={itemCount}
-      overscan={10}
-      itemContent={(index) => <AyahItem index={index} data={{ ayahs, version, translationEditionsFetched }} />}
-    />
+    <div className="flex flex-col gap-5">
+      <WindowVirtualizer>
+        {ayahs.map((ayah, index) => (
+          <AyahItem key={index} index={index} data={{ ayahs, version, translationEditionsFetched }} />
+        ))}
+      </WindowVirtualizer>
+    </div>
   );
 }
