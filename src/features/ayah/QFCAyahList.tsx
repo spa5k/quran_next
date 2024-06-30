@@ -1,7 +1,7 @@
 "use client";
-import { Separator } from "@radix-ui/react-dropdown-menu";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import React from "react";
+
+import { Separator } from "@/components/ui/separator";
+import { Virtuoso } from "react-virtuoso";
 import { type AyahQFC } from "../quran/api/ayah";
 import { MushafText } from "./MushafText";
 import { TranslationText } from "./TranslationText";
@@ -13,49 +13,28 @@ interface QFCAyahListProps {
 }
 
 export function QFCAyahList({ ayahs, version, translationEditionsFetched }: QFCAyahListProps) {
-  const parentRef = React.useRef<HTMLDivElement>(null);
-
-  const rowVirtualizer = useVirtualizer({
-    count: ayahs.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 100, // Adjust based on your item height
-  });
-
   return (
-    <div ref={parentRef} style={{ height: `500px`, overflow: "auto" }}>
-      <div
-        style={{
-          height: `${rowVirtualizer.getTotalSize()}px`,
-          width: "100%",
-          position: "relative",
-        }}
-      >
-        {rowVirtualizer.getVirtualItems().map((virtualItem) => {
-          const ayah = ayahs[virtualItem.index];
+    <div style={{ height: `800px`, overflow: "auto", position: "relative" }}>
+      <Virtuoso
+        style={{ height: "100%" }}
+        totalCount={ayahs.length}
+        itemContent={(index) => {
+          const ayah = ayahs[index];
           return (
-            <div
-              key={virtualItem.key}
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                transform: `translateY(${virtualItem.start}px)`,
-              }}
-            >
+            <div className="flex flex-col gap-4" style={{ padding: "10px 0" }}>
               <MushafText page={ayah.page.toString()} text={ayah.text} type={version} />
               {translationEditionsFetched.map((edition: any) => (
                 <div key={edition.id}>
-                  {edition.ayahs[virtualItem.index]?.text && (
-                    <TranslationText text={edition.ayahs[virtualItem.index]!.text} editionId={edition.id} />
+                  {edition.ayahs[index]?.text && (
+                    <TranslationText text={edition.ayahs[index]!.text} editionId={edition.id} />
                   )}
                 </div>
               ))}
               <Separator />
             </div>
           );
-        })}
-      </div>
+        }}
+      />
     </div>
   );
 }

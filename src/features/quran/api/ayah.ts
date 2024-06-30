@@ -127,7 +127,6 @@ export class RemoteAyahService extends AyahService {
     const ayahTextFile = await fetch(textFileUrl);
 
     const ayahLines = (await ayahTextFile.text()).trim().split("\n");
-    // const ayahLines = ayahTextFile.trim().split("\n");
 
     const chapter = quranData.chapters.find((ch) => ch.chapter === surahNumber);
 
@@ -136,20 +135,23 @@ export class RemoteAyahService extends AyahService {
     }
 
     const ayahs: AyahQFC[] = [];
+    // get start verse page number and end verse page number
+    const lineStart = chapter.verses[0].line;
+    const lineEnd = chapter.verses[chapter.verses.length - 1].line;
 
-    // Map each verse to its corresponding text line
-    chapter.verses.forEach((verse, index) => {
-      const text = ayahLines[index];
+    // use the lineStart as line number to get the verse
+    for (let i = lineStart; i <= lineEnd; i++) {
+      const text = ayahLines[i - 1];
       if (text) {
         ayahs.push({
-          id: verse.line,
+          id: i,
           surah: surahNumber,
-          ayah: verse.verse,
-          page: verse.page,
+          ayah: i,
+          page: chapter.verses.find((verse) => verse.line === i)?.page ?? 0,
           text,
         });
       }
-    });
+    }
 
     return ayahs;
   }
