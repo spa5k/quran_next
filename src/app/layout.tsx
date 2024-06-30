@@ -62,7 +62,7 @@ export default function RootLayout({
           <Providers>
             <TailwindIndicator />
             <ElectronIndicator />
-            <div className="flex h-screen border-collapse overflow-hidden">
+            <div className="flex  border-collapse overflow-hidden">
               <aside className="inset-y-0 left-0 z-10 hidden flex-col border-r bg-background sm:flex">
                 <NavigationLinks />
               </aside>
