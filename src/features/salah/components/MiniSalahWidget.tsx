@@ -7,7 +7,7 @@ import utc from "dayjs/plugin/utc";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getPrayerTimes, useLocationStore } from "../store/salahStore";
 import { LocationFetcher } from "./LocationFetcher";
 
@@ -29,86 +29,15 @@ export const MiniSalahWidget = () => {
   const [currentPrayerTime, setCurrentPrayerTime] = useState("");
   const [nextPrayerTime, setNextPrayerTime] = useState("");
   const [progress, setProgress] = useState(0);
-  const [retry, setRetry] = useState(false);
   const adhanAudioRef = useRef<HTMLAudioElement>(null);
 
   const path = usePathname();
-
-  useEffect(() => {
-    if (rehydrated && !currentLatitude && !currentLongitude) {
-      return;
-    }
-    if (!(prayerTimes && meta && sunnahTimes)) {
-      return;
-    }
-    const calculateCurrentPrayer = () => {
-      const now = dayjs().tz(meta.timezone);
-
-      const prayers = [
-        { name: "Fajr", time: dayjs(prayerTimes.fajr).tz(meta.timezone) },
-        { name: "Sunrise", time: dayjs(prayerTimes.sunrise).tz(meta.timezone) },
-        { name: "Dhuhr", time: dayjs(prayerTimes.dhuhr).tz(meta.timezone) },
-        { name: "Asr", time: dayjs(prayerTimes.asr).tz(meta.timezone) },
-        { name: "Maghrib", time: dayjs(prayerTimes.maghrib).tz(meta.timezone) },
-        { name: "Isha", time: dayjs(prayerTimes.isha).tz(meta.timezone) },
-        { name: "Last Third of the Night", time: dayjs(sunnahTimes.lastThirdOfTheNight).tz(meta.timezone) },
-        { name: "Midnight", time: dayjs(sunnahTimes.middleOfTheNight).tz(meta.timezone) },
-      ];
-
-      const prayerDetails = getPrayerTimes();
-
-      const currentPrayerName = prayerDetails?.prayerTimes.currentPrayer();
-      const nextPrayerName = prayerDetails?.prayerTimes.nextPrayer();
-      const timeForNextPrayer = prayers.find((prayer) => prayer.name.toLowerCase() === nextPrayerName)?.time;
-      const currentPrayerDetails = prayers.find((prayer) => prayer.name.toLowerCase() === currentPrayerName);
-
-      setCurrentPrayer(currentPrayerName!);
-      setNextPrayer(nextPrayerName!);
-      setCurrentPrayerTime(currentPrayerDetails?.time.format("h:mm A")!);
-      setNextPrayerTime(timeForNextPrayer?.format("h:mm A")!);
-
-      if (currentPrayerName === "isha" && nextPrayerName === "none") {
-        setNextPrayer("Last Third of the Night");
-        setNextPrayerTime(prayers.find((prayer) => prayer.name === "Last Third of the Night")?.time.format("h:mm A")!);
-        const timeForNextPrayer = prayers[6].time;
-        const totalDuration = timeForNextPrayer?.diff(currentPrayerDetails?.time);
-        const elapsedDuration = now.diff(currentPrayerDetails?.time);
-        const progressPercentage = (elapsedDuration / totalDuration!) * 100;
-
-        setProgress(progressPercentage);
-      } else {
-        const totalDuration = timeForNextPrayer?.diff(currentPrayerDetails?.time);
-        const elapsedDuration = now.diff(currentPrayerDetails?.time);
-        const progressPercentage = (elapsedDuration / totalDuration!) * 100;
-
-        setProgress(progressPercentage);
-      }
-
-      // Play Adhan and show notification if enabled and not already played
-      if (
-        !(playAdhan && adhanAudioRef.current && !isAdhanPlayed(currentPrayerName!)
-          && now.isSame(currentPrayerDetails?.time, "minute")
-          && (currentPrayerName === "none" || currentPrayerName === "sunrise"))
-      ) {
-        return;
-      }
-      adhanAudioRef.current.play();
-
-      showNotification(currentPrayerName!); // Show notification
-      markAdhanAsPlayed(currentPrayerName!); // Mark Adhan as played
-    };
-
-    calculateCurrentPrayer();
-    const interval = setInterval(calculateCurrentPrayer, 60_000); // Update every minute
-
-    return () => clearInterval(interval);
-  }, [prayerTimes, meta, playAdhan, sunnahTimes, rehydrated, currentLatitude, currentLongitude]);
 
   const showNotification = (prayerName: string) => {
     if (Notification.permission === "granted") {
       new Notification("Prayer Time", {
         body: `It's time for ${prayerName} prayer.`,
-        icon: "/aqsa.jpg", // Replace with your icon path
+        icon: "/aqsa.jpg",
       });
     }
   };
@@ -123,6 +52,76 @@ export const MiniSalahWidget = () => {
     playedPrayers.push(prayerName);
     localStorage.setItem("playedPrayers", JSON.stringify(playedPrayers));
   };
+
+  const calculateCurrentPrayer = useCallback(() => {
+    if (!(prayerTimes && meta && sunnahTimes)) {
+      return;
+    }
+
+    const now = dayjs().tz(meta.timezone);
+
+    const prayers = [
+      { name: "Fajr", time: dayjs(prayerTimes.fajr).tz(meta.timezone) },
+      { name: "Sunrise", time: dayjs(prayerTimes.sunrise).tz(meta.timezone) },
+      { name: "Dhuhr", time: dayjs(prayerTimes.dhuhr).tz(meta.timezone) },
+      { name: "Asr", time: dayjs(prayerTimes.asr).tz(meta.timezone) },
+      { name: "Maghrib", time: dayjs(prayerTimes.maghrib).tz(meta.timezone) },
+      { name: "Isha", time: dayjs(prayerTimes.isha).tz(meta.timezone) },
+      { name: "Last Third of the Night", time: dayjs(sunnahTimes.lastThirdOfTheNight).tz(meta.timezone) },
+      { name: "Midnight", time: dayjs(sunnahTimes.middleOfTheNight).tz(meta.timezone) },
+    ];
+
+    const prayerDetails = getPrayerTimes();
+
+    let currentPrayerName = prayerDetails?.prayerTimes.currentPrayer() as string;
+    const nextPrayerName = prayerDetails?.prayerTimes.nextPrayer();
+    let timeForNextPrayer = prayers.find((prayer) => prayer.name.toLowerCase() === nextPrayerName)?.time;
+    let currentPrayerDetails = prayers.find((prayer) => prayer.name.toLowerCase() === currentPrayerName);
+
+    if (currentPrayerName === "none" && nextPrayerName === "fajr") {
+      currentPrayerName = "Midnight";
+      currentPrayerDetails = prayers.find((prayer) => prayer.name === "Midnight");
+    }
+
+    setCurrentPrayer(currentPrayerName!);
+    setNextPrayer(nextPrayerName!);
+    setCurrentPrayerTime(currentPrayerDetails?.time.format("h:mm A")!);
+    setNextPrayerTime(timeForNextPrayer?.format("h:mm A")!);
+
+    if (currentPrayerName === "isha" && nextPrayerName === "none") {
+      setNextPrayer("Last Third of the Night");
+      setNextPrayerTime(prayers.find((prayer) => prayer.name === "Last Third of the Night")?.time.format("h:mm A")!);
+      timeForNextPrayer = prayers[6].time;
+    }
+
+    const totalDuration = timeForNextPrayer?.diff(currentPrayerDetails?.time);
+    const elapsedDuration = now.diff(currentPrayerDetails?.time);
+    const progressPercentage = (elapsedDuration / totalDuration!) * 100;
+
+    setProgress(progressPercentage);
+
+    if (
+      !(playAdhan && adhanAudioRef.current && !isAdhanPlayed(currentPrayerName!)
+        && now.isSame(currentPrayerDetails?.time, "minute")
+        && (currentPrayerName !== "none" && currentPrayerName !== "sunrise"))
+    ) {
+      return;
+    }
+    adhanAudioRef.current.play();
+    showNotification(currentPrayerName!);
+    markAdhanAsPlayed(currentPrayerName!);
+  }, [prayerTimes, meta, sunnahTimes, playAdhan]);
+
+  useEffect(() => {
+    if (rehydrated && !currentLatitude && !currentLongitude) {
+      return;
+    }
+
+    calculateCurrentPrayer();
+    const interval = setInterval(calculateCurrentPrayer, 60_000);
+
+    return () => clearInterval(interval);
+  }, [calculateCurrentPrayer, rehydrated, currentLatitude, currentLongitude]);
 
   useEffect(() => {
     if (Notification.permission !== "granted") {
@@ -155,20 +154,7 @@ export const MiniSalahWidget = () => {
     });
   }, [adhanAudioRef]);
 
-  if (retry && path != "/salah") {
-    return (
-      <div className="flex items-center justify-center">
-        <Button
-          onClick={() => setRetry(false)}
-          className="px-4 py-2"
-        >
-          Add location
-        </Button>
-      </div>
-    );
-  }
-
-  if (!prayerTimes && (!currentLatitude || !currentLongitude) && rehydrated) {
+  if (!prayerTimes && (!currentLongitude || !currentLatitude)) {
     return (
       <div className="flex items-center justify-center">
         {path == "/salah" || (
