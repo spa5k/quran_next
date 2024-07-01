@@ -17,7 +17,7 @@ const MushafText = ({ page, text, type = "v1", className, ...props }: {
     loadFont(paddedPage, type);
   }, [paddedPage, type]);
 
-  const fontFamily = `${type === "v1" ? "Mushaf Page" : "Mushaf2 Page"} ${paddedPage}`;
+  const fontFamily = `${type === "v1" ? "Mushaf_Page" : "Mushaf2_Page"}_${paddedPage}`;
 
   // if text contains "number,", or any number with comma then delete it
   text = text.replace(/(\d+),/g, "");
@@ -25,7 +25,12 @@ const MushafText = ({ page, text, type = "v1", className, ...props }: {
   const combinedClassName = twMerge(clsx(className, "ayah_text", "text-pretty", "leading-loose"));
 
   return (
-    <p style={{ fontFamily: `'${fontFamily}', sans-serif` }} className={combinedClassName} dir="rtl" {...props}>
+    <p
+      style={{ fontFamily: `'${fontFamily}', sans-serif`, wordBreak: "break-all" }}
+      className={combinedClassName}
+      dir="rtl"
+      {...props}
+    >
       {text}
     </p>
   );
