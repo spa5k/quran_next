@@ -177,8 +177,8 @@ export const MiniSalahWidget = () => {
   return (
     <Link href={"/salah"} prefetch={false}>
       <LocationFetcher />
-      <div className="flex items-center justify-center w-full ">
-        <div className="relative w-full bg-gray-200 rounded-md overflow-hidden">
+      <div className="flex items-center justify-center w-full text-secondary-foreground">
+        <div className="relative w-full bg-dot-thick-primary rounded-md overflow-hidden">
           <motion.div
             className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary to-green-400"
             initial={{ width: 0 }}
@@ -198,8 +198,10 @@ export const MiniSalahWidget = () => {
               </p>
               <p className="hidden sm:flex">{currentPrayerTime}</p>
             </div>
-            <div className="flex text-center items-center gap-4">
-              <p className="text-sm font-bold sm:text-xl">{nextPrayer.charAt(0).toUpperCase() + nextPrayer.slice(1)}</p>
+            <div className="flex text-center items-center gap-4 dark:text-primary">
+              <p className="text-sm font-bold sm:text-xl ">
+                {nextPrayer.charAt(0).toUpperCase() + nextPrayer.slice(1)}
+              </p>
               <p className="hidden sm:flex">{nextPrayerTime}</p>
             </div>
           </div>
