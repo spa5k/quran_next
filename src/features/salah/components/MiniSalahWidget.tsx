@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useGeolocation } from "@uidotdev/usehooks";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
@@ -10,6 +9,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { getPrayerTimes, useLocationStore } from "../store/salahStore";
+import { LocationFetcher } from "./LocationFetcher";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -18,12 +18,11 @@ export const MiniSalahWidget = () => {
   const {
     prayerTimes,
     meta,
-    setCoordinates,
-    calculatePrayerTimes,
     playAdhan,
     latitude: currentLatitude,
     rehydrated,
     sunnahTimes,
+    longitude: currentLongitude,
   } = useLocationStore();
   const [currentPrayer, setCurrentPrayer] = useState("");
   const [nextPrayer, setNextPrayer] = useState("");
@@ -35,17 +34,10 @@ export const MiniSalahWidget = () => {
 
   const path = usePathname();
 
-  const {
-    loading,
-    latitude,
-    longitude,
-  } = useGeolocation({
-    enableHighAccuracy: true,
-    timeout: 10_000,
-    maximumAge: 0,
-  });
-
   useEffect(() => {
+    if (rehydrated && !currentLatitude && !currentLongitude) {
+      return;
+    }
     if (!(prayerTimes && meta && sunnahTimes)) {
       return;
     }
@@ -74,11 +66,23 @@ export const MiniSalahWidget = () => {
       setNextPrayer(nextPrayerName!);
       setCurrentPrayerTime(currentPrayerDetails?.time.format("h:mm A")!);
       setNextPrayerTime(timeForNextPrayer?.format("h:mm A")!);
-      const totalDuration = timeForNextPrayer?.diff(currentPrayerDetails?.time);
-      const elapsedDuration = now.diff(currentPrayerDetails?.time);
-      const progressPercentage = (elapsedDuration / totalDuration!) * 100;
 
-      setProgress(progressPercentage);
+      if (currentPrayerName === "isha" && nextPrayerName === "none") {
+        setNextPrayer("Last Third of the Night");
+        setNextPrayerTime(prayers.find((prayer) => prayer.name === "Last Third of the Night")?.time.format("h:mm A")!);
+        const timeForNextPrayer = prayers[6].time;
+        const totalDuration = timeForNextPrayer?.diff(currentPrayerDetails?.time);
+        const elapsedDuration = now.diff(currentPrayerDetails?.time);
+        const progressPercentage = (elapsedDuration / totalDuration!) * 100;
+
+        setProgress(progressPercentage);
+      } else {
+        const totalDuration = timeForNextPrayer?.diff(currentPrayerDetails?.time);
+        const elapsedDuration = now.diff(currentPrayerDetails?.time);
+        const progressPercentage = (elapsedDuration / totalDuration!) * 100;
+
+        setProgress(progressPercentage);
+      }
 
       // Play Adhan and show notification if enabled and not already played
       if (
@@ -98,7 +102,7 @@ export const MiniSalahWidget = () => {
     const interval = setInterval(calculateCurrentPrayer, 60_000); // Update every minute
 
     return () => clearInterval(interval);
-  }, [prayerTimes, meta, playAdhan, sunnahTimes]);
+  }, [prayerTimes, meta, playAdhan, sunnahTimes, rehydrated, currentLatitude, currentLongitude]);
 
   const showNotification = (prayerName: string) => {
     if (Notification.permission === "granted") {
@@ -151,25 +155,6 @@ export const MiniSalahWidget = () => {
     });
   }, [adhanAudioRef]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      // if location permission is granted, and the state is rehydrated, and the latitude/longitude from state is null, then fetch the geocoordinates
-      if (!loading && latitude && longitude && rehydrated && !currentLatitude) {
-        setCoordinates(latitude.toString(), longitude.toString());
-        calculatePrayerTimes();
-      }
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, [loading, latitude, longitude, rehydrated, currentLatitude]);
-
-  if (loading && !latitude && !longitude) {
-    return (
-      <div className="flex items-center justify-center">
-        <div className="text-center">Loading...</div>
-      </div>
-    );
-  }
-
   if (retry && path != "/salah") {
     return (
       <div className="flex items-center justify-center">
@@ -183,7 +168,7 @@ export const MiniSalahWidget = () => {
     );
   }
 
-  if (!prayerTimes && (!longitude || !latitude)) {
+  if (!prayerTimes && (!currentLatitude || !currentLongitude) && rehydrated) {
     return (
       <div className="flex items-center justify-center">
         {path == "/salah" || (
@@ -205,6 +190,7 @@ export const MiniSalahWidget = () => {
 
   return (
     <Link href={"/salah"} prefetch={false}>
+      <LocationFetcher />
       <div className="flex items-center justify-center w-full ">
         <div className="relative w-full bg-gray-200 rounded-md overflow-hidden">
           <motion.div
