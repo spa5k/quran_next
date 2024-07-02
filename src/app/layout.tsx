@@ -1,29 +1,12 @@
 import { ModeToggle } from "@/components/generic/ThemseSwitcher";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { MiniSalahWidget } from "@/features/salah/components/MiniSalahWidget";
-import { PanelLeft, Search, User } from "lucide-react";
+import { PanelLeft, Search } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { ElectronIndicator } from "../components/generic/ElectronIndicator";
 import { TailwindIndicator } from "../components/generic/TailwindIndicator";
 import { MobileNavigationLinks } from "../components/layout/MobileNavigationLinks";
@@ -86,30 +69,11 @@ export default function RootLayout({
                         <MobileNavigationLinks />
                       </SheetContent>
                     </Sheet>
-                    <Breadcrumb className="hidden md:flex">
-                      <BreadcrumbList>
-                        <BreadcrumbItem>
-                          <BreadcrumbLink asChild>
-                            <Link href="#">Dashboard</Link>
-                          </BreadcrumbLink>
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator />
-                        <BreadcrumbItem>
-                          <BreadcrumbLink asChild>
-                            <Link href="#">Products</Link>
-                          </BreadcrumbLink>
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator />
-                        <BreadcrumbItem>
-                          <BreadcrumbPage>Edit Product</BreadcrumbPage>
-                        </BreadcrumbItem>
-                      </BreadcrumbList>
-                    </Breadcrumb>
-                    <div className="relative ml-auto flex-1">
+                    <div className="relative ml-auto flex-1 md:w-1/4 md:max-w-[45%] w-full">
                       <MiniSalahWidget />
                     </div>
 
-                    <div className="relative ml-auto flex-1 md:grow-0">
+                    <div className="md:relative ml-auto flex-1 md:grow-0 hidden md:flex">
                       <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Input
                         type="search"
@@ -118,25 +82,6 @@ export default function RootLayout({
                       />
                     </div>
                     <ModeToggle />
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="overflow-hidden rounded-full"
-                        >
-                          <User width={36} height={36} />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>Settings</DropdownMenuItem>
-                        <DropdownMenuItem>Support</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>Logout</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
                   </header>
                   {/* <AuroraBackground> */}
                   <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 z-10">

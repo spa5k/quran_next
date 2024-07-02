@@ -57,7 +57,7 @@ export const EditionSingleSelect = (
           value={selectedEdition}
           onValueChange={handleChange}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full md:w-[310px]">
             <Badge
               className="text-xs"
               color="primary"
@@ -67,11 +67,13 @@ export const EditionSingleSelect = (
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              {parsedEditions.map((edition) => (
-                <SelectItem key={edition.value} value={edition.value}>
-                  {edition.label}
-                </SelectItem>
-              ))}
+              {parsedEditions.map((edition) => {
+                return (
+                  <SelectItem key={edition.value} value={edition.value}>
+                    {edition.label}
+                  </SelectItem>
+                );
+              })}
             </SelectGroup>
           </SelectContent>
         </Select>

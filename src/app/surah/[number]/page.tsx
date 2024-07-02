@@ -100,7 +100,7 @@ export default async function Page({
 
   return (
     <main className={`mt-20 flex gap-4 flex-col ${fonts} items-center`}>
-      <div className="flex gap-4">
+      <div className="flex-col gap-4 md:flex md:flex-row md:gap-8">
         <EditionSingleSelect
           edition={quranEditions}
           queryParam="q"

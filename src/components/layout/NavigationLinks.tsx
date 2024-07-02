@@ -5,20 +5,52 @@ import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { ArrowLeft, ArrowRight, Book, Clock, Home, LineChart, Moon, Settings } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation"; // Import useRouter
+import { usePathname } from "next/navigation";
 import { useState } from "react";
+
+// Reusable TooltipLink component
+const TooltipLink = ({ href, icon: Icon, label, isOpen, isActive }: {
+  href: string;
+  icon: React.ElementType;
+  label: string;
+  isOpen: boolean;
+  isActive: boolean;
+}) => (
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <Link
+        href={href}
+        className={cn(
+          "flex h-9 w-full px-4 items-center justify-items-start rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8",
+          isActive && "bg-accent text-accent-foreground",
+        )}
+      >
+        <Icon className="h-5 w-5" />
+        <span className={isOpen ? "pl-4" : "sr-only"}>{label}</span>
+      </Link>
+    </TooltipTrigger>
+    <TooltipContent side="right">{label}</TooltipContent>
+  </Tooltip>
+);
 
 export const NavigationLinks = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [status, setStatus] = useState(false);
   const pathname = usePathname();
+
   const handleToggle = () => {
     setStatus(true);
     setIsOpen(!isOpen);
     setTimeout(() => setStatus(false), 500);
   };
 
-  const isActive = (path: string) => pathname === path; // Function to check if the route is active
+  const isActive = (path: string) => {
+    if (path === "/") {
+      return pathname === path;
+    }
+    return pathname.startsWith(path);
+  };
+
   return (
     <div
       className={cn(
@@ -34,105 +66,61 @@ export const NavigationLinks = () => {
             className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:text-base"
           >
             <Moon className="h-4 w-4 transition-all hover:scale-110" />
-            <span className={"sr-only"}>Acme Inc</span>
+            <span className={"sr-only"}>Quran</span>
           </Link>
           <div className="pt-20 flex flex-col items-center gap-4 px-2">
+            <TooltipLink
+              href="/"
+              icon={Home}
+              label="Home"
+              isOpen={isOpen}
+              isActive={isActive("/")}
+            />
+            <TooltipLink
+              href="/quran"
+              icon={Book}
+              label="Quran"
+              isOpen={isOpen}
+              isActive={isActive("/quran") || isActive("/surah")}
+            />
+            <TooltipLink
+              href="/salah"
+              icon={Clock}
+              label="Salah"
+              isOpen={isOpen}
+              isActive={isActive("/salah")}
+            />
+            <TooltipLink
+              href="#"
+              icon={LineChart}
+              label="Analytics"
+              isOpen={isOpen}
+              isActive={isActive("#")}
+            />
             <Tooltip>
               <TooltipTrigger asChild>
-                <Link
-                  href="/"
-                  className={cn(
-                    "flex h-9 w-full px-4 items-center justify-items-start rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8",
-                    isActive("/") && "bg-accent text-accent-foreground", // Apply active background class
-                  )}
-                >
-                  <Home className="h-5 w-5" />
-                  <span className={isOpen ? "pl-4" : "sr-only"}>Home</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">Home</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href="/quran"
-                  className={cn(
-                    "flex h-9 w-full px-4 items-center justify-items-start rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8",
-                    isActive("/quran") && "bg-accent text-accent-foreground", // Apply active background class
-                  )}
-                >
-                  <Book className="h-5 w-5" />
-                  <span className={isOpen ? "pl-4" : "sr-only"}>Quran</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">Quran</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href="/salah"
-                  className={cn(
-                    "flex h-9 w-full px-4 items-center justify-items-start rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8",
-                    isActive("/salah") && "bg-accent text-accent-foreground", // Apply active background class
-                  )}
-                >
-                  <Clock className="h-5 w-5" />
-                  <span className={isOpen ? "pl-4" : "sr-only"}>Salah</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">Salah</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href="#"
-                  className={cn(
-                    "flex h-9 w-full items-center px-4 justify-items-start rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8",
-                    isActive("#") && "bg-accent text-accent-foreground", // Apply active background class
-                  )}
-                >
-                  <LineChart className="h-5 w-5" />
-                  <span className={isOpen ? "pl-4" : "sr-only"}>Analytics</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">Analytics</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href={"#"}
+                <button
                   onClick={handleToggle}
                   className="flex h-9 w-full items-center px-4 justify-items-start rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8"
                 >
-                  {isOpen ? <ArrowLeft className="h-5 w-5" /> : <ArrowRight className="h-5 w-5 " />}
+                  {isOpen ? <ArrowLeft className="h-5 w-5" /> : <ArrowRight className="h-5 w-5" />}
                   <span className={isOpen ? "pl-4" : "sr-only"}>
                     {isOpen ? "Collapse" : "Open"}
                   </span>
-                </Link>
+                </button>
               </TooltipTrigger>
               <TooltipContent side="right">
                 {isOpen ? "Collapse" : "Open"}
               </TooltipContent>
             </Tooltip>
+            <TooltipLink
+              href="/settings"
+              icon={Settings}
+              label="Settings"
+              isOpen={isOpen}
+              isActive={isActive("#")}
+            />
           </div>
-        </nav>
-
-        <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                href="#"
-                className={cn(
-                  "flex h-9 w-full items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8",
-                  isActive("#") && "bg-accent text-accent-foreground", // Apply active background class
-                )}
-              >
-                <Settings className="h-5 w-5" />
-                <span className={isOpen ? "pl-4" : "sr-only"}>Settings</span>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">Settings</TooltipContent>
-          </Tooltip>
         </nav>
       </TooltipProvider>
     </div>

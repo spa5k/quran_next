@@ -13,7 +13,7 @@ export const DynamicFontSizer: React.FC = () => {
     return minFont + (step - 1) * ((maxFont - minFont) / (maxStep - minStep));
   };
 
-  const defaultStep = 1;
+  const defaultStep = 4;
   const [fontStep, setFontStep] = useState<number>(defaultStep);
 
   useEffect(() => {

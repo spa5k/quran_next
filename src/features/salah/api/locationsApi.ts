@@ -47,15 +47,6 @@ export const fetchLocationData = async (
     }
     const meta = metaData.data[0].meta;
 
-    console.log({
-      country,
-      lat: location.lat,
-      lng: location.lng,
-      name: location.name,
-      city: cityName,
-      meta,
-    });
-
     return {
       country,
       lat: location.lat,
