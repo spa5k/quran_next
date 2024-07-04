@@ -1,5 +1,6 @@
 "use client";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { FastForwardIcon, PauseIcon, PlayIcon, RewindIcon } from "lucide-react";
@@ -108,6 +109,8 @@ export function QuranRecitationBar() {
   if (!currentSurah || !currentAyah) {
     return null;
   }
+  // also remove 64 kbps, 128 ewt etc
+  const cleanedReciter = currentReciter?.replace(/_/g, " ");
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-background rounded-t-lg border p-6 w-full mx-auto flex flex-col gap-4">
@@ -124,9 +127,12 @@ export function QuranRecitationBar() {
         </div>
         <div className="flex flex-row items-center gap-2">
           <div className="bg-muted rounded-full w-8 h-8 flex items-center justify-center">
-            <img src="/placeholder.svg" width={32} height={32} alt="Reciter" className="rounded-full object-cover" />
+            <Avatar>
+              <AvatarImage src="https://avatar.iran.liara.run/public/boy" alt={cleanedReciter} />
+              <AvatarFallback>{cleanedReciter![0]}</AvatarFallback>
+            </Avatar>
           </div>
-          <div className="text-sm font-medium">{currentReciter}</div>
+          <div className="text-sm font-medium">{cleanedReciter}</div>
         </div>
         <div className="flex flex-row items-center gap-2">
           <Button variant="ghost" size="icon" className="w-8 h-8" onClick={handleRewind}>

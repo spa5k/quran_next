@@ -7,7 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
 import { Howl } from "howler";
 import { Check, Copy, Pause, Play } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { WindowVirtualizer } from "virtua";
 import { type Ayah, type AyahQFC } from "../quran/api/ayah";
 import { ayahCount } from "../recitation/data/ayahCount";
@@ -25,9 +25,13 @@ type CombinedAyahListProps = {
   version?: "v1" | "v2";
 };
 
-const CombinedAyahList = (
-  { ayahs, quranEditionsFetched, translationEditionsFetched, fallbackAyahs, version }: CombinedAyahListProps,
-) => {
+const CombinedAyahList = ({
+  ayahs,
+  quranEditionsFetched,
+  translationEditionsFetched,
+  fallbackAyahs,
+  version,
+}: CombinedAyahListProps) => {
   const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -76,7 +80,7 @@ const CombinedAyahList = (
     }
   };
 
-  const playAyah = (index: number) => {
+  const playAyah = useCallback((index: number) => {
     stopCurrentHowl();
 
     const currentAyah = ayahs[index];
@@ -91,10 +95,11 @@ const CombinedAyahList = (
 
     setHowl(newHowl);
     setIsPlaying(true);
+    setAyah(index + 1);
     newHowl.play();
-  };
+  }, [ayahs, currentReciter, setIsPlaying]);
 
-  const moveToNextAyah = () => {
+  const moveToNextAyah = useCallback(() => {
     if (currentAyah && currentSurah) {
       const totalAyahs = ayahCount[currentSurah - 1];
       if (currentAyah < totalAyahs) {
@@ -106,11 +111,12 @@ const CombinedAyahList = (
         playAyah(1);
       }
     }
-  };
+  }, [currentAyah, currentSurah, playAyah, setAyah, setSurah]);
 
-  const togglePlayPause = () => {
+  const togglePlayPause = (index: number) => {
+    console.log({ currentAyah, index: index + 1 });
     if (howl) {
-      if (howl.playing()) {
+      if (isPlaying && currentAyah === index + 1) {
         howl.pause();
         setIsPlaying(false);
       } else {
@@ -120,6 +126,7 @@ const CombinedAyahList = (
     } else {
       playAyah(0);
     }
+    setAyah(index + 1);
   };
 
   useEffect(() => {
@@ -134,9 +141,7 @@ const CombinedAyahList = (
 
   return (
     <div className="flex flex-col gap-5" ref={containerRef} onCopy={handleCopyEvent}>
-      <p className="font-arabic_noto">
-        <Toaster />
-      </p>
+      <Toaster />
       <WindowVirtualizer>
         {ayahs.map((ayah, index) => (
           <div key={index} className="flex flex-col gap-6 justify-center mt-4">
@@ -145,18 +150,23 @@ const CombinedAyahList = (
               <Button
                 onClick={() => handleCopy(fallbackAyahs[index].text, index)}
                 size="icon"
+                aria-label={`Copy Ayah ${index + 1}`}
               >
                 {copiedIndex === index ? <Check /> : <Copy />}
               </Button>
               <Button
                 onClick={() => {
-                  if (isPlaying && currentAyah === index) {
-                    togglePlayPause();
+                  console.log("Clicked", { index: index + 1, currentAyah });
+                  if (isPlaying && currentAyah === index + 1) {
+                    togglePlayPause(index);
+                    console.log("Pause", index);
                   } else {
+                    console.log("Play", index);
                     playAyah(index);
                   }
                 }}
                 size="icon"
+                aria-label={`Play/Pause Ayah ${index + 1}`}
               >
                 {isPlaying && currentAyah === index + 1 ? <Pause /> : <Play />}
               </Button>
