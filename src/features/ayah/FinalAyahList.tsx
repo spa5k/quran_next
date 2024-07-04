@@ -10,6 +10,7 @@ import { Check, Copy, Pause, Play } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { WindowVirtualizer } from "virtua";
 import { type Ayah, type AyahQFC } from "../quran/api/ayah";
+import { useRecitationStore } from "../recitation/store/recitationStore";
 import { AyahText } from "./AyahText";
 import MushafText from "./MushafText";
 import { TranslationText } from "./TranslationText";
@@ -30,6 +31,7 @@ const CombinedAyahList = (
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [currentAyahIndex, setCurrentAyahIndex] = useState<number | null>(null);
   const [howl, setHowl] = useState<Howl | null>(null);
+  const currentReciter = useRecitationStore((state) => state.currentReciter);
 
   const isQFC = (ayah: Ayah | AyahQFC): ayah is AyahQFC => "page" in ayah;
 
@@ -81,7 +83,7 @@ const CombinedAyahList = (
 
     const surahNumber = String(ayahs[index].surah).padStart(3, "0");
     const ayahNumber = String(ayahs[index].ayah).padStart(3, "0");
-    const url = `https://everyayah.com/data/Abdullah_Matroud_128kbps/${surahNumber}${ayahNumber}.mp3`;
+    const url = `https://everyayah.com/data/${currentReciter}/${surahNumber}${ayahNumber}.mp3`;
 
     const newHowl = new Howl({
       src: [url],
@@ -95,6 +97,13 @@ const CombinedAyahList = (
     setHowl(newHowl);
     setCurrentAyahIndex(index);
     newHowl.play();
+  };
+
+  const pauseAyah = () => {
+    if (howl) {
+      howl.stop();
+      setCurrentAyahIndex(null);
+    }
   };
 
   return (
@@ -114,7 +123,13 @@ const CombinedAyahList = (
                 {copiedIndex === index ? <Check /> : <Copy />}
               </Button>
               <Button
-                onClick={() => playAyah(index)}
+                onClick={() => {
+                  if (howl?.playing() && currentAyahIndex === index) {
+                    pauseAyah();
+                  } else {
+                    playAyah(index);
+                  }
+                }}
                 size="icon"
               >
                 {currentAyahIndex === index ? <Pause /> : <Play />}

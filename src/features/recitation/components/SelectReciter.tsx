@@ -1,4 +1,4 @@
-// SelectReciter.tsx
+"use client";
 import {
   Select,
   SelectContent,
