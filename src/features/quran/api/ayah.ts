@@ -146,7 +146,7 @@ export class RemoteAyahService extends AyahService {
         ayahs.push({
           id: i,
           surah: surahNumber,
-          ayah: i,
+          ayah: chapter.verses.find((verse) => verse.line === i)?.verse ?? 0,
           page: chapter.verses.find((verse) => verse.line === i)?.page ?? 0,
           text,
         });
