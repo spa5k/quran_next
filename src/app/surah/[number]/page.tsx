@@ -1,4 +1,4 @@
-import { AyahList } from "@/features/ayah/AyahList";
+import CombinedAyahList from "@/features/ayah/FinalAyahList";
 import { DynamicFontSizer } from "@/features/ayah/FontResizer";
 import { quranEditions } from "@/features/data/quranEditions";
 import { translationEditions } from "@/features/data/translationEditions";
@@ -139,26 +139,15 @@ export default async function Page({
       </div>
       <DynamicFontSizer />
 
-      <div className="flex flex-col gap-8 w-1/2 justify-center">
-        {isAyahQFC(referenceAyahs[0])
-          ? (
-            <QFCAyahList
-              ayahs={quranEditionsFetched[0].ayahs as AyahQFC[]}
-              translationEditionsFetched={translationEditionsFetched}
-              version={quranEditionsFetched[0].id === 1 ? "v1" : "v2"}
-              key={quranEditionsFetched[0].id}
-              fallbackAyahs={fallbackAyahs}
-            />
-          )
-          : (
-            <AyahList
-              quranEditionsFetched={quranEditionsFetched}
-              ayahs={referenceAyahs as Ayah[]}
-              translationEditionsFetched={translationEditionsFetched}
-              fallbackAyahs={fallbackAyahs} // Pass the fallback ayahs
-              key={quranEditionsFetched[0].id}
-            />
-          )}
+      <div className="flex flex-col gap-8 w-full justify-center md:w-1/2">
+        <CombinedAyahList
+          ayahs={referenceAyahs}
+          fallbackAyahs={fallbackAyahs}
+          quranEditionsFetched={quranEditionsFetched}
+          translationEditionsFetched={translationEditionsFetched}
+          key={quranEditionsFetched[0].id}
+          version={isAyahQFC(referenceAyahs[0]) ? (quranEditionsFetched[0].id === 1 ? "v1" : "v2") : undefined}
+        />
       </div>
     </main>
   );
