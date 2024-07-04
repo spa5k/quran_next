@@ -2,7 +2,6 @@
 
 import { Form, FormControl, FormDescription, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import MultiSelectFormField from "@/components/ui/multi-select";
-import { useToast } from "@/components/ui/use-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -21,9 +20,10 @@ export const EditionMultiSelectForm = (
   { edition, queryParam, placeholder, description, defaultSelected = [], maxSelectable = 3 }:
     EditionMultiSelectFormProps,
 ) => {
-  const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // check if the data is there in defaultSelected and name is not null
 
   // Initialize form with default values from query parameters or props
   const form = useForm<{ quran: string[] }>({

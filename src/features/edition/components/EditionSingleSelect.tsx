@@ -2,7 +2,6 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/components/ui/use-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { Edition } from "../api/editions";
@@ -18,7 +17,6 @@ interface EditionSingleSelectFormProps {
 export const EditionSingleSelect = (
   { edition, queryParam, placeholder, description, defaultSelected = "" }: EditionSingleSelectFormProps,
 ) => {
-  const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedEdition, setSelectedEdition] = useState<string>(defaultSelected);

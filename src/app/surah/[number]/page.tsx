@@ -6,6 +6,7 @@ import type { Edition } from "@/features/edition/api/editions";
 import { EditionMultiSelectForm } from "@/features/edition/components/EditionMultiSelect";
 import { EditionSingleSelect } from "@/features/edition/components/EditionSingleSelect";
 import { type Ayah, type AyahQFC, fetchAyahs, fetchAyahsQFC } from "@/features/quran/api/ayah";
+import { SelectReciter } from "@/features/recitation/components/SelectReciter";
 import {
   cormorant_garamond,
   indopak,
@@ -17,9 +18,6 @@ import {
   taviraj,
   uthmanic,
 } from "@/lib/fonts";
-import dynamic from "next/dynamic";
-
-const QFCAyahList = dynamic(() => import("@/features/ayah/QFCAyahList"), { ssr: false });
 
 export default async function Page({
   searchParams,
@@ -35,13 +33,7 @@ export default async function Page({
   params?: { number: string };
 }): Promise<JSX.Element> {
   function parseEditions(editions: string): number[] {
-    const editionIds = editions.split(",").map((edition) => parseInt(edition.trim())).filter(edition =>
-      !isNaN(edition)
-    );
-    if (!editionIds.includes(146)) {
-      editionIds.push(146); // Ensure edition 146 is always included
-    }
-    return editionIds;
+    return editions.split(",").map((edition) => parseInt(edition.trim())).filter(edition => !isNaN(edition));
   }
 
   const quranEditionsSelected = parseEditions(searchParams?.q ?? "145");
@@ -138,7 +130,7 @@ export default async function Page({
         />
       </div>
       <DynamicFontSizer />
-
+      <SelectReciter />
       <div className="flex flex-col gap-8 w-full justify-center md:w-1/2">
         <CombinedAyahList
           ayahs={referenceAyahs}

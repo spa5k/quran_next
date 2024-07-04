@@ -126,6 +126,10 @@ const MultiSelectFormField = React.forwardRef<
                     {selectedValues.map((value) => {
                       const option = options.find((o) => o.value === value);
                       const IconComponent = option?.icon;
+
+                      if (!option || !value) {
+                        return null;
+                      }
                       return (
                         <Badge
                           key={value}
