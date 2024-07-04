@@ -179,7 +179,7 @@ const MultiSelectFormField = React.forwardRef<
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-[200px] p-0 drop-shadow-sm"
+          className="w-[314px] p-0 drop-shadow-sm"
           align="start"
           onEscapeKeyDown={() => setIsPopoverOpen(false)}
         >
@@ -205,27 +205,23 @@ const MultiSelectFormField = React.forwardRef<
                       }}
                       disabled={!isSelected && selectedValuesSet.current.size >= (maxSelectable || options.length)}
                       className={clsx(
-                        "cursor-pointer",
+                        "cursor-pointer gap-4",
                         !isSelected && selectedValuesSet.current.size >= (maxSelectable || options.length)
                           && "bg-neutral-300 text-opacity-60 text-accent-foreground cursor-not-allowed",
                       )}
                     >
-                      <div
-                        className={cn(
-                          "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary-foreground dark:border-secondary-foreground",
-                          isSelected
-                            ? "bg-primary text-primary-foreground"
-                            : "opacity-50 [&_svg]:invisible",
-                        )}
-                      >
-                        <CheckIcon className="h-4 w-4" />
-                      </div>
+                      {isSelected ? <CheckIcon className="h-4 w-4" /> : <div className="w-4 h-4" />}
                       {option.icon && <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
                       <span>{option.label}</span>
                     </CommandItem>
                   );
                 })}
-                <span className="text-sm text-muted-foreground mx-3">Can select up to {maxSelectable} items</span>
+                <div className="flex mt-2">
+                  <div className="w-6 h-4" />
+                  <span className="text-sm text-muted-foreground mx-3 ml-4">
+                    Can select up to {maxSelectable} items
+                  </span>
+                </div>
               </CommandGroup>
               <CommandSeparator />
               <CommandGroup>
