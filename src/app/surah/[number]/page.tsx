@@ -35,7 +35,13 @@ export default async function Page({
   params?: { number: string };
 }): Promise<JSX.Element> {
   function parseEditions(editions: string): number[] {
-    return editions.split(",").map((edition) => parseInt(edition.trim())).filter(edition => !isNaN(edition));
+    const editionIds = editions.split(",").map((edition) => parseInt(edition.trim())).filter(edition =>
+      !isNaN(edition)
+    );
+    if (!editionIds.includes(146)) {
+      editionIds.push(146); // Ensure edition 146 is always included
+    }
+    return editionIds;
   }
 
   const quranEditionsSelected = parseEditions(searchParams?.q ?? "145");
@@ -88,6 +94,21 @@ export default async function Page({
     }),
   );
 
+  // Fetch the fallback edition (ID 146)
+  const fallbackEdition = quranEditions.find((edition) => edition.id === 146);
+  let fallbackAyahs: Ayah[] = [];
+  if (fallbackEdition) {
+    try {
+      fallbackAyahs = await fetchAyahs(
+        fallbackEdition.id,
+        parseInt(params?.number ?? "1"),
+        fallbackEdition.slug,
+      );
+    } catch (error) {
+      console.error(`Failed to fetch ayahs for fallback edition 146:`, error);
+    }
+  }
+
   // Assuming the first Quran edition is the reference for ayah order
   const referenceAyahs = quranEditionsFetched[0]?.ayahs || [];
 
@@ -126,6 +147,7 @@ export default async function Page({
               translationEditionsFetched={translationEditionsFetched}
               version={quranEditionsFetched[0].id === 1 ? "v1" : "v2"}
               key={quranEditionsFetched[0].id}
+              fallbackAyahs={fallbackAyahs}
             />
           )
           : (
@@ -133,6 +155,7 @@ export default async function Page({
               quranEditionsFetched={quranEditionsFetched}
               ayahs={referenceAyahs as Ayah[]}
               translationEditionsFetched={translationEditionsFetched}
+              fallbackAyahs={fallbackAyahs} // Pass the fallback ayahs
               key={quranEditionsFetched[0].id}
             />
           )}
