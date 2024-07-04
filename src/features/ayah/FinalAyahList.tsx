@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
-import { Check, Copy } from "lucide-react";
+import { Howl } from "howler";
+import { Check, Copy, Pause, Play } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { WindowVirtualizer } from "virtua";
 import { type Ayah, type AyahQFC } from "../quran/api/ayah";
@@ -27,6 +28,8 @@ const CombinedAyahList = (
   const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [currentAyahIndex, setCurrentAyahIndex] = useState<number | null>(null);
+  const [howl, setHowl] = useState<Howl | null>(null);
 
   const isQFC = (ayah: Ayah | AyahQFC): ayah is AyahQFC => "page" in ayah;
 
@@ -71,6 +74,29 @@ const CombinedAyahList = (
     }
   };
 
+  const playAyah = (index: number) => {
+    if (howl) {
+      howl.stop();
+    }
+
+    const surahNumber = String(ayahs[index].surah).padStart(3, "0");
+    const ayahNumber = String(ayahs[index].ayah).padStart(3, "0");
+    const url = `https://everyayah.com/data/Abdullah_Matroud_128kbps/${surahNumber}${ayahNumber}.mp3`;
+
+    const newHowl = new Howl({
+      src: [url],
+      onend: () => {
+        if (index < ayahs.length - 1) {
+          playAyah(index + 1);
+        }
+      },
+    });
+
+    setHowl(newHowl);
+    setCurrentAyahIndex(index);
+    newHowl.play();
+  };
+
   return (
     <div className="flex flex-col gap-5" ref={containerRef} onCopy={handleCopyEvent}>
       <p className="font-arabic_noto">
@@ -86,6 +112,12 @@ const CombinedAyahList = (
                 size="icon"
               >
                 {copiedIndex === index ? <Check /> : <Copy />}
+              </Button>
+              <Button
+                onClick={() => playAyah(index)}
+                size="icon"
+              >
+                {currentAyahIndex === index ? <Pause /> : <Play />}
               </Button>
             </div>
             <div key={quranEditionsFetched[0].id}>
