@@ -4,7 +4,7 @@ tasks:
   next_dev:
     desc: "Development server for Next.js"
     cmds:
-      - "pnpm next dev --turbo"
+      - "pnpm web dev --turbo"
 
   next_build:
     desc: "Build Next.js project"

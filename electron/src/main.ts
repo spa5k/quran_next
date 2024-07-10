@@ -91,11 +91,12 @@ async function startNextJSServer() {
   try {
     const nextJSPort = await getPort({ portRange: [30011, 50000] });
     const appPath = app.getAppPath();
-    const parentDir = path.dirname(appPath);
-    const grandParentDir = path.dirname(parentDir);
-    const webDir = path.join(grandParentDir, "web");
+    const webDir = path.join(appPath, "web");
 
-    console.log("webDir:", webDir);
+    log.info(
+      "Web directory:------------------------------------------------",
+      webDir,
+    );
 
     await startServer({
       dir: webDir,
@@ -128,6 +129,12 @@ app.whenReady().then(async () => {
     const honoPort = await startHonoServer();
     console.log("Hono server started on port:", `http://localhost:${honoPort}`);
     ipcMain.handle("getHonoPort", () => honoPort);
+    const appPath = app.getAppPath();
+    const webDir = path.join(appPath, "web");
+    log.info(
+      "Web directory:------------------------------------------------",
+      webDir,
+    );
 
     const latestReleaseVersion = await getLatestReleaseVersion(
       "spa5k",
