@@ -3,13 +3,13 @@ import { app, BrowserWindow, ipcMain, shell } from "electron";
 import log from "electron-log";
 import settings from "electron-settings";
 import { getPort } from "get-port-please";
-import { startServer } from "next/dist/server/lib/start-server.js";
+import { startServer } from "next/dist/server/lib/start-server";
 import * as path from "path";
 import { join } from "path";
-import { startHonoServer } from "./server/index.js";
-import downloadFile from "./utils/downloader.js";
-import { nextConfig } from "./utils/nextconfig.js";
-import { getLatestRelease, getLatestReleaseVersion } from "./utils/releases.js";
+import { startHonoServer } from "./server/index";
+import downloadFile from "./utils/downloader";
+import { nextConfig } from "./utils/nextconfig";
+import { getLatestRelease, getLatestReleaseVersion } from "./utils/releases";
 
 process.env.__NEXT_PRIVATE_STANDALONE_CONFIG = JSON.stringify(nextConfig);
 
@@ -27,7 +27,6 @@ function createLoadingWindow(): BrowserWindow {
       nodeIntegration: true,
       contextIsolation: false,
     },
-    // backgroundMaterial: "acrylic",
   });
 
   const url = join(__dirname, "..", "public", "loading.html");
@@ -90,12 +89,9 @@ function createWindow(): BrowserWindow {
 async function startNextJSServer() {
   try {
     const nextJSPort = await getPort({ portRange: [30011, 50000] });
-    const appPath = app.getAppPath();
-    const webDir = path.join(appPath, "web");
-
-    log.info(
-      "Web directory:------------------------------------------------",
-      webDir,
+    const webDir = path.join(
+      path.dirname(path.dirname(app.getAppPath())),
+      "web",
     );
 
     await startServer({
@@ -127,14 +123,8 @@ app.whenReady().then(async () => {
     ipcMain.on("ping", () => log.info("pong"));
 
     const honoPort = await startHonoServer();
-    console.log("Hono server started on port:", `http://localhost:${honoPort}`);
+    log.info("Hono server started on port:", `http://localhost:${honoPort}`);
     ipcMain.handle("getHonoPort", () => honoPort);
-    const appPath = app.getAppPath();
-    const webDir = path.join(appPath, "web");
-    log.info(
-      "Web directory:------------------------------------------------",
-      webDir,
-    );
 
     const latestReleaseVersion = await getLatestReleaseVersion(
       "spa5k",
@@ -156,7 +146,7 @@ app.whenReady().then(async () => {
 
       downloadFile(mainWindow!, latestReleaseUrl, { filename: "quran.db" })
         .then(() => {
-          console.log("Download completed successfully");
+          log.info("Download completed successfully");
           settings.set("lastReleaseVersion", latestReleaseVersion);
         })
         .catch((error) => {

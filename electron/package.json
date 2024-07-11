@@ -6,9 +6,13 @@
     "email": "admin@saybackend.com",
     "url": "https://saybackend.com"
   },
+  "homepage": "https://saybackend.com",
   "main": "./build/main.js",
   "scripts": {
     "dist": "electron-builder --dir",
+    "linux": "electron-builder --linux deb",
+    "win": "electron-builder --win",
+    "mac": "electron-builder --mac",
     "postinstall": "electron-builder install-app-deps",
     "start": "NODE_ENV=development electron .",
     "build": "tsup",
@@ -51,6 +55,8 @@
   "build": {
     "asar": true,
     "executableName": "Quran",
+    "asarUnpack": "**\\*.{node,dll}",
+    "appId": "com.saybackend.quran",
     "files": [
       "build"
     ],
