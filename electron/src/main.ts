@@ -89,11 +89,8 @@ function createWindow(): BrowserWindow {
 
 async function startNextJSServer() {
   try {
-    const nextJSPort = await getPort({ portRange: [30011, 50000] });
-    const appPath = app.getAppPath();
-    const parentDir = path.dirname(appPath);
-    const grandParentDir = path.dirname(parentDir);
-    const webDir = path.join(grandParentDir, "web");
+    const nextJSPort = await getPort({ portRange: [30_011, 50_000] });
+    const webDir = path.join(app.getAppPath(), "app");
 
     console.log("webDir:", webDir);
 
@@ -131,7 +128,7 @@ app.whenReady().then(async () => {
 
     const latestReleaseVersion = await getLatestReleaseVersion(
       "spa5k",
-      "quran_data",
+      "quran_data"
     );
 
     const lastReleaseVersion = await settings.get("lastReleaseVersion");
@@ -141,7 +138,7 @@ app.whenReady().then(async () => {
     if (latestReleaseVersion === lastReleaseVersion) {
       log.info(
         "No new release found in the repository. Last release is up to date.",
-        lastReleaseVersion,
+        lastReleaseVersion
       );
     } else {
       const latestReleaseUrl = await getLatestRelease("spa5k", "quran_data");

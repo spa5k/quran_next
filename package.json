@@ -8,7 +8,7 @@
     "name": "Quran.com",
     "email": "abcd@gmail.com"
   },
-  "main": "main/main.js",
+  "main": "build/main.js",
   "scripts": {
     "next:dev": "next dev",
     "next:build": "next build",
@@ -104,23 +104,42 @@
   "build": {
     "asar": true,
     "executableName": "Quran",
-    "files": [
-      "main"
+    "appId": "com.saybackend.quran",
+    "asarUnpack": [
+      "node_modules/next",
+      "node_modules/@img",
+      "node_modules/sharp",
+      "**\\*.{node,dll}"
     ],
-    "productName": "Quran",
-    "extraFiles": [
+    "files": [
+      "build",
       {
         "from": ".next/standalone",
-        "to": "web"
+        "to": "app",
+        "filter": [
+          "!**/.env",
+          "!**/package.json"
+        ]
       },
       {
         "from": ".next/static",
-        "to": "web/.next/static"
+        "to": "app/.next/static"
       },
       {
         "from": "public",
-        "to": "web/public"
+        "to": "app/public"
       }
-    ]
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "linux": {
+      "target": [
+        "deb"
+      ],
+      "category": "Development"
+    }
   }
 }
