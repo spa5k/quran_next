@@ -13,68 +13,83 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { reciters } from "@/features/recitation/data/reciters";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { useRecitationStore } from "../store/recitationStore";
 
 export function SelectReciter() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setReciter, setAyah } = useRecitationStore();
-  const DEFAULT_RECITER = useRecitationStore((state) => state.currentReciter);
-  const [selectedReciter, setSelectedReciter] = useState<string>(DEFAULT_RECITER ?? "Abdul_Basit_Murattal_64kbps");
-  const [selectedQuality, setSelectedQuality] = useState<number>(64);
-  const [, setCurrentAyah] = useState<string>("1");
+  const {
+    setReciter,
+    setAyah,
+    setSelectedReciter,
+    setSelectedQuality,
+    setCurrentAyah,
+    selectedReciter,
+    selectedQuality,
+  } = useRecitationStore();
 
   const parsedReciters = reciters.map((reciter) => ({
     label: reciter.style ? `${reciter.reciter_name} (${reciter.style})` : reciter.reciter_name,
-    value: `${reciter.folder_name}_${selectedQuality}kbps`,
+    value: `${reciter.folder_name}`,
     qualities: reciter.quality,
+    folder: `${reciter.folder_name}_${selectedQuality}kbps`,
   }));
 
-  const updateQueryParam = (param: string, value: string) => {
+  const updateQueryParams = useCallback((params: Record<string, string>) => {
     const currentParams = new URLSearchParams(window.location.search);
-    if (value) {
-      currentParams.set(param, value);
-    } else {
-      currentParams.delete(param);
-    }
+    Object.keys(params).forEach((key) => {
+      if (params[key]) {
+        currentParams.set(key, params[key]);
+      } else {
+        currentParams.delete(key);
+      }
+    });
     const newQueryString = currentParams.toString().replace(/%2C/g, ",");
     router.push(`?${newQueryString}`);
-  };
+  }, [router]);
 
   useEffect(() => {
-    const reciterParam = searchParams.get("r");
-    const qualityParam = searchParams.get("ql");
-    const initialReciter = reciterParam || DEFAULT_RECITER;
+    const reciterParam = searchParams.get("reciter");
+    const qualityParam = searchParams.get("quality");
+    const initialReciter = reciterParam || selectedReciter;
     const initialQuality = qualityParam ? parseInt(qualityParam, 10) : 64;
     const initialAyah = "1";
-    setSelectedReciter(initialReciter ?? "Abdul_Basit_Murattal_64kbps");
+    setSelectedReciter(initialReciter ?? "Abdul_Basit_Murattal");
     setSelectedQuality(initialQuality);
     setCurrentAyah(initialAyah);
-    setReciter(initialReciter ?? "Abdul_Basit_Murattal_64kbps");
+    setReciter(initialReciter ?? "Abdul_Basit_Murattal");
     setAyah(parseInt(initialAyah, 10));
-  }, [searchParams, setReciter, setAyah, DEFAULT_RECITER]);
+  }, [searchParams, setReciter, setAyah, setSelectedReciter, setSelectedQuality, setCurrentAyah, selectedReciter]);
 
   useEffect(() => {
     const reciter = parsedReciters.find(r => r.value === selectedReciter);
     if (reciter) {
       const lowestQuality = Math.min(...reciter.qualities);
-      if (selectedQuality !== lowestQuality) {
+      if (!reciter.qualities.includes(selectedQuality)) {
         setSelectedQuality(lowestQuality);
-        updateQueryParam("ql", lowestQuality.toString());
+        updateQueryParams({ reciter: selectedReciter, quality: lowestQuality.toString() });
       }
     }
-  }, [selectedReciter, parsedReciters, selectedQuality]);
+  }, [selectedReciter, parsedReciters, selectedQuality, setSelectedQuality, updateQueryParams]);
 
   const handleReciterChange = (value: string) => {
     setSelectedReciter(value);
     setReciter(value);
-    updateQueryParam("r", value);
+    const reciter = parsedReciters.find(r => r.value === value);
+
+    if (!reciter) {
+      return;
+    }
+    const lowestQuality = Math.min(...reciter.qualities);
+    setSelectedQuality(lowestQuality);
+    updateQueryParams({ reciter: value, quality: lowestQuality.toString() });
   };
 
   const handleQualityChange = (quality: number) => {
     setSelectedQuality(quality);
-    updateQueryParam("ql", quality.toString());
+    const reciter = parsedReciters.find(r => r.value === selectedReciter);
+    updateQueryParams({ reciter: reciter?.value ?? selectedReciter, quality: quality.toString() });
   };
 
   return (

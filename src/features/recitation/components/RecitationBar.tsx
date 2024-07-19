@@ -11,7 +11,7 @@ import { useRecitationStore } from "../store/recitationStore";
 import { getHowlInstance, stopCurrentHowl } from "../utils/howl";
 
 export function QuranRecitationBar() {
-  const { currentReciter, currentAyah, isPlaying, setIsPlaying, currentSurah, setSurah, setAyah } =
+  const { currentReciter, currentAyah, isPlaying, setIsPlaying, currentSurah, setSurah, setAyah, selectedQuality } =
     useRecitationStore();
   const [howl, setHowl] = useState<Howl | null>(null);
   const [duration, setDuration] = useState<number>(0);
@@ -67,7 +67,7 @@ export function QuranRecitationBar() {
 
     const surahNumber = String(surah).padStart(3, "0");
     const ayahNumber = String(ayah).padStart(3, "0");
-    const url = `https://everyayah.com/data/${currentReciter}/${surahNumber}${ayahNumber}.mp3`;
+    const url = `https://everyayah.com/data/${currentReciter}_${selectedQuality}kbps/${surahNumber}${ayahNumber}.mp3`;
 
     const newHowl = getHowlInstance(url);
 

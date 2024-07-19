@@ -35,7 +35,7 @@ const CombinedAyahList = ({
   const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const { currentReciter, currentAyah, isPlaying, setIsPlaying, currentSurah, setSurah, setAyah } =
+  const { currentReciter, currentAyah, isPlaying, setIsPlaying, currentSurah, setSurah, setAyah, selectedQuality } =
     useRecitationStore();
   const [howl, setHowl] = useState<Howl | null>(null);
 
@@ -89,7 +89,7 @@ const CombinedAyahList = ({
 
     const surahNumber = String(surah).padStart(3, "0");
     const ayahNumber = String(ayah).padStart(3, "0");
-    const url = `https://everyayah.com/data/${currentReciter}/${surahNumber}${ayahNumber}.mp3`;
+    const url = `https://everyayah.com/data/${currentReciter}_${selectedQuality}kbps/${surahNumber}${ayahNumber}.mp3`;
 
     const newHowl = getHowlInstance(url);
 
