@@ -1,4 +1,3 @@
-// store.ts
 import { create } from "zustand";
 
 interface RecitationState {
@@ -12,8 +11,7 @@ interface RecitationState {
   setIsPlaying: (isPlaying: boolean) => void;
 }
 
-const DEFAULT_RECITER = "Abdul_Basit_Murattal_64kbps"; // Set your default reciter here
-
+const DEFAULT_RECITER = "Abdul_Basit_Murattal_64kbps";
 export const useRecitationStore = create<RecitationState>((set) => ({
   currentReciter: DEFAULT_RECITER,
   currentSurah: null,

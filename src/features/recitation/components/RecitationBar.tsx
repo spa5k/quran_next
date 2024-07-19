@@ -91,19 +91,21 @@ export function QuranRecitationBar() {
   };
 
   const handleRewind = () => {
-    if (howl) {
-      const newTime = Math.max(0, (howl.seek() as number) - 10);
-      howl.seek(newTime);
-      setCurrentTime(newTime);
+    if (!howl) {
+      return;
     }
+    const newTime = Math.max(0, (howl.seek() as number) - 10);
+    howl.seek(newTime);
+    setCurrentTime(newTime);
   };
 
   const handleFastForward = () => {
-    if (howl) {
-      const newTime = Math.min(duration, (howl.seek() as number) + 10);
-      howl.seek(newTime);
-      setCurrentTime(newTime);
+    if (!howl) {
+      return;
     }
+    const newTime = Math.min(duration, (howl.seek() as number) + 10);
+    howl.seek(newTime);
+    setCurrentTime(newTime);
   };
 
   if (!currentSurah || !currentAyah) {
