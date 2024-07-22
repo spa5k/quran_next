@@ -33,7 +33,6 @@ export function SelectReciter() {
     label: reciter.style ? `${reciter.reciter_name} (${reciter.style})` : reciter.reciter_name,
     value: `${reciter.folder_name}`,
     qualities: reciter.quality,
-    folder: `${reciter.folder_name}_${selectedQuality}kbps`,
   }));
 
   const updateQueryParams = useCallback((params: Record<string, string>) => {

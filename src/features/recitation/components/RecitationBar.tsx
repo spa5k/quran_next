@@ -7,6 +7,7 @@ import { FastForwardIcon, PauseIcon, PlayIcon, RewindIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ayahCount } from "../data/ayahCount";
+import { reciters } from "../data/reciters";
 import { useRecitationStore } from "../store/recitationStore";
 import { getHowlInstance, stopCurrentHowl } from "../utils/howl";
 
@@ -16,6 +17,7 @@ export function QuranRecitationBar() {
   const [howl, setHowl] = useState<Howl | null>(null);
   const [duration, setDuration] = useState<number>(0);
   const [currentTime, setCurrentTime] = useState<number>(0);
+  const [timings, setTimings] = useState<number[]>([]);
 
   const params = useParams() as { number: string };
 
@@ -26,24 +28,40 @@ export function QuranRecitationBar() {
   }, [currentSurah, params.number, setSurah]);
 
   useEffect(() => {
+    if (currentReciter && currentSurah) {
+      const folder = reciters.find((reciter) => reciter.folder_name === currentReciter)?.slug;
+      fetch(`https://raw.githubusercontent.com/spa5k/quran_timings_api/master/everyayah/${folder}/${currentSurah}.json`)
+        .then((response) => response.json())
+        .then((data: number[]) => {
+          // add a zero infront of the first ayah timing
+          data.unshift(0);
+          setTimings(data);
+        })
+        .catch((error) => console.error("Error fetching timings:", error));
+    }
+  }, [currentReciter, currentSurah]);
+
+  useEffect(() => {
     if (!howl) {
       return;
     }
     howl.on("end", () => {
       setIsPlaying(false);
-      setCurrentTime(0);
       moveToNextAyah();
     });
 
     howl.on("play", () => {
-      setDuration(howl.duration());
+      const duration = howl.duration() as number + timings[currentAyah!];
+      setDuration(duration);
     });
 
     const interval = setInterval(() => {
-      if (howl.playing()) {
-        setCurrentTime(howl.seek() as number);
+      if (!howl.playing()) {
+        return;
       }
-    }, 1000);
+      const newTime = timings[currentAyah! - 1] / 1000 + howl.seek() as number;
+      setCurrentTime(newTime);
+    }, 100);
 
     return () => clearInterval(interval);
   }, [howl, setIsPlaying]);
@@ -54,10 +72,6 @@ export function QuranRecitationBar() {
       if (currentAyah < totalAyahs) {
         setAyah(currentAyah + 1);
         playAyah(currentAyah + 1);
-      } else if (currentSurah < ayahCount.length) {
-        setSurah(currentSurah + 1);
-        setAyah(1);
-        playAyah(1, currentSurah + 1);
       }
     }
   };
@@ -111,8 +125,18 @@ export function QuranRecitationBar() {
   if (!currentSurah || !currentAyah) {
     return null;
   }
-  // also remove 64 kbps, 128 ewt etc
   const cleanedReciter = currentReciter?.replace(/_/g, " ");
+
+  const finalTiming = timings[timings.length - 1];
+
+  const formatTime = (timeInMilliseconds: number) => {
+    const hours = Math.floor(timeInMilliseconds / 3_600_000);
+    const minutes = Math.floor(timeInMilliseconds / 60_000);
+    const seconds = Math.floor((timeInMilliseconds % 60_000) / 1000);
+    return hours > 0
+      ? `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+      : `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-background rounded-t-lg border p-6 w-full mx-auto flex flex-col gap-4">
@@ -153,7 +177,7 @@ export function QuranRecitationBar() {
           <Slider
             className="w-full [&>span:first-child]:h-1 [&>span:first-child]:bg-primary [&_[role=slider]]:bg-primary [&_[role=slider]]:w-3 [&_[role=slider]]:h-3 [&_[role=slider]]:border-0 [&>span:first-child_span]:bg-primary [&_[role=slider]:focus-visible]:ring-0 [&_[role=slider]:focus-visible]:ring-offset-0 [&_[role=slider]:focus-visible]:scale-105 [&_[role=slider]:focus-visible]:transition-transform"
             value={[currentTime]}
-            max={duration}
+            max={finalTiming / 1000}
             onValueChange={(value) => {
               if (howl) {
                 howl.seek(value[0]);
@@ -163,9 +187,9 @@ export function QuranRecitationBar() {
           />
           <div className="flex flex-row items-center justify-between">
             <div className="text-sm text-muted-foreground">
-              {new Date(currentTime * 1000).toISOString().substr(14, 5)}
+              {formatTime(currentTime * 1000)}
             </div>
-            <div className="text-sm text-muted-foreground">{new Date(duration * 1000).toISOString().substr(14, 5)}</div>
+            <div className="text-sm text-muted-foreground">{formatTime(finalTiming)}</div>
           </div>
         </div>
       </div>
