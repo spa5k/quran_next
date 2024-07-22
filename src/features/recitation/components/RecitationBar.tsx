@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { FastForwardIcon, PauseIcon, PlayIcon, RewindIcon } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ayahCount } from "../data/ayahCount";
 import { reciters } from "../data/reciters";
 import { useRecitationStore } from "../store/recitationStore";
@@ -33,13 +33,36 @@ export function QuranRecitationBar() {
       fetch(`https://raw.githubusercontent.com/spa5k/quran_timings_api/master/everyayah/${folder}/${currentSurah}.json`)
         .then((response) => response.json())
         .then((data: number[]) => {
-          // add a zero infront of the first ayah timing
           data.unshift(0);
           setTimings(data);
         })
         .catch((error) => console.error("Error fetching timings:", error));
     }
   }, [currentReciter, currentSurah]);
+
+  const playAyah = useCallback((ayah = currentAyah, surah = currentSurah) => {
+    stopCurrentHowl();
+
+    const surahNumber = String(surah).padStart(3, "0");
+    const ayahNumber = String(ayah).padStart(3, "0");
+    const url = `https://everyayah.com/data/${currentReciter}_${selectedQuality}kbps/${surahNumber}${ayahNumber}.mp3`;
+
+    const newHowl = getHowlInstance(url);
+
+    setHowl(newHowl);
+    setIsPlaying(true);
+    newHowl.play();
+  }, [currentReciter, selectedQuality, currentAyah, currentSurah, setIsPlaying]);
+
+  const moveToNextAyah = useCallback(() => {
+    if (currentAyah && currentSurah) {
+      const totalAyahs = ayahCount[currentSurah - 1];
+      if (currentAyah < totalAyahs) {
+        setAyah(currentAyah + 1);
+        playAyah(currentAyah + 1);
+      }
+    }
+  }, [currentAyah, currentSurah, playAyah, setAyah]);
 
   useEffect(() => {
     if (!howl) {
@@ -59,38 +82,14 @@ export function QuranRecitationBar() {
       if (!howl.playing()) {
         return;
       }
-      const newTime = timings[currentAyah! - 1] / 1000 + howl.seek() as number;
+      const newTime = timings[currentAyah! - 1] / 1000 + (howl.seek() as number);
       setCurrentTime(newTime);
-    }, 100);
+    }, 10);
 
     return () => clearInterval(interval);
-  }, [howl, setIsPlaying]);
+  }, [howl, setIsPlaying, timings, currentAyah, moveToNextAyah]);
 
-  const moveToNextAyah = () => {
-    if (currentAyah && currentSurah) {
-      const totalAyahs = ayahCount[currentSurah - 1];
-      if (currentAyah < totalAyahs) {
-        setAyah(currentAyah + 1);
-        playAyah(currentAyah + 1);
-      }
-    }
-  };
-
-  const playAyah = (ayah = currentAyah, surah = currentSurah) => {
-    stopCurrentHowl();
-
-    const surahNumber = String(surah).padStart(3, "0");
-    const ayahNumber = String(ayah).padStart(3, "0");
-    const url = `https://everyayah.com/data/${currentReciter}_${selectedQuality}kbps/${surahNumber}${ayahNumber}.mp3`;
-
-    const newHowl = getHowlInstance(url);
-
-    setHowl(newHowl);
-    setIsPlaying(true);
-    newHowl.play();
-  };
-
-  const togglePlayPause = () => {
+  const togglePlayPause = useCallback(() => {
     if (howl) {
       if (howl.playing()) {
         howl.pause();
@@ -102,41 +101,42 @@ export function QuranRecitationBar() {
     } else {
       playAyah();
     }
-  };
+  }, [howl, playAyah, setIsPlaying]);
 
-  const handleRewind = () => {
+  const handleRewind = useCallback(() => {
     if (!howl) {
       return;
     }
     const newTime = Math.max(0, (howl.seek() as number) - 10);
     howl.seek(newTime);
     setCurrentTime(newTime);
-  };
+  }, [howl]);
 
-  const handleFastForward = () => {
+  const handleFastForward = useCallback(() => {
     if (!howl) {
       return;
     }
     const newTime = Math.min(duration, (howl.seek() as number) + 10);
     howl.seek(newTime);
     setCurrentTime(newTime);
-  };
+  }, [howl, duration]);
 
-  if (!currentSurah || !currentAyah) {
-    return null;
-  }
   const cleanedReciter = currentReciter?.replace(/_/g, " ");
 
-  const finalTiming = timings[timings.length - 1];
+  const finalTiming = useMemo(() => timings[timings.length - 1], [timings]);
 
-  const formatTime = (timeInMilliseconds: number) => {
+  const formatTime = useCallback((timeInMilliseconds: number) => {
     const hours = Math.floor(timeInMilliseconds / 3_600_000);
     const minutes = Math.floor(timeInMilliseconds / 60_000);
     const seconds = Math.floor((timeInMilliseconds % 60_000) / 1000);
     return hours > 0
       ? `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
       : `${minutes}:${seconds.toString().padStart(2, "0")}`;
-  };
+  }, []);
+
+  if (!currentSurah || !currentAyah) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-background rounded-t-lg border p-6 w-full mx-auto flex flex-col gap-4">
@@ -175,7 +175,7 @@ export function QuranRecitationBar() {
         </div>
         <div className="flex flex-col gap-2">
           <Slider
-            className="w-full [&>span:first-child]:h-1 [&>span:first-child]:bg-primary [&_[role=slider]]:bg-primary [&_[role=slider]]:w-3 [&_[role=slider]]:h-3 [&_[role=slider]]:border-0 [&>span:first-child_span]:bg-primary [&_[role=slider]:focus-visible]:ring-0 [&_[role=slider]:focus-visible]:ring-offset-0 [&_[role=slider]:focus-visible]:scale-105 [&_[role=slider]:focus-visible]:transition-transform"
+            className="w-full transition-all duration-300 ease-in-out [&>span:first-child]:h-1 [&>span:first-child]:bg-primary [&_[role=slider]]:bg-primary [&_[role=slider]]:w-3 [&_[role=slider]]:h-3 [&_[role=slider]]:border-0 [&>span:first-child_span]:bg-primary [&_[role=slider]:focus-visible]:ring-0 [&_[role=slider]:focus-visible]:ring-offset-0 [&_[role=slider]:focus-visible]:scale-105 [&_[role=slider]:focus-visible]:transition-transform"
             value={[currentTime]}
             max={finalTiming / 1000}
             onValueChange={(value) => {
