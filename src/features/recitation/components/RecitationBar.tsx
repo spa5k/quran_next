@@ -4,21 +4,40 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import AyahPlayer from "@/features/ayah/AyahPlayer";
+import { useQuery } from "@tanstack/react-query";
 import { FastForwardIcon, PauseIcon, PlayIcon, RewindIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ayahCount } from "../data/ayahCount";
 import { reciters } from "../data/reciters";
 import { useRecitationStore } from "../store/recitationStore";
+import type { Timings } from "../types/timingTypes";
+
+const fetchTimings = async (reciterSlug: string, surah: number, style: string) => {
+  const response = await fetch(
+    `https://raw.githubusercontent.com/spa5k/quran_timings_api/master/data/${style}/${reciterSlug}/${surah}.json`,
+  );
+  if (!response.ok) {
+    throw new Error("Network response was not ok");
+  }
+  return response.json() as Promise<Timings>;
+};
 
 export function QuranRecitationBar() {
-  const { currentReciter, currentAyah, currentSurah, setSurah, isPlaying, setIsPlaying } = useRecitationStore();
+  const { currentReciter, currentAyah, currentSurah, setSurah, isPlaying, setIsPlaying, step, setStep } =
+    useRecitationStore();
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [sliderValue, setSliderValue] = useState<number>(0);
-  const [duration, setDuration] = useState<number>(0);
   const [isSeeking, setIsSeeking] = useState<boolean>(false);
 
   const params = useParams() as { number: string };
+
+  const reciter = reciters.find((reciter) => reciter.slug === currentReciter);
+
+  const { data: timings, error } = useQuery({
+    queryKey: ["timings", currentReciter, currentSurah, reciter?.slug],
+    queryFn: () => fetchTimings(reciter!.slug, currentSurah!, reciter!.style),
+    enabled: !!currentReciter && !!currentSurah,
+  });
 
   useEffect(() => {
     if (!currentSurah) {
@@ -27,38 +46,34 @@ export function QuranRecitationBar() {
   }, [currentSurah, params.number, setSurah]);
 
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
+    if (audioRef.current && timings) {
+      const handleTimeUpdate = () => {
+        const currentTime = audioRef.current!.currentTime;
+        const currentAyahIndex = timings.findIndex((timing) =>
+          timing.start <= currentTime && timing.end >= currentTime
+        );
+        if (currentAyahIndex !== -1 && currentAyahIndex + 1 !== currentAyah) {
+          setStep(currentAyahIndex + 1);
+        }
+      };
 
-    const updateSlider = () => {
-      if (!isSeeking) {
-        setSliderValue(audio.currentTime);
-      }
-    };
-
-    const setAudioDuration = () => {
-      setDuration(audio.duration);
-    };
-
-    audio.addEventListener("timeupdate", updateSlider);
-    audio.addEventListener("loadedmetadata", setAudioDuration);
-
-    return () => {
-      audio.removeEventListener("timeupdate", updateSlider);
-      audio.removeEventListener("loadedmetadata", setAudioDuration);
-    };
-  }, [audioRef, isSeeking]);
+      audioRef.current.addEventListener("timeupdate", handleTimeUpdate);
+      return () => {
+        audioRef.current?.removeEventListener("timeupdate", handleTimeUpdate);
+      };
+    }
+  }, [timings, currentAyah, setStep]);
 
   const handleSliderChange = (value: number) => {
-    setSliderValue(value);
+    if (audioRef.current) {
+      audioRef.current.currentTime = value;
+    }
   };
 
   const handleSliderCommit = (value: number) => {
-    const audio = audioRef.current;
-    if (audio) {
-      audio.currentTime = value;
-      setSliderValue(value);
-      setIsSeeking(false);
+    setIsSeeking(false);
+    if (audioRef.current) {
+      audioRef.current.currentTime = value;
     }
   };
 
@@ -77,14 +92,14 @@ export function QuranRecitationBar() {
   const moveForward = () => {
     const audio = audioRef.current;
     if (audio) {
-      audio.currentTime += 10; // Move forward by 10 seconds
+      audio.currentTime += 10;
     }
   };
 
   const moveBackward = () => {
     const audio = audioRef.current;
     if (audio) {
-      audio.currentTime -= 10; // Move backward by 10 seconds
+      audio.currentTime -= 10;
     }
   };
 
@@ -92,7 +107,9 @@ export function QuranRecitationBar() {
     return null;
   }
 
-  const reciter = reciters.find((reciter) => reciter.slug.toString() === currentReciter)!;
+  if (error) {
+    return <div>Error loading timings data</div>;
+  }
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-background rounded-t-lg border p-6 w-full mx-auto flex flex-col gap-4">
@@ -114,12 +131,13 @@ export function QuranRecitationBar() {
               <AvatarFallback>{currentReciter}</AvatarFallback>
             </Avatar>
           </div>
-          <div className="text-sm font-medium">{reciter.name}</div>
+          <div className="text-sm font-medium">{reciter?.name}</div>
         </div>
         <Slider
-          value={[sliderValue]}
+          value={[audioRef.current ? audioRef.current.currentTime : 0]}
           min={0}
-          max={duration}
+          max={audioRef.current?.duration}
+          step={1}
           onValueChange={(value) => {
             setIsSeeking(true);
             handleSliderChange(value[0]);

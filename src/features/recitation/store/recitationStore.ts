@@ -10,6 +10,8 @@ interface RecitationState {
   currentStyle: string;
   duration: number;
   currentTime: number;
+  step: number;
+  setStep: (step: number) => void;
   setReciter: (reciter: string) => void;
   setSurah: (surah: number) => void;
   setAyah: (ayah: number) => void;
@@ -32,6 +34,8 @@ export const useRecitationStore = create<RecitationState>()(
       currentStyle: "mujawaad",
       duration: 0,
       currentTime: 0,
+      step: 0,
+      setStep: (step) => set({ step }),
       setCurrentStyle: (style) => set({ currentStyle: style }),
       setReciter: (reciter) => set({ currentReciter: reciter }),
       setSurah: (surah) => set({ currentSurah: surah }),
@@ -45,6 +49,16 @@ export const useRecitationStore = create<RecitationState>()(
     {
       name: "recitation-storage",
       storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        currentReciter: state.currentReciter,
+        currentSurah: state.currentSurah,
+        currentAyah: state.currentAyah,
+        selectedReciter: state.selectedReciter,
+        currentStyle: state.currentStyle,
+        duration: state.duration,
+        currentTime: state.currentTime,
+        step: state.step,
+      }),
     },
   ),
 );
