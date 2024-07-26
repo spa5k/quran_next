@@ -9,6 +9,7 @@ import { Check, Copy, Pause, Play } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { WindowVirtualizer } from "virtua";
 import { type Ayah, type AyahQFC } from "../quran/api/ayah";
+import { reciters } from "../recitation/data/reciters";
 import { useRecitationStore } from "../recitation/store/recitationStore";
 import AyahPlayer from "./AyahPlayer";
 import { AyahText } from "./AyahText";
@@ -34,7 +35,7 @@ const CombinedAyahList = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const { currentAyah, isPlaying, setIsPlaying, setAyah } = useRecitationStore();
+  const { currentAyah, isPlaying, setIsPlaying, setAyah, currentReciter, currentSurah } = useRecitationStore();
 
   const isQFC = (ayah: Ayah | AyahQFC): ayah is AyahQFC => "page" in ayah;
 
@@ -91,6 +92,8 @@ const CombinedAyahList = ({
     }
     setAyah(index + 1);
   };
+
+  const reciter = reciters.find((reciter) => reciter.slug === currentReciter);
 
   return (
     <div className="flex flex-col gap-5 mb-96" ref={containerRef} onCopy={handleCopyEvent}>

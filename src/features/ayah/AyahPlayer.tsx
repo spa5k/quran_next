@@ -6,7 +6,7 @@ import type { Timings } from "../recitation/types/timingTypes";
 
 let currentPlayingInstance: HTMLAudioElement | null = null;
 
-const fetchTimings = async (reciterSlug: string, surah: number, style: string) => {
+export const fetchTimings = async (reciterSlug: string, surah: number, style: string) => {
   const response = await fetch(
     `https://raw.githubusercontent.com/spa5k/quran_timings_api/master/data/${style}/${reciterSlug}/${surah}.json`,
   );
@@ -70,7 +70,7 @@ const AyahPlayer = (
     audioRef.current.src = audioUrl;
     audioRef.current.currentTime = verseTiming.timestamp_from / 1000;
     audioRef.current.play();
-  }, [isPlaying, timings, currentAyah, currentSurah]);
+  }, [isPlaying, timings, currentAyah, currentSurah, audioRef]);
 
   useEffect(() => {
     if (!audioRef.current) {

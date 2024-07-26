@@ -16,6 +16,7 @@ export function QuranRecitationBar() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [sliderValue, setSliderValue] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
+  const [isSeeking, setIsSeeking] = useState<boolean>(false);
 
   const params = useParams() as { number: string };
 
@@ -30,7 +31,9 @@ export function QuranRecitationBar() {
     if (!audio) return;
 
     const updateSlider = () => {
-      setSliderValue(audio.currentTime);
+      if (!isSeeking) {
+        setSliderValue(audio.currentTime);
+      }
     };
 
     const setAudioDuration = () => {
@@ -44,13 +47,18 @@ export function QuranRecitationBar() {
       audio.removeEventListener("timeupdate", updateSlider);
       audio.removeEventListener("loadedmetadata", setAudioDuration);
     };
-  }, [audioRef]);
+  }, [audioRef, isSeeking]);
 
   const handleSliderChange = (value: number) => {
+    setSliderValue(value);
+  };
+
+  const handleSliderCommit = (value: number) => {
     const audio = audioRef.current;
     if (audio) {
       audio.currentTime = value;
       setSliderValue(value);
+      setIsSeeking(false);
     }
   };
 
@@ -69,14 +77,14 @@ export function QuranRecitationBar() {
   const moveForward = () => {
     const audio = audioRef.current;
     if (audio) {
-      audio.currentTime += 10;
+      audio.currentTime += 10; // Move forward by 10 seconds
     }
   };
 
   const moveBackward = () => {
     const audio = audioRef.current;
     if (audio) {
-      audio.currentTime -= 10;
+      audio.currentTime -= 10; // Move backward by 10 seconds
     }
   };
 
@@ -112,20 +120,21 @@ export function QuranRecitationBar() {
           value={[sliderValue]}
           min={0}
           max={duration}
-          onValueChange={(value) => handleSliderChange(value[0])}
+          onValueChange={(value) => {
+            setIsSeeking(true);
+            handleSliderChange(value[0]);
+          }}
+          onValueCommit={(value) => handleSliderCommit(value[0])}
           className="mt-4"
         />
-
         <div className="flex flex-row items-center gap-2">
-          <Button variant="ghost" size="icon" className="w-8 h-8" onClick={moveBackward}>
+          <Button onClick={moveBackward} aria-label="Move Backward">
             <RewindIcon className="w-5 h-5 text-muted-foreground" />
           </Button>
-          <Button variant="ghost" size="icon" className="w-8 h-8" onClick={togglePlayPause}>
-            {isPlaying
-              ? <PauseIcon className="w-5 h-5 text-muted-foreground" />
-              : <PlayIcon className="w-5 h-5 text-muted-foreground" />}
+          <Button onClick={togglePlayPause} aria-label="Play/Pause">
+            {isPlaying ? <PauseIcon /> : <PlayIcon />}
           </Button>
-          <Button variant="ghost" size="icon" className="w-8 h-8" onClick={moveForward}>
+          <Button onClick={moveForward} aria-label="Move Forward">
             <FastForwardIcon className="w-5 h-5 text-muted-foreground" />
           </Button>
         </div>
