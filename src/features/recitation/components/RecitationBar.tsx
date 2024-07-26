@@ -12,6 +12,7 @@ import { ayahCount } from "../data/ayahCount";
 import { reciters } from "../data/reciters";
 import { useRecitationStore } from "../store/recitationStore";
 import type { Timings } from "../types/timingTypes";
+import { timeFormatter } from "../utils/timeFormatter";
 
 const fetchTimings = async (reciterSlug: string, surah: number, style: string) => {
   const response = await fetch(
@@ -28,6 +29,7 @@ export function QuranRecitationBar() {
     useRecitationStore();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isSeeking, setIsSeeking] = useState<boolean>(false);
+  const [verseTimings, setVerseTimings] = useState<any[]>([]);
 
   const params = useParams() as { number: string };
 
@@ -46,11 +48,17 @@ export function QuranRecitationBar() {
   }, [currentSurah, params.number, setSurah]);
 
   useEffect(() => {
-    if (audioRef.current && timings) {
+    if (timings) {
+      setVerseTimings(timings.audio_files);
+    }
+  }, [timings]);
+
+  useEffect(() => {
+    if (audioRef.current && verseTimings.length > 0) {
       const handleTimeUpdate = () => {
-        const currentTime = audioRef.current!.currentTime;
-        const currentAyahIndex = timings.findIndex((timing) =>
-          timing.start <= currentTime && timing.end >= currentTime
+        const currentTime = audioRef.current!.currentTime * 1000; // Convert to milliseconds
+        const currentAyahIndex = verseTimings.findIndex(
+          (timing) => timing.timestamp_from <= currentTime && timing.timestamp_to >= currentTime,
         );
         if (currentAyahIndex !== -1 && currentAyahIndex + 1 !== currentAyah) {
           setStep(currentAyahIndex + 1);
@@ -62,18 +70,18 @@ export function QuranRecitationBar() {
         audioRef.current?.removeEventListener("timeupdate", handleTimeUpdate);
       };
     }
-  }, [timings, currentAyah, setStep]);
+  }, [verseTimings, currentAyah, setStep]);
 
   const handleSliderChange = (value: number) => {
     if (audioRef.current) {
-      audioRef.current.currentTime = value;
+      audioRef.current.currentTime = value; // Convert to seconds
     }
   };
 
   const handleSliderCommit = (value: number) => {
     setIsSeeking(false);
     if (audioRef.current) {
-      audioRef.current.currentTime = value;
+      audioRef.current.currentTime = value; // Convert to seconds
     }
   };
 
@@ -135,16 +143,15 @@ export function QuranRecitationBar() {
         </div>
         <Slider
           value={[audioRef.current ? audioRef.current.currentTime : 0]}
-          min={0}
-          max={audioRef.current?.duration}
-          step={1}
+          max={audioRef.current?.duration ? audioRef.current.duration : 0}
+          onValueCommit={(value) => handleSliderCommit(value[0])}
           onValueChange={(value) => {
             setIsSeeking(true);
             handleSliderChange(value[0]);
           }}
-          onValueCommit={(value) => handleSliderCommit(value[0])}
-          className="mt-4"
         />
+        <p>{timeFormatter(audioRef.current?.currentTime || 0)}</p>
+        <p>{timeFormatter(audioRef.current?.duration || 0)}</p>
         <div className="flex flex-row items-center gap-2">
           <Button onClick={moveBackward} aria-label="Move Backward">
             <RewindIcon className="w-5 h-5 text-muted-foreground" />
