@@ -8,6 +8,8 @@ interface RecitationState {
   isPlaying: boolean;
   selectedReciter: string;
   currentStyle: string;
+  duration: number;
+  currentTime: number;
   setReciter: (reciter: string) => void;
   setSurah: (surah: number) => void;
   setAyah: (ayah: number) => void;
@@ -15,17 +17,21 @@ interface RecitationState {
   setSelectedReciter: (reciter: string) => void;
   setCurrentAyah: (ayah: string) => void;
   setCurrentStyle: (style: string) => void;
+  setDuration: (duration: number) => void;
+  setCurrentTime: (time: number) => void;
 }
 
 export const useRecitationStore = create<RecitationState>()(
   persist(
     (set, get) => ({
-      currentReciter: "1",
+      currentReciter: "abdul_baset",
       currentSurah: null,
       currentAyah: null,
       isPlaying: false,
-      selectedReciter: "1",
+      selectedReciter: "abdul_baset",
       currentStyle: "mujawaad",
+      duration: 0,
+      currentTime: 0,
       setCurrentStyle: (style) => set({ currentStyle: style }),
       setReciter: (reciter) => set({ currentReciter: reciter }),
       setSurah: (surah) => set({ currentSurah: surah }),
@@ -33,6 +39,8 @@ export const useRecitationStore = create<RecitationState>()(
       setIsPlaying: (isPlaying) => set({ isPlaying }),
       setSelectedReciter: (reciter) => set({ selectedReciter: reciter }),
       setCurrentAyah: (ayah) => set({ currentAyah: parseInt(ayah, 10) }),
+      setDuration: (duration) => set({ duration }),
+      setCurrentTime: (time) => set({ currentTime: time }),
     }),
     {
       name: "recitation-storage",

@@ -5,16 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
-import { Howl } from "howler";
 import { Check, Copy, Pause, Play } from "lucide-react";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { WindowVirtualizer } from "virtua";
 import { type Ayah, type AyahQFC } from "../quran/api/ayah";
-import { ayahCount } from "../recitation/data/ayahCount";
-import { reciters } from "../recitation/data/reciters";
 import { useRecitationStore } from "../recitation/store/recitationStore";
-import type { Timings } from "../recitation/types/timingTypes";
-import { getHowlInstance, stopCurrentHowl } from "../recitation/utils/howl";
+import AyahPlayer from "./AyahPlayer";
 import { AyahText } from "./AyahText";
 import MushafText from "./MushafText";
 import { TranslationText } from "./TranslationText";
@@ -36,10 +32,9 @@ const CombinedAyahList = ({
 }: CombinedAyahListProps) => {
   const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const { currentReciter, currentAyah, isPlaying, setIsPlaying, currentSurah, setSurah, setAyah } =
-    useRecitationStore();
-  const [howl, setHowl] = useState<Howl | null>(null);
+  const { currentAyah, isPlaying, setIsPlaying, setAyah } = useRecitationStore();
 
   const isQFC = (ayah: Ayah | AyahQFC): ayah is AyahQFC => "page" in ayah;
 
@@ -82,74 +77,23 @@ const CombinedAyahList = ({
     }
   };
 
-  const playAyah = useCallback((index: number) => {
-    stopCurrentHowl();
-
-    if (!(currentReciter && currentSurah)) {
-      return;
-    }
-
-    const reciter = reciters.find((reciter) => reciter.slug === currentReciter)!;
-    const { slug, style } = reciter;
-
-    fetch(
-      `https://raw.githubusercontent.com/spa5k/quran_timings_api/master/data/${style}/${slug}/${currentSurah}.json`,
-    )
-      .then((response) => response.json())
-      .then((data: Timings) => {
-        const newHowl = getHowlInstance(data.audio_files[0].audio_url);
-
-        const currentTime = data.audio_files[0].verse_timings[index].timestamp_from / 1000;
-        newHowl!.seek(currentTime);
-        setIsPlaying(true);
-
-        newHowl!.play();
-      })
-      .catch((error) => console.error("Error fetching timings:", error));
-  }, [currentReciter, currentSurah, setIsPlaying]);
-
-  const moveToNextAyah = useCallback(() => {
-    if (currentAyah && currentSurah) {
-      const totalAyahs = ayahCount[currentSurah - 1];
-      if (currentAyah < totalAyahs) {
-        setAyah(currentAyah + 1);
-        playAyah(currentAyah + 1);
-      } else if (currentSurah < ayahCount.length) {
-        setSurah(currentSurah + 1);
-        setAyah(1);
-        playAyah(1);
-      }
-    }
-  }, [currentAyah, currentSurah, playAyah, setAyah, setSurah]);
-
   const togglePlayPause = (index: number) => {
-    console.log({ currentAyah, index: index + 1 });
-    if (howl) {
-      if (isPlaying && currentAyah === index + 1) {
-        howl.pause();
-        setIsPlaying(false);
-      } else {
-        howl.play();
-        setIsPlaying(true);
+    if (isPlaying && currentAyah === index + 1) {
+      if (audioRef.current) {
+        audioRef.current.pause();
       }
+      setIsPlaying(false);
     } else {
-      playAyah(0);
+      if (audioRef.current) {
+        audioRef.current.play();
+      }
+      setIsPlaying(true);
     }
     setAyah(index + 1);
   };
 
-  useEffect(() => {
-    if (!howl) {
-      return;
-    }
-    howl.on("end", () => {
-      setIsPlaying(false);
-      moveToNextAyah();
-    });
-  }, [howl, moveToNextAyah, setIsPlaying]);
-
   return (
-    <div className="flex flex-col gap-5" ref={containerRef} onCopy={handleCopyEvent}>
+    <div className="flex flex-col gap-5 mb-96" ref={containerRef} onCopy={handleCopyEvent}>
       <Toaster />
       <WindowVirtualizer>
         {ayahs.map((ayah, index) => (
@@ -164,14 +108,7 @@ const CombinedAyahList = ({
                 {copiedIndex === index ? <Check /> : <Copy />}
               </Button>
               <Button
-                onClick={() => {
-                  console.log("Clicked", { index: index + 1, currentAyah });
-                  if (isPlaying && currentAyah === index + 1) {
-                    togglePlayPause(index);
-                  } else {
-                    playAyah(index);
-                  }
-                }}
+                onClick={() => togglePlayPause(index)}
                 size="icon"
                 aria-label={`Play/Pause Ayah ${index + 1}`}
               >
@@ -209,6 +146,7 @@ const CombinedAyahList = ({
           </div>
         ))}
       </WindowVirtualizer>
+      <AyahPlayer audioRef={audioRef} />
     </div>
   );
 };
