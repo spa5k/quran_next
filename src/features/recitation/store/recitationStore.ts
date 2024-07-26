@@ -7,33 +7,31 @@ interface RecitationState {
   currentAyah: number | null;
   isPlaying: boolean;
   selectedReciter: string;
-  selectedQuality: number;
+  currentStyle: string;
   setReciter: (reciter: string) => void;
   setSurah: (surah: number) => void;
   setAyah: (ayah: number) => void;
   setIsPlaying: (isPlaying: boolean) => void;
   setSelectedReciter: (reciter: string) => void;
-  setSelectedQuality: (quality: number) => void;
   setCurrentAyah: (ayah: string) => void;
+  setCurrentStyle: (style: string) => void;
 }
-
-const DEFAULT_RECITER = "Abdul_Basit_Murattal";
 
 export const useRecitationStore = create<RecitationState>()(
   persist(
     (set, get) => ({
-      currentReciter: DEFAULT_RECITER,
+      currentReciter: "1",
       currentSurah: null,
       currentAyah: null,
       isPlaying: false,
-      selectedReciter: DEFAULT_RECITER,
-      selectedQuality: 64,
+      selectedReciter: "1",
+      currentStyle: "mujawaad",
+      setCurrentStyle: (style) => set({ currentStyle: style }),
       setReciter: (reciter) => set({ currentReciter: reciter }),
       setSurah: (surah) => set({ currentSurah: surah }),
       setAyah: (ayah) => set({ currentAyah: ayah }),
       setIsPlaying: (isPlaying) => set({ isPlaying }),
       setSelectedReciter: (reciter) => set({ selectedReciter: reciter }),
-      setSelectedQuality: (quality) => set({ selectedQuality: quality }),
       setCurrentAyah: (ayah) => set({ currentAyah: parseInt(ayah, 10) }),
     }),
     {

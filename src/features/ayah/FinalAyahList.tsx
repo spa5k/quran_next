@@ -11,7 +11,9 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { WindowVirtualizer } from "virtua";
 import { type Ayah, type AyahQFC } from "../quran/api/ayah";
 import { ayahCount } from "../recitation/data/ayahCount";
+import { reciters } from "../recitation/data/reciters";
 import { useRecitationStore } from "../recitation/store/recitationStore";
+import type { Timings } from "../recitation/types/timingTypes";
 import { getHowlInstance, stopCurrentHowl } from "../recitation/utils/howl";
 import { AyahText } from "./AyahText";
 import MushafText from "./MushafText";
@@ -35,7 +37,7 @@ const CombinedAyahList = ({
   const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const { currentReciter, currentAyah, isPlaying, setIsPlaying, currentSurah, setSurah, setAyah, selectedQuality } =
+  const { currentReciter, currentAyah, isPlaying, setIsPlaying, currentSurah, setSurah, setAyah } =
     useRecitationStore();
   const [howl, setHowl] = useState<Howl | null>(null);
 
@@ -83,21 +85,28 @@ const CombinedAyahList = ({
   const playAyah = useCallback((index: number) => {
     stopCurrentHowl();
 
-    const currentAyah = ayahs[index];
-    const surah = currentAyah.surah;
-    const ayah = currentAyah.ayah;
+    if (!(currentReciter && currentSurah)) {
+      return;
+    }
 
-    const surahNumber = String(surah).padStart(3, "0");
-    const ayahNumber = String(ayah).padStart(3, "0");
-    const url = `https://everyayah.com/data/${currentReciter}_${selectedQuality}kbps/${surahNumber}${ayahNumber}.mp3`;
+    const reciter = reciters.find((reciter) => reciter.slug === currentReciter)!;
+    const { slug, style } = reciter;
 
-    const newHowl = getHowlInstance(url);
+    fetch(
+      `https://raw.githubusercontent.com/spa5k/quran_timings_api/master/data/${style}/${slug}/${currentSurah}.json`,
+    )
+      .then((response) => response.json())
+      .then((data: Timings) => {
+        const newHowl = getHowlInstance(data.audio_files[0].audio_url);
 
-    setHowl(newHowl);
-    setIsPlaying(true);
-    setAyah(index + 1);
-    newHowl.play();
-  }, [ayahs, currentReciter, setIsPlaying]);
+        const currentTime = data.audio_files[0].verse_timings[index].timestamp_from / 1000;
+        newHowl!.seek(currentTime);
+        setIsPlaying(true);
+
+        newHowl!.play();
+      })
+      .catch((error) => console.error("Error fetching timings:", error));
+  }, [currentReciter, currentSurah, setIsPlaying]);
 
   const moveToNextAyah = useCallback(() => {
     if (currentAyah && currentSurah) {
@@ -159,9 +168,7 @@ const CombinedAyahList = ({
                   console.log("Clicked", { index: index + 1, currentAyah });
                   if (isPlaying && currentAyah === index + 1) {
                     togglePlayPause(index);
-                    console.log("Pause", index);
                   } else {
-                    console.log("Play", index);
                     playAyah(index);
                   }
                 }}

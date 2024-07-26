@@ -17,3 +17,20 @@ export interface RecitationDetail {
   [key: number]: QuranRecitation; // Dynamic keys for each Surah
   ayahCount: number[]; // Array of Ayah counts for each Surah
 }
+
+export interface Recitation {
+  id: number;
+  reciter_id: number;
+  name: string;
+  translated_name: {
+    name: string;
+    language_name: string;
+  };
+  style: string;
+  qirat: {
+    name: string;
+    language_name: string;
+  };
+  slug: string;
+}
+[];

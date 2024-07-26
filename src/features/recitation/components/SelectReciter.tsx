@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { reciters } from "@/features/recitation/data/reciters";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect } from "react";
@@ -23,16 +22,13 @@ export function SelectReciter() {
     setReciter,
     setAyah,
     setSelectedReciter,
-    setSelectedQuality,
     setCurrentAyah,
     selectedReciter,
-    selectedQuality,
   } = useRecitationStore();
 
   const parsedReciters = reciters.map((reciter) => ({
-    label: reciter.style ? `${reciter.reciter_name} (${reciter.style})` : reciter.reciter_name,
-    value: `${reciter.folder_name}`,
-    qualities: reciter.quality,
+    label: reciter.name,
+    value: reciter.slug,
   }));
 
   const updateQueryParams = useCallback((params: Record<string, string>) => {
@@ -50,45 +46,22 @@ export function SelectReciter() {
 
   useEffect(() => {
     const reciterParam = searchParams.get("reciter");
-    const qualityParam = searchParams.get("quality");
     const initialReciter = reciterParam || selectedReciter;
-    const initialQuality = qualityParam ? parseInt(qualityParam, 10) : 64;
     const initialAyah = "1";
-    setSelectedReciter(initialReciter ?? "Abdul_Basit_Murattal");
-    setSelectedQuality(initialQuality);
+    setSelectedReciter(initialReciter);
     setCurrentAyah(initialAyah);
-    setReciter(initialReciter ?? "Abdul_Basit_Murattal");
+    setReciter(initialReciter);
     setAyah(parseInt(initialAyah, 10));
-  }, [searchParams, setReciter, setAyah, setSelectedReciter, setSelectedQuality, setCurrentAyah, selectedReciter]);
-
-  useEffect(() => {
-    const reciter = parsedReciters.find(r => r.value === selectedReciter);
-    if (reciter) {
-      const lowestQuality = Math.min(...reciter.qualities);
-      if (!reciter.qualities.includes(selectedQuality)) {
-        setSelectedQuality(lowestQuality);
-        updateQueryParams({ reciter: selectedReciter, quality: lowestQuality.toString() });
-      }
-    }
-  }, [selectedReciter, parsedReciters, selectedQuality, setSelectedQuality, updateQueryParams]);
+  }, [searchParams, setReciter, setAyah, setSelectedReciter, setCurrentAyah, selectedReciter]);
 
   const handleReciterChange = (value: string) => {
     setSelectedReciter(value);
     setReciter(value);
     const reciter = parsedReciters.find(r => r.value === value);
-
     if (!reciter) {
       return;
     }
-    const lowestQuality = Math.min(...reciter.qualities);
-    setSelectedQuality(lowestQuality);
-    updateQueryParams({ reciter: value, quality: lowestQuality.toString() });
-  };
-
-  const handleQualityChange = (quality: number) => {
-    setSelectedQuality(quality);
-    const reciter = parsedReciters.find(r => r.value === selectedReciter);
-    updateQueryParams({ reciter: reciter?.value ?? selectedReciter, quality: quality.toString() });
+    updateQueryParams({ reciter: value });
   };
 
   return (
@@ -106,29 +79,13 @@ export function SelectReciter() {
             <SelectGroup>
               <SelectLabel>Select Reciter</SelectLabel>
               {parsedReciters.map((reciter) => (
-                <SelectItem key={reciter.value + reciter.qualities.join("")} value={reciter.value}>
+                <SelectItem key={reciter.value} value={reciter.value.toString()}>
                   {reciter.label}
                 </SelectItem>
               ))}
             </SelectGroup>
           </SelectContent>
         </Select>
-        <div className="flex items-center justify-between w-full mx-auto mt-4">
-          <Label>
-            Select Quality
-          </Label>
-          <ToggleGroup
-            type="single"
-            value={selectedQuality.toString()}
-            onValueChange={(value) => handleQualityChange(parseInt(value, 10))}
-          >
-            {parsedReciters.find(reciter => reciter.value === selectedReciter)?.qualities.map((quality) => (
-              <ToggleGroupItem key={quality} value={quality.toString()} aria-label={`Toggle ${quality} kbps`}>
-                {quality} kbps
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        </div>
       </div>
     </div>
   );
