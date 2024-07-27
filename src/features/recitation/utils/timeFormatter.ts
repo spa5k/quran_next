@@ -1,3 +1,9 @@
+/**
+ * Formats the given number of seconds into a time string in the format "HH:MM:SS".
+ *
+ * @param seconds - The number of seconds to format.
+ * @returns The formatted time string.
+ */
 export function timeFormatter(seconds: number) {
   // Calculate hours, minutes, and seconds
   const hours = Math.floor(seconds / 3600);

@@ -73,6 +73,7 @@
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.52.1",
     "react-spring": "^9.7.4",
+    "react-use-audio-player": "^2.2.0",
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.1",

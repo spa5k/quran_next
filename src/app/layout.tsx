@@ -1,9 +1,9 @@
 import { ModeToggle } from "@/components/generic/ThemseSwitcher";
+import { AudioProvider } from "@/components/providers/AudioProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { MiniSalahWidget } from "@/features/salah/components/MiniSalahWidget";
 import { PanelLeft, Search } from "lucide-react";
 import type { Metadata } from "next";
@@ -11,7 +11,7 @@ import { ElectronIndicator } from "../components/generic/ElectronIndicator";
 import { TailwindIndicator } from "../components/generic/TailwindIndicator";
 import { MobileNavigationLinks } from "../components/layout/MobileNavigationLinks";
 import { NavigationLinks } from "../components/layout/NavigationLinks";
-import Providers from "../components/providers/ReactQueryProvider";
+import ReactQueryProviderWrapper from "../components/providers/ReactQueryProvider";
 import { cormorant_garamond, indopak, inter, lexend, readex_pro, taviraj } from "../lib/fonts";
 import "./globals.css";
 
@@ -48,8 +48,8 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <TooltipProvider>
-            <Providers>
+          <ReactQueryProviderWrapper>
+            <AudioProvider>
               <TailwindIndicator />
               <ElectronIndicator />
               <div className="flex  border-collapse overflow-hidden">
@@ -90,8 +90,8 @@ export default function RootLayout({
                   {/* </AuroraBackground> */}
                 </div>
               </div>
-            </Providers>
-          </TooltipProvider>
+            </AudioProvider>
+          </ReactQueryProviderWrapper>
         </ThemeProvider>
       </body>
     </html>

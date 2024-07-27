@@ -1,41 +1,35 @@
 "use client";
 
+import { useAudio } from "@/components/providers/AudioProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import AyahPlayer from "@/features/ayah/AyahPlayer";
 import { useQuery } from "@tanstack/react-query";
-import { FastForwardIcon, PauseIcon, PlayIcon, RewindIcon } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ayahCount } from "../data/ayahCount";
 import { reciters } from "../data/reciters";
 import { useRecitationStore } from "../store/recitationStore";
 import type { Timings } from "../types/timingTypes";
-import { timeFormatter } from "../utils/timeFormatter";
 
-const fetchTimings = async (reciterSlug: string, surah: number, style: string) => {
+const fetchTimings = async (reciterSlug: string, surah: number, style: string): Promise<Timings> => {
   const response = await fetch(
     `https://raw.githubusercontent.com/spa5k/quran_timings_api/master/data/${style}/${reciterSlug}/${surah}.json`,
   );
   if (!response.ok) {
-    throw new Error("Network response was not ok");
+    throw new Error("Failed to fetch timings data");
   }
-  return response.json() as Promise<Timings>;
+  return response.json();
 };
 
 export function QuranRecitationBar() {
-  const { currentReciter, currentAyah, currentSurah, setSurah, isPlaying, setIsPlaying, step, setStep } =
-    useRecitationStore();
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isSeeking, setIsSeeking] = useState<boolean>(false);
-  const [verseTimings, setVerseTimings] = useState<any[]>([]);
+  const { currentReciter, currentAyah, currentSurah, setSurah } = useRecitationStore();
+  const { isPlaying, play, pause, progress, seek, error: audioError, duration } = useAudio();
 
   const params = useParams() as { number: string };
 
-  const reciter = reciters.find((reciter) => reciter.slug === currentReciter);
+  const reciter = useMemo(() => reciters.find((reciter) => reciter.slug === currentReciter), [currentReciter]);
 
-  const { data: timings, error } = useQuery({
+  const { data: timings, error, isLoading } = useQuery({
     queryKey: ["timings", currentReciter, currentSurah, reciter?.slug],
     queryFn: () => fetchTimings(reciter!.slug, currentSurah!, reciter!.style),
     enabled: !!currentReciter && !!currentSurah,
@@ -47,76 +41,30 @@ export function QuranRecitationBar() {
     }
   }, [currentSurah, params.number, setSurah]);
 
-  useEffect(() => {
-    if (timings) {
-      setVerseTimings(timings.audio_files);
-    }
-  }, [timings]);
+  const audioUrl = timings?.audio_files[0].audio_url;
+
+  const [sliderValue, setSliderValue] = useState(progress * 100);
 
   useEffect(() => {
-    if (audioRef.current && verseTimings.length > 0) {
-      const handleTimeUpdate = () => {
-        const currentTime = audioRef.current!.currentTime * 1000; // Convert to milliseconds
-        const currentAyahIndex = verseTimings.findIndex(
-          (timing) => timing.timestamp_from <= currentTime && timing.timestamp_to >= currentTime,
-        );
-        if (currentAyahIndex !== -1 && currentAyahIndex + 1 !== currentAyah) {
-          setStep(currentAyahIndex + 1);
-        }
-      };
+    console.log(progress * 100);
+    setSliderValue(progress * 100);
+  }, [progress]);
 
-      audioRef.current.addEventListener("timeupdate", handleTimeUpdate);
-      return () => {
-        audioRef.current?.removeEventListener("timeupdate", handleTimeUpdate);
-      };
-    }
-  }, [verseTimings, currentAyah, setStep]);
-
-  const handleSliderChange = (value: number) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = value; // Convert to seconds
-    }
-  };
-
-  const handleSliderCommit = (value: number) => {
-    setIsSeeking(false);
-    if (audioRef.current) {
-      audioRef.current.currentTime = value; // Convert to seconds
-    }
-  };
-
-  const togglePlayPause = () => {
-    const audio = audioRef.current;
-    if (audio) {
-      if (isPlaying) {
-        audio.pause();
-      } else {
-        audio.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
-  const moveForward = () => {
-    const audio = audioRef.current;
-    if (audio) {
-      audio.currentTime += 10;
-    }
-  };
-
-  const moveBackward = () => {
-    const audio = audioRef.current;
-    if (audio) {
-      audio.currentTime -= 10;
-    }
+  const handleSliderChange = (value: number[]) => {
+    setSliderValue(value[0]);
+    seek(value[0] / 100);
   };
 
   if (!currentSurah || !currentAyah) {
     return null;
   }
 
-  if (error) {
-    return <div>Error loading timings data</div>;
+  if (error || audioError) {
+    return <div>Error loading timings data: {error?.message || audioError}</div>;
+  }
+
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
 
   return (
@@ -136,35 +84,24 @@ export function QuranRecitationBar() {
           <div className="bg-muted rounded-full w-8 h-8 flex items-center justify-center">
             <Avatar>
               <AvatarImage src="https://avatar.iran.liara.run/public/boy" alt={currentReciter!} />
-              <AvatarFallback>{currentReciter}</AvatarFallback>
+              <AvatarFallback>{currentReciter?.[0]?.toUpperCase() + (currentReciter?.slice(1) ?? "")}</AvatarFallback>
             </Avatar>
           </div>
           <div className="text-sm font-medium">{reciter?.name}</div>
         </div>
-        <Slider
-          value={[audioRef.current ? audioRef.current.currentTime : 0]}
-          max={audioRef.current?.duration ? audioRef.current.duration : 0}
-          onValueCommit={(value) => handleSliderCommit(value[0])}
-          onValueChange={(value) => {
-            setIsSeeking(true);
-            handleSliderChange(value[0]);
-          }}
-        />
-        <p>{timeFormatter(audioRef.current?.currentTime || 0)}</p>
-        <p>{timeFormatter(audioRef.current?.duration || 0)}</p>
-        <div className="flex flex-row items-center gap-2">
-          <Button onClick={moveBackward} aria-label="Move Backward">
-            <RewindIcon className="w-5 h-5 text-muted-foreground" />
-          </Button>
-          <Button onClick={togglePlayPause} aria-label="Play/Pause">
-            {isPlaying ? <PauseIcon /> : <PlayIcon />}
-          </Button>
-          <Button onClick={moveForward} aria-label="Move Forward">
-            <FastForwardIcon className="w-5 h-5 text-muted-foreground" />
-          </Button>
+        <div className="flex flex-row items-center gap-4">
+          <button onClick={isPlaying ? () => pause() : () => play(audioUrl!)} className="p-2 bg-primary rounded">
+            {isPlaying ? "Pause" : "Play"}
+          </button>
+
+          <Slider
+            value={[sliderValue]}
+            onValueChange={handleSliderChange}
+            max={100}
+            step={0.01}
+          />
         </div>
       </div>
-      <AyahPlayer audioRef={audioRef} />
     </div>
   );
 }

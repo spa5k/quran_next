@@ -11,7 +11,7 @@ import { WindowVirtualizer } from "virtua";
 import { type Ayah, type AyahQFC } from "../quran/api/ayah";
 import { reciters } from "../recitation/data/reciters";
 import { useRecitationStore } from "../recitation/store/recitationStore";
-import AyahPlayer from "./AyahPlayer";
+// import AyahPlayer from "./AyahPlayer";
 import { AyahText } from "./AyahText";
 import MushafText from "./MushafText";
 import { TranslationText } from "./TranslationText";
@@ -149,7 +149,7 @@ const CombinedAyahList = ({
           </div>
         ))}
       </WindowVirtualizer>
-      <AyahPlayer audioRef={audioRef} />
+      {/* <AyahPlayer audioRef={audioRef} /> */}
     </div>
   );
 };
