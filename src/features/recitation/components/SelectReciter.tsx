@@ -29,6 +29,7 @@ export function SelectReciter() {
   const parsedReciters = reciters.map((reciter) => ({
     label: reciter.name,
     value: reciter.slug,
+    id: reciter.id,
   }));
 
   const updateQueryParams = useCallback((params: Record<string, string>) => {
@@ -79,7 +80,7 @@ export function SelectReciter() {
             <SelectGroup>
               <SelectLabel>Select Reciter</SelectLabel>
               {parsedReciters.map((reciter) => (
-                <SelectItem key={reciter.value} value={reciter.value.toString()}>
+                <SelectItem key={reciter.id} value={reciter.value.toString()}>
                   {reciter.label}
                 </SelectItem>
               ))}

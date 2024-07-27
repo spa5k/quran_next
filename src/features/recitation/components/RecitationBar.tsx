@@ -2,8 +2,10 @@
 
 import { useAudio } from "@/components/providers/AudioProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useQuery } from "@tanstack/react-query";
+import { PauseIcon, PlayIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ayahCount } from "../data/ayahCount";
@@ -23,7 +25,7 @@ const fetchTimings = async (reciterSlug: string, surah: number, style: string): 
 
 export function QuranRecitationBar() {
   const { currentReciter, currentAyah, currentSurah, setSurah } = useRecitationStore();
-  const { isPlaying, play, pause, progress, seek, error: audioError, duration } = useAudio();
+  const { isPlaying, play, pause, progress, seek, error: audioError } = useAudio();
 
   const params = useParams() as { number: string };
 
@@ -46,7 +48,6 @@ export function QuranRecitationBar() {
   const [sliderValue, setSliderValue] = useState(progress * 100);
 
   useEffect(() => {
-    console.log(progress * 100);
     setSliderValue(progress * 100);
   }, [progress]);
 
@@ -54,6 +55,20 @@ export function QuranRecitationBar() {
     setSliderValue(value[0]);
     seek(value[0] / 100);
   };
+
+  useEffect(() => {
+    if (!timings) {
+      return;
+    }
+    if (audioUrl) {
+      play(audioUrl);
+    }
+
+    const currentAyahTimings = timings.audio_files[0].verse_timings[currentAyah! - 1].timestamp_from;
+
+    const seekPercentage = currentAyahTimings / timings.audio_files[0].duration;
+    seek(seekPercentage);
+  }, [currentAyah]);
 
   if (!currentSurah || !currentAyah) {
     return null;
@@ -90,15 +105,16 @@ export function QuranRecitationBar() {
           <div className="text-sm font-medium">{reciter?.name}</div>
         </div>
         <div className="flex flex-row items-center gap-4">
-          <button onClick={isPlaying ? () => pause() : () => play(audioUrl!)} className="p-2 bg-primary rounded">
-            {isPlaying ? "Pause" : "Play"}
-          </button>
+          <Button onClick={isPlaying ? () => pause() : () => play(audioUrl!)} disabled={!audioUrl}>
+            {isPlaying ? <PauseIcon /> : <PlayIcon />}
+          </Button>
 
           <Slider
             value={[sliderValue]}
             onValueChange={handleSliderChange}
             max={100}
             step={0.01}
+            disabled={!audioUrl}
           />
         </div>
       </div>
