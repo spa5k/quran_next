@@ -4,11 +4,12 @@ import { useAudio } from "@/components/providers/AudioProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { PauseIcon, PlayIcon } from "lucide-react";
 import { useParams } from "next/navigation";
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ayahCount } from "../data/ayahCount";
 import { reciters } from "../data/reciters";
 import { useRecitationStore } from "../store/recitationStore";
@@ -25,7 +26,7 @@ const fetchTimings = async (reciterSlug: string, surah: number, style: string): 
 };
 
 export function QuranRecitationBar() {
-  const { currentReciter, currentAyah, currentSurah, setSurah } = useRecitationStore();
+  const { currentReciter, currentAyah, currentSurah, setSurah, setCurrentAyah } = useRecitationStore();
   const { isPlaying, play, pause, progress, seek, error: audioError, currentTime } = useAudio();
 
   const [step, setStep] = useState(0);
@@ -122,50 +123,76 @@ export function QuranRecitationBar() {
             {isPlaying ? <PauseIcon /> : <PlayIcon />}
           </Button>
 
-          <div className="flex flex-col items-center w-full">
-            <Slider
-              value={[sliderValue]}
-              onValueChange={handleSliderChange}
-              max={100}
-              step={10}
-              disabled={!audioUrl}
-              className="transition-all"
-            />
-            <div className="mt-1.5 flex flex-row justify-between w-full relative">
-              {verseTimings.map((timing, index) => {
-                const position = (timing.timestamp_from / totalDuration) * 100;
-                const nextPosition = index < verseTimings.length - 1
-                  ? (verseTimings[index + 1].timestamp_from / totalDuration) * 100
-                  : 100;
-                const isCurrentStep = step === index + 1;
-                return (
-                  <React.Fragment key={`step-${index}`}>
-                    <span
-                      className={clsx(
-                        "absolute text-sm",
-                        isCurrentStep && "text-primary",
-                        !isCurrentStep && "text-muted-foreground text-10 opacity-40",
-                      )}
-                      style={{ left: `${position}%` }}
-                      role="presentation"
-                    >
-                      |
-                    </span>
-                    {isCurrentStep && (
-                      <div
-                        className="absolute bg-primary mt-[5px]"
-                        style={{
-                          left: `${position}%`,
-                          width: `${nextPosition - position}%`,
-                          height: "12px",
+          <TooltipProvider>
+            <div className="flex flex-col items-center w-full">
+              <Slider
+                value={[sliderValue]}
+                onValueChange={handleSliderChange}
+                max={100}
+                step={10}
+                disabled={!audioUrl}
+                className="transition-all"
+              />
+              <div className="mt-1.5 flex flex-row justify-between w-full relative">
+                {verseTimings.map((timing, index) => {
+                  const position = (timing.timestamp_from / totalDuration) * 100;
+                  const nextPosition = index < verseTimings.length - 1
+                    ? (verseTimings[index + 1].timestamp_from / totalDuration) * 100
+                    : 100;
+
+                  const isCurrentStep = step === index + 1;
+
+                  return (
+                    <Tooltip key={`step-${index}`}>
+                      <TooltipTrigger
+                        className={clsx(
+                          "absolute text-sm",
+                          isCurrentStep && "text-primary",
+                          !isCurrentStep && "text-muted-foreground text-10 opacity-40",
+                        )}
+                        style={{ left: `${position}%` }}
+                        onClick={() => {
+                          setCurrentAyah((index + 1).toString());
                         }}
-                      />
-                    )}
-                  </React.Fragment>
-                );
-              })}
+                      >
+                        <span
+                          className={clsx(
+                            "absolute text-sm",
+                            isCurrentStep && "text-primary",
+                            !isCurrentStep && "text-muted-foreground text-10 opacity-40",
+                          )}
+                          style={{ left: `${position}%` }}
+                          role="presentation"
+                        >
+                          |
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="top"
+                        align="center"
+                        style={{ left: `${position}%` }}
+                        // className="absolute"
+                        role="tooltip"
+                      >
+                        <p>{`Ayah ${index + 1}`}</p>
+                      </TooltipContent>
+                      {isCurrentStep && (
+                        <div
+                          className="absolute bg-primary opacity-20"
+                          style={{
+                            left: `${position}%`,
+                            width: `${nextPosition - position}%`,
+                            height: "2px",
+                            top: "50%",
+                          }}
+                        />
+                      )}
+                    </Tooltip>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          </TooltipProvider>
         </div>
       </div>
     </div>
