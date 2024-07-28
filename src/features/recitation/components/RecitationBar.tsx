@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useQuery } from "@tanstack/react-query";
+import clsx from "clsx";
 import { PauseIcon, PlayIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -25,7 +26,9 @@ const fetchTimings = async (reciterSlug: string, surah: number, style: string): 
 
 export function QuranRecitationBar() {
   const { currentReciter, currentAyah, currentSurah, setSurah } = useRecitationStore();
-  const { isPlaying, play, pause, progress, seek, error: audioError } = useAudio();
+  const { isPlaying, play, pause, progress, seek, error: audioError, currentTime } = useAudio();
+
+  const [step, setStep] = useState(0);
 
   const params = useParams() as { number: string };
 
@@ -49,6 +52,13 @@ export function QuranRecitationBar() {
 
   useEffect(() => {
     setSliderValue(progress * 100);
+    if (!timings || !currentTime) {
+      return;
+    }
+    const currentStep = timings?.audio_files[0].verse_timings.findIndex((timing) =>
+      timing.timestamp_from <= currentTime * 1000 && timing.timestamp_to >= currentTime * 1000
+    );
+    setStep(currentStep! + 1);
   }, [progress]);
 
   const handleSliderChange = (value: number[]) => {
@@ -78,9 +88,12 @@ export function QuranRecitationBar() {
     return <div>Error loading timings data: {error?.message || audioError}</div>;
   }
 
-  if (isLoading) {
+  if (isLoading || !timings) {
     return <div>Loading...</div>;
   }
+
+  const verseTimings = timings.audio_files[0].verse_timings;
+  const totalDuration = timings.audio_files[0].duration;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-background rounded-t-lg border p-6 w-full mx-auto flex flex-col gap-4">
@@ -109,13 +122,31 @@ export function QuranRecitationBar() {
             {isPlaying ? <PauseIcon /> : <PlayIcon />}
           </Button>
 
-          <Slider
-            value={[sliderValue]}
-            onValueChange={handleSliderChange}
-            max={100}
-            step={0.01}
-            disabled={!audioUrl}
-          />
+          <div className="flex flex-col items-center w-full">
+            <Slider
+              value={[sliderValue]}
+              onValueChange={handleSliderChange}
+              max={100}
+              step={10}
+              disabled={!audioUrl}
+              className="transition-all"
+            />
+            <div className="mt-1.5 flex flex-row justify-between w-full relative">
+              {verseTimings.map((timing, index) => {
+                const position = (timing.timestamp_from / totalDuration) * 100;
+                return (
+                  <span
+                    key={`step-${index}`}
+                    className={clsx("absolute text-sm font-light", { "text-10 opacity-40": index > 0 && index < 100 })}
+                    style={{ left: `${position}%` }}
+                    role="presentation"
+                  >
+                    |
+                  </span>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </div>

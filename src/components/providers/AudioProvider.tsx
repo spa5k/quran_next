@@ -84,10 +84,24 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
   };
 
   const duration = audioRef.current?.duration;
+  const currentTime = audioRef.current?.currentTime;
 
   return (
     <AudioContext.Provider
-      value={{ isPlaying, currentTrack, play, pause, stop, volume, changeVolume, progress, seek, error, duration }}
+      value={{
+        isPlaying,
+        currentTrack,
+        play,
+        pause,
+        stop,
+        volume,
+        changeVolume,
+        progress,
+        seek,
+        error,
+        duration,
+        currentTime,
+      }}
     >
       {children}
     </AudioContext.Provider>
@@ -114,6 +128,7 @@ export interface AudioContextType {
   seek: (newProgress: number) => void;
   error: string | null;
   duration?: number;
+  currentTime?: number;
 }
 
 export interface AudioProviderProps {
