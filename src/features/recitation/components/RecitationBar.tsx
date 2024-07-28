@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { PauseIcon, PlayIcon } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ayahCount } from "../data/ayahCount";
 import { reciters } from "../data/reciters";
 import { useRecitationStore } from "../store/recitationStore";
@@ -134,15 +134,34 @@ export function QuranRecitationBar() {
             <div className="mt-1.5 flex flex-row justify-between w-full relative">
               {verseTimings.map((timing, index) => {
                 const position = (timing.timestamp_from / totalDuration) * 100;
+                const nextPosition = index < verseTimings.length - 1
+                  ? (verseTimings[index + 1].timestamp_from / totalDuration) * 100
+                  : 100;
+                const isCurrentStep = step === index + 1;
                 return (
-                  <span
-                    key={`step-${index}`}
-                    className={clsx("absolute text-sm font-light", { "text-10 opacity-40": index > 0 && index < 100 })}
-                    style={{ left: `${position}%` }}
-                    role="presentation"
-                  >
-                    |
-                  </span>
+                  <React.Fragment key={`step-${index}`}>
+                    <span
+                      className={clsx(
+                        "absolute text-sm",
+                        isCurrentStep && "text-primary",
+                        !isCurrentStep && "text-muted-foreground text-10 opacity-40",
+                      )}
+                      style={{ left: `${position}%` }}
+                      role="presentation"
+                    >
+                      |
+                    </span>
+                    {isCurrentStep && (
+                      <div
+                        className="absolute bg-primary mt-[5px]"
+                        style={{
+                          left: `${position}%`,
+                          width: `${nextPosition - position}%`,
+                          height: "12px",
+                        }}
+                      />
+                    )}
+                  </React.Fragment>
                 );
               })}
             </div>
