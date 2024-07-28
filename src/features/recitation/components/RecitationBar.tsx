@@ -14,6 +14,7 @@ import { ayahCount } from "../data/ayahCount";
 import { reciters } from "../data/reciters";
 import { useRecitationStore } from "../store/recitationStore";
 import type { Timings } from "../types/timingTypes";
+import { timeFormatter } from "../utils/timeFormatter";
 
 const fetchTimings = async (reciterSlug: string, surah: number, style: string): Promise<Timings> => {
   const response = await fetch(
@@ -171,10 +172,9 @@ export function QuranRecitationBar() {
                         side="top"
                         align="center"
                         style={{ left: `${position}%` }}
-                        // className="absolute"
                         role="tooltip"
                       >
-                        <p>{`Ayah ${index + 1}`}</p>
+                        <p>{`Ayah ${index + 1}, Time: ${timeFormatter(timing.timestamp_from / 1000)}`}</p>
                       </TooltipContent>
                       {isCurrentStep && (
                         <div
