@@ -158,14 +158,15 @@ export function QuranRecitationBar() {
                       >
                         <span
                           className={clsx(
-                            "absolute text-sm",
+                            "absolute text-sm transition-colors duration-200",
                             isCurrentStep && "text-primary",
                             !isCurrentStep && "text-muted-foreground text-10 opacity-40",
+                            "hover:font-extrabold hover:scale-110 hover:opacity-100",
                           )}
                           style={{ left: `${position}%` }}
                           role="presentation"
                         >
-                          |
+                          {"▏"}
                         </span>
                       </TooltipTrigger>
                       <TooltipContent

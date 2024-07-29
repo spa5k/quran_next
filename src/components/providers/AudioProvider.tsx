@@ -78,6 +78,9 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
   };
 
   const seek = (newProgress: number) => {
+    if (!audioRef?.current?.duration) {
+      return;
+    }
     if (audioRef.current) {
       audioRef.current.currentTime = newProgress * audioRef.current.duration;
     }
