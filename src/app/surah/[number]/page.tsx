@@ -16,7 +16,6 @@ import {
   noto_sans_arabic,
   noto_sans_devanagari,
   readex_pro,
-  taviraj,
   uthmanic,
 } from "@/lib/fonts";
 
@@ -106,7 +105,7 @@ export default async function Page({
   const referenceAyahs = quranEditionsFetched[0]?.ayahs || [];
 
   const fonts =
-    `${taviraj.variable} ${cormorant_garamond.variable} ${lexend.variable} ${readex_pro.variable} ${indopak.variable} font-primary ${noto_sans_devanagari.variable} ${noto_nastaliq_urdu.variable} ${uthmanic.variable} ${noto_sans_arabic.variable}`;
+    `${cormorant_garamond.variable} ${lexend.variable} ${readex_pro.variable} ${indopak.variable} font-primary ${noto_sans_devanagari.variable} ${noto_nastaliq_urdu.variable} ${uthmanic.variable} ${noto_sans_arabic.variable}`;
 
   function isAyahQFC(ayah: AyahQFC | Ayah): ayah is AyahQFC {
     return (ayah as AyahQFC).page !== undefined;

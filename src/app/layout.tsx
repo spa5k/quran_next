@@ -12,7 +12,7 @@ import { TailwindIndicator } from "../components/generic/TailwindIndicator";
 import { MobileNavigationLinks } from "../components/layout/MobileNavigationLinks";
 import { NavigationLinks } from "../components/layout/NavigationLinks";
 import ReactQueryProviderWrapper from "../components/providers/ReactQueryProvider";
-import { cormorant_garamond, indopak, inter, lexend, readex_pro, taviraj } from "../lib/fonts";
+import { cormorant_garamond, indopak, inter, lexend, readex_pro } from "../lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -29,8 +29,6 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={inter.className
-          + " "
-          + taviraj.variable
           + " "
           + cormorant_garamond.variable
           + " "
