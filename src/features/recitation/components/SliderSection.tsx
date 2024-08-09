@@ -103,7 +103,7 @@ export const SliderSection = ({
         />
         <div className="mt-[-21px] flex flex-row justify-between w-full relative">
           {verseTimings.map((timing, index) => {
-            if (index % interval !== 0 && index !== totalSteps - 1) {
+            if (index % interval !== 0 && index !== 0 && index !== totalSteps - 1) {
               return null;
             }
             const position = (timing.timestamp_from / totalDuration) * 100;
