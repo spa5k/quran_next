@@ -14,7 +14,7 @@ import { AvatarSection } from "./RecitationAvatar";
 import { RecitationControls } from "./RecitationControls";
 import { SliderSection } from "./SliderSection";
 
-export function QuranRecitationBar() {
+export function RecitationBar() {
   const {
     currentReciter,
     currentAyah,

@@ -59,6 +59,7 @@ export const SliderSection = ({
         && timing.timestamp_to >= currentTime * 1000,
     );
     setStep(currentStep! + 1);
+    setCurrentAyah((currentStep! + 1).toString());
   }, [currentTime, progress, timings]);
 
   const handleSliderChange = (value: number[]) => {
@@ -115,7 +116,7 @@ export const SliderSection = ({
                       isCurrentStep && "text-primary",
                       !isCurrentStep
                         && "text-muted-foreground text-10 opacity-40",
-                      "hover:font-extrabold hover:scale-110 hover:opacity-100 hidden",
+                      "hover:font-extrabold hover:scale-110 hover:opacity-100 ",
                     )}
                     style={{ left: `${position}%` }}
                     role="presentation"

@@ -6,7 +6,7 @@ import type { Edition } from "@/features/edition/api/editions";
 import { EditionMultiSelectForm } from "@/features/edition/components/EditionMultiSelect";
 import { EditionSingleSelect } from "@/features/edition/components/EditionSingleSelect";
 import { type Ayah, type AyahQFC, fetchAyahs, fetchAyahsQFC } from "@/features/quran/api/ayah";
-import { QuranRecitationBar } from "@/features/recitation/components/RecitationBar";
+import { RecitationBar } from "@/features/recitation/components/RecitationBar";
 import { SelectReciter } from "@/features/recitation/components/SelectReciter";
 import {
   cormorant_garamond,
@@ -141,7 +141,7 @@ export default async function Page({
           version={isAyahQFC(referenceAyahs[0]) ? (quranEditionsFetched[0].id === 1 ? "v1" : "v2") : undefined}
         />
       </div>
-      <QuranRecitationBar />
+      <RecitationBar />
     </main>
   );
 }
