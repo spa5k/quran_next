@@ -48,8 +48,9 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
       }
       audioRef.current.play().then(() => {
         setIsPlaying(true);
-      }).catch(() => {
-        setError("Error playing audio");
+        setError(null); // Reset error state when a new track is played
+      }).catch((err) => {
+        setError(`Error playing audio: ${err.message}`);
         setIsPlaying(false);
       });
     }
@@ -63,11 +64,12 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
   };
 
   const stop = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      setIsPlaying(false);
+    if (!audioRef.current) {
+      return;
     }
+    audioRef.current.pause();
+    audioRef.current.currentTime = 0;
+    setIsPlaying(false);
   };
 
   const changeVolume = (newVolume: number) => {
@@ -78,10 +80,7 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
   };
 
   const seek = (newProgress: number) => {
-    if (!audioRef?.current?.duration) {
-      return;
-    }
-    if (audioRef.current) {
+    if (audioRef.current?.duration) {
       audioRef.current.currentTime = newProgress * audioRef.current.duration;
     }
   };
