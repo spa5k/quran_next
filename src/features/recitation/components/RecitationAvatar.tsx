@@ -12,7 +12,7 @@ export const AvatarSection = ({ name, currentReciter }: AvatarSectionProps) => {
 
   if (!name) return null;
   return (
-    <div className="flex flex-row items-center gap-2">
+    <div className="flex flex-row items-center gap-4">
       <div className="bg-muted rounded-full w-8 h-8 flex items-center justify-center">
         <Avatar>
           <AvatarImage

@@ -70,6 +70,22 @@ export const SliderSection = ({
   const verseTimings = timings.audio_files[0].verse_timings;
   const totalDuration = timings.audio_files[0].duration;
 
+  const totalSteps = verseTimings.length;
+  let interval = 1;
+  if (totalSteps > 10) {
+    if (totalSteps <= 30) {
+      interval = Math.ceil(totalSteps / 15);
+    } else if (totalSteps <= 50) {
+      interval = Math.ceil(totalSteps / 20);
+    } else if (totalSteps <= 100) {
+      interval = Math.ceil(totalSteps / 30);
+    } else if (totalSteps <= 200) {
+      interval = Math.ceil(totalSteps / 50);
+    } else if (totalSteps <= 500) {
+      interval = Math.ceil(totalSteps / 100);
+    }
+  }
+
   if (audioError) {
     return <div>Error: {audioError}</div>;
   }
@@ -83,10 +99,13 @@ export const SliderSection = ({
           max={100}
           step={10}
           disabled={!audioUrl}
-          className="transition-all"
+          className="transition-all "
         />
-        <div className="mt-1.5 flex flex-row justify-between w-full relative">
+        <div className="mt-[-21px] flex flex-row justify-between w-full relative">
           {verseTimings.map((timing, index) => {
+            if (index % interval !== 0 && index !== totalSteps - 1) {
+              return null;
+            }
             const position = (timing.timestamp_from / totalDuration) * 100;
             const nextPosition = index < verseTimings.length - 1
               ? (verseTimings[index + 1].timestamp_from
@@ -103,7 +122,7 @@ export const SliderSection = ({
                     "absolute text-sm",
                     isCurrentStep && "text-primary",
                     !isCurrentStep
-                      && "text-muted-foreground text-10 opacity-40",
+                      && "text-muted-foreground text-10 opacity-10",
                   )}
                   style={{ left: `${position}%` }}
                   onClick={() => {
@@ -116,7 +135,7 @@ export const SliderSection = ({
                       isCurrentStep && "text-primary",
                       !isCurrentStep
                         && "text-muted-foreground text-10 opacity-40",
-                      "hover:font-extrabold hover:scale-110 hover:opacity-100 ",
+                      "hover:font-extrabold hover:scale-110 hover:opacity-100 z-0",
                     )}
                     style={{ left: `${position}%` }}
                     role="presentation"
